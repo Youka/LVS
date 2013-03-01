@@ -1,3 +1,2 @@
-* convert avs frame rows to cairo strides
 * write LVS base class
 * implent plugin interfaces

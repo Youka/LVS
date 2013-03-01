@@ -10,32 +10,52 @@
 
 // Clip with frames & samples filter
 class LVSFilteredClip : public GenericVideoFilter{
+	private:
+		// LVS instance for filtering process
+		LVS *lvs;
+		// Image buffer for frame conversion
+		unsigned char* image;
 	public:
 		// Clip constructor
-		LVSFilteredClip(IScriptEnvironment* env, PClip clip, const char* video_file, const char* audio_file) : GenericVideoFilter(clip), lvs(0){
+		LVSFilteredClip(IScriptEnvironment* env, PClip clip, const char* video_file, const char* audio_file) : GenericVideoFilter(clip), lvs(0), image(0){
 			// Create LVS instance
 			try{
 				this->lvs = new LVS(video_file, this->vi.width, this->vi.height, this->vi.IsRGB32(), static_cast<double>(this->vi.fps_numerator) / this->vi.fps_denominator, this->vi.num_frames,
 													audio_file, this->vi.nchannels, this->vi.audio_samples_per_second, this->vi.num_audio_samples,
 													env);
 			}catch(std::exception e){
-				env->ThrowError("%s initialization failed: %s", FILTER_NAME, e.what());
+				env->ThrowError(FILTER_NAME" initialization failed: %s", e.what());
 			}
+			// Create image buffer (4-bytes per pixel for cairo stride alignment)
+			this->image = new unsigned char[this->vi.width * this->vi.height << 2];
 		}
 		// Clip destructor
 		~LVSFilteredClip(){
 			// Free LVS instance
 			if(this->lvs)
 				delete this->lvs;
+			// Free image buffer
+			if(this->image)
+				delete[] this->image;
 		}
 		// Frames callback
 		PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env){
 			// Get current frame from child clip & add writing support
 			PVideoFrame frame = this->child->GetFrame(n, env);
 			env->MakeWritable(&frame);
-			// Filter frame
+			// Get frame & image row sizes
+			int rowsize = frame->GetRowSize(), pitch = frame->GetPitch(), stride = this->vi.width << 2;
+			// Convert frame to image
+			unsigned char *src = frame->GetWritePtr() + pitch * (this->vi.height - 1), *dst = this->image;
+			for(int y = 0; y < this->vi.height; y++){
+				memcpy(dst, src, rowsize);
+				src -= pitch;
+				dst += stride;
+			}
+			// Filter image
 			try{
-				this->lvs->RenderOnFrame(frame->GetWritePtr(), n);
+				// Send image data through filter process
+				this->lvs->RenderOnFrame(this->image, n);
 			}catch(std::exception e){
 				// Show UTF8 error message
 				wchar_t *werr = utf8_to_utf16(e.what());
@@ -44,6 +64,13 @@ class LVSFilteredClip : public GenericVideoFilter{
 				// Throw exception upwards?
 				if(choice == IDCANCEL)
 					env->ThrowError(e.what());
+			}
+			// Convert image to frame
+			src = this->image, dst = frame->GetWritePtr() + pitch * (this->vi.height - 1);
+			for(int y = 0; y < this->vi.height; y++){
+				memcpy(dst, src, rowsize);
+				src += stride;
+				dst -= pitch;
 			}
 			// Return filtered frame
 			return frame;
@@ -54,6 +81,7 @@ class LVSFilteredClip : public GenericVideoFilter{
 			this->child->GetAudio(buf, start, count, env);
 			// Filter samples
 			try{
+				// Send samples data through filter process
 				this->lvs->RenderOnSamples(reinterpret_cast<__int16*>(buf), start, count);
 			}catch(std::exception e){
 				// Show UTF8 error message
@@ -65,9 +93,6 @@ class LVSFilteredClip : public GenericVideoFilter{
 					env->ThrowError(e.what());
 			}
 		}
-	private:
-		// LVS instance for filtering process
-		LVS *lvs;
 };
 
 // Filter execution
