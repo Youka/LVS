@@ -1,4 +1,4 @@
-#include "LVS.h"
+#include "LVS.hpp"
 
 LVS::LVS(const char* video_file, int width, int height, bool has_alpha, double fps, int frames,
 				const char* audio_file, int channels, int sample_rate, __int64 samples,

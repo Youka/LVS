@@ -105,11 +105,11 @@
 			Name="Libraries"
 			>
 			<File
-				RelativePath=".\cairo.h"
+				RelativePath=".\cairo.hpp"
 				>
 			</File>
 			<File
-				RelativePath=".\lua.h"
+				RelativePath=".\lua.hpp"
 				>
 			</File>
 		</Filter>
@@ -121,7 +121,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\LVS.h"
+				RelativePath=".\LVS.hpp"
 				>
 			</File>
 		</Filter>
@@ -129,7 +129,7 @@
 			Name="Information"
 			>
 			<File
-				RelativePath=".\fileinfo.h"
+				RelativePath=".\fileinfo.hpp"
 				>
 			</File>
 			<File
@@ -145,7 +145,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\conv.h"
+				RelativePath=".\conv.hpp"
 				>
 			</File>
 		</Filter>

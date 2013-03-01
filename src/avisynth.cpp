@@ -2,11 +2,11 @@
 #include <windows.h>
 #include <avisynth.h>
 // Include LVS
-#include "LVS.h"
+#include "LVS.hpp"
 // Include utilities
 #include <exception>
-#include "conv.h"
-#include "fileinfo.h"
+#include "conv.hpp"
+#include "fileinfo.hpp"
 
 // Clip with frames & samples filter
 class LVSFilteredClip : public GenericVideoFilter{
@@ -33,11 +33,6 @@ class LVSFilteredClip : public GenericVideoFilter{
 			// Get current frame from child clip & add writing support
 			PVideoFrame frame = this->child->GetFrame(n, env);
 			env->MakeWritable(&frame);
-			// TEST START
-			char a[32];
-			itoa(frame->GetPitch(), a, 10);
-			MessageBoxA(0, a, "PITCH/STRIDE", MB_OK);
-			// TEST END
 			// Filter frame
 			try{
 				this->lvs->RenderOnFrame(frame->GetWritePtr(), n);
