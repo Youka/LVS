@@ -44,6 +44,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories="include;Lua_5.2"
+				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32_EXTRA_LEAN"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				WarningLevel="1"

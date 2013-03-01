@@ -110,14 +110,14 @@ AVSValue LVSExecute(AVSValue args, void* user_data, IScriptEnvironment* env){
 	else if(audio_file && !clip_info.HasAudio())
 		env->ThrowError("No audio stream for script '%s'!", audio_file);
 	// Convert video to RGB colorspace
-	if(!clip_info.IsRGB())
+	if(video_file && !clip_info.IsRGB())
 		try{
 			clip = env->Invoke("ConvertToRGB24", clip).AsClip();
 		}catch(IScriptEnvironment::NotFound e){
 			env->ThrowError("Couldn't convert video to RGB colorspace!");
 		}
 	// Convert audio to 16 bits sample size
-	if(clip_info.SampleType() !=  SAMPLE_INT16)
+	if(audio_file && clip_info.SampleType() !=  SAMPLE_INT16)
 		try{
 			clip = env->Invoke("ConvertAudioTo16bit", clip).AsClip();
 		}catch(IScriptEnvironment::NotFound e){
