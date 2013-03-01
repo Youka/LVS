@@ -101,6 +101,10 @@
 				RelativePath=".\avisynth.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\virtualdub.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Libraries"

@@ -4,9 +4,9 @@
 // Include LVS
 #include "LVS.hpp"
 // Include utilities
+#include "fileinfo.hpp"
 #include <exception>
 #include "conv.hpp"
-#include "fileinfo.hpp"
 
 // Clip with frames & samples filter
 class LVSFilteredClip : public GenericVideoFilter{
@@ -14,7 +14,7 @@ class LVSFilteredClip : public GenericVideoFilter{
 		// LVS instance for filtering process
 		LVS *lvs;
 		// Image buffer for frame conversion
-		unsigned char* image;
+		unsigned char *image;
 	public:
 		// Clip constructor
 		LVSFilteredClip(IScriptEnvironment* env, PClip clip, const char* video_file, const char* audio_file) : GenericVideoFilter(clip), lvs(0), image(0){
