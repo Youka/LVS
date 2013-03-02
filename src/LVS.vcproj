@@ -43,7 +43,7 @@
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="include;Lua_5.2"
+				AdditionalIncludeDirectories="include;include\BaseClasses;Lua_5.2"
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32_EXTRA_LEAN"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -62,9 +62,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="cairo-static.lib Lua_5.2.lib"
+				AdditionalDependencies="strmbase.lib winmm.lib cairo-static.lib Lua_5.2.lib"
 				AdditionalLibraryDirectories="libs;temp"
-				GenerateDebugInformation="true"
+				GenerateDebugInformation="false"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				TargetMachine="1"
@@ -108,6 +108,18 @@
 			</File>
 			<File
 				RelativePath=".\config_dialog.rc"
+				>
+			</File>
+			<File
+				RelativePath=".\directshow.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\directshow.def"
+				>
+			</File>
+			<File
+				RelativePath=".\main.cpp"
 				>
 			</File>
 			<File

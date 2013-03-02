@@ -45,6 +45,7 @@
 				FavorSizeOrSpeed="1"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
+				EnableEnhancedInstructionSet="2"
 				WarningLevel="1"
 				DebugInformationFormat="3"
 				CompileAs="1"

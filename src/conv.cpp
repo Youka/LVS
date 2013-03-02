@@ -1,7 +1,7 @@
 #include "conv.hpp"
 #include <windows.h>
 
-// Text
+// Text conversion
 char* utf16_to_utf8(const wchar_t *wc){
     int c_len = WideCharToMultiByte(CP_UTF8, 0, wc, wcslen(wc)+1, 0, 0, 0, 0);
     char *c = new char[c_len];
@@ -16,7 +16,7 @@ wchar_t* utf8_to_utf16(const char *c){
     return wc;
 }
 
-// Image
+// Image conversion
 void avisynth_frame_to_image(unsigned char *frame_data, int frame_pitch, unsigned char *image_data, int image_stride, int rowsize, int height){
 	frame_data += frame_pitch * (height-1);
 	for(int y = 0; y < height; y++){

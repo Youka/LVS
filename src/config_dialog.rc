@@ -1,4 +1,4 @@
-#include <windows.h>
+#include <winresrc.h>
 #include "config_dialog.hpp"
 #include "fileinfo.hpp"
 
