@@ -172,7 +172,7 @@ namespace vdub{
 		return TRUE;
 	}
 	int config_func(VDXFilterActivation *fdata, const VDXFilterFunctions *ffuncs, VDXHWND wnd){
-		// Show dialog and return result
+		// Show configuration dialog and return result
 		return DialogBoxParamW(DLL_INSTANCE, MAKEINTRESOURCE(ID_CONFIG_DIALOG), reinterpret_cast<HWND>(wnd), config_event_handler, reinterpret_cast<LPARAM>(fdata->filter_data));
 	}
 	// Filter description
