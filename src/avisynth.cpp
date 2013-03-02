@@ -46,12 +46,7 @@ class LVSFilteredClip : public GenericVideoFilter{
 			// Get frame & image row sizes
 			int rowsize = frame->GetRowSize(), pitch = frame->GetPitch(), stride = this->vi.width << 2;
 			// Convert frame to image
-			unsigned char *src = frame->GetWritePtr() + pitch * (this->vi.height - 1), *dst = this->image;
-			for(int y = 0; y < this->vi.height; y++){
-				memcpy(dst, src, rowsize);
-				src -= pitch;
-				dst += stride;
-			}
+			avisynth_frame_to_image(frame->GetWritePtr(), pitch, this->image, stride, rowsize, this->vi.height);
 			// Filter image
 			try{
 				// Send image data through filter process
@@ -66,12 +61,7 @@ class LVSFilteredClip : public GenericVideoFilter{
 					env->ThrowError(e.what());
 			}
 			// Convert image to frame
-			src = this->image, dst = frame->GetWritePtr() + pitch * (this->vi.height - 1);
-			for(int y = 0; y < this->vi.height; y++){
-				memcpy(dst, src, rowsize);
-				src += stride;
-				dst -= pitch;
-			}
+			image_to_avisynth_frame(this->image, stride, frame->GetWritePtr(), pitch, rowsize, this->vi.height);
 			// Return filtered frame
 			return frame;
 		}
