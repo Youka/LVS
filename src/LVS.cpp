@@ -14,6 +14,6 @@ void LVS::RenderOnFrame(unsigned char* data, int frame_number){
 
 }
 
-void LVS::RenderOnSamples(__int16* buff, __int64 start, __int64 count){
+void LVS::RenderOnSamples(float* buff, __int64 start, __int64 count){
 
 }

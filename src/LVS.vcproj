@@ -102,6 +102,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\config_dialog.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\config_dialog.rc"
+				>
+			</File>
+			<File
 				RelativePath=".\virtualdub.cpp"
 				>
 			</File>

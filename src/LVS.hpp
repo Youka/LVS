@@ -12,5 +12,5 @@ class LVS{
 		// Render on frame
 		void RenderOnFrame(unsigned char* data, int frame_number);
 		// Render on samples
-		void RenderOnSamples(__int16* buff, __int64 start, __int64 count);
+		void RenderOnSamples(float* buf, __int64 start, __int64 count);
 };

@@ -3,6 +3,7 @@
 // Include LVS
 #include "LVS.hpp"
 // Include GUI
+#include "config_dialog.hpp"
 #include <windows.h>
 #include <Commdlg.h>
 // Include utilities
@@ -11,49 +12,201 @@
 #include "conv.hpp"
 #include <cstdio>
 
+// DLL instance getter for VC compilers
+extern "C" IMAGE_DOS_HEADER __ImageBase;
+#define DLL_INSTANCE reinterpret_cast<HINSTANCE>(&__ImageBase)
+
 // VirtualDub process
 namespace vdub{
 	// VirtualDub version
 	int version;
 	// Filter instance data container
-	struct lvs_data{
+	struct LVSData{
 		LVS *lvs;
 		unsigned char *image;
-		wchar_t *filename;
+		char *filename;
 	};
 	// Filter initialization
 	int init_func(VDXFilterActivation *fdata, const VDXFilterFunctions *ffuncs){
+		LVSData *inst_data = reinterpret_cast<LVSData*>(fdata->filter_data);
+		// Initialize instance data
+		inst_data->lvs = NULL;
+		inst_data->image = NULL;
+		inst_data->filename = NULL;
+		// Success
 		return 0;
 	}
 	// Filter deinitialization
 	void deinit_func(VDXFilterActivation *fdata, const VDXFilterFunctions *ffuncs){
-
+		LVSData *inst_data = reinterpret_cast<LVSData*>(fdata->filter_data);
+		// Free instance data
+		if(inst_data->lvs){
+			delete inst_data->lvs;
+			inst_data->lvs = NULL;
+		}
+		if(inst_data->image){
+			delete[] inst_data->image;
+			inst_data->image = NULL;
+		}
+		if(inst_data->filename){
+			delete[] inst_data->filename;
+			inst_data->filename = NULL;
+		}
 	}
 	// Filter running
 	int run_func(const VDXFilterActivation *fdata, const VDXFilterFunctions *ffuncs){
+
+		// TODO
+
+		// Success
 		return 0;
 	}
 	// Filter parameters check
 	long param_func(VDXFilterActivation *fdata, const VDXFilterFunctions *ffuncs){
-		return 0;
+		// VirtualDub version supports color format other than RGB32?
+		if(version >= 12)
+			// Just RGB formats allowed
+			switch(fdata->src.mpPixmapLayout->format){
+				case nsVDXPixmap::kPixFormat_RGB888:
+				case nsVDXPixmap::kPixFormat_XRGB8888:
+					break;
+				default:
+					return FILTERPARAM_NOT_SUPPORTED;
+			}
+		// Color format accepted
+		return FILTERPARAM_SUPPORTS_ALTFORMATS | FILTERPARAM_SWAP_BUFFERS;
 	}
 	// Filter configuration
+	INT_PTR CALLBACK config_event_handler(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam){
+		// Evaluate event
+		switch(msg){
+			// Dialog initialization
+			case WM_INITDIALOG:{
+				// Store userdata to window
+				LVSData *inst_data = reinterpret_cast<LVSData*>(lParam);
+				SetWindowLongPtrA(wnd, DWLP_USER, reinterpret_cast<LONG_PTR>(inst_data));
+				// Set default filename
+				if(inst_data->filename){
+					HWND edit = GetDlgItem(wnd, ID_CONFIG_FILENAME);
+					wchar_t *filenamew = utf8_to_utf16(inst_data->filename);
+					SendMessageW(edit, WM_SETTEXT, 0, reinterpret_cast<LPARAM>(filenamew));
+					delete[] filenamew;
+					SendMessageW(edit, EM_SETSEL, 0, -1);
+				}
+			}break;
+			// Dialog action
+			case WM_COMMAND:{
+				// Evaluate action command
+				switch(wParam){
+					// '...' button
+					case ID_CONFIG_CHOOSE_FILE:{
+						// Prepare file dialog properties
+						wchar_t file[256]; file[0] = '\0';
+						OPENFILENAMEW ofn;
+						memset(&ofn, 0, sizeof(ofn));
+						ofn.lStructSize = sizeof(OPENFILENAMEW);
+						ofn.hwndOwner = wnd;
+						ofn.hInstance = DLL_INSTANCE;
+						ofn.lpstrFilter = L"Lua file (*.lua)\0*.lua\0\0";
+						ofn.nFilterIndex = 1;
+						ofn.lpstrFile = file;
+						ofn.nMaxFile = sizeof(file);
+						ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+						// Show file dialog
+						if(GetOpenFileNameW(&ofn)){
+							// Save filename input to dialog
+							HWND edit = GetDlgItem(wnd, ID_CONFIG_FILENAME);
+							SendMessageW(edit, WM_SETTEXT, 0, reinterpret_cast<LPARAM>(ofn.lpstrFile));
+							SendMessageW(edit, EM_SETSEL, 0, -1);
+						}
+					}break;
+					// 'OK' button
+					case IDOK:{
+						// Get stored userdata from window
+						LVSData *inst_data = reinterpret_cast<LVSData*>(GetWindowLongPtrA(wnd, DWLP_USER));
+						// Save filename
+						HWND edit = GetDlgItem(wnd, ID_CONFIG_FILENAME);
+						int text_len = static_cast<int>(SendMessageW(edit, WM_GETTEXTLENGTH, 0, 0));
+						wchar_t *text_buf = new wchar_t[text_len+1];
+						SendMessageW(edit, WM_GETTEXT, text_len+1, reinterpret_cast<LPARAM>(text_buf));
+						if(inst_data->filename)
+							delete[] inst_data->filename;
+						inst_data->filename = utf16_to_utf8(text_buf);
+						delete[] text_buf;
+						// Close dialog
+						EndDialog(wnd, 0);
+					}break;
+					// 'Cancel' button
+					case IDCANCEL:{
+						// Close dialog
+						EndDialog(wnd, 1);
+					}break;
+				}
+			}break;
+			// Dialog closure ('X' button)
+			case WM_CLOSE:{
+				EndDialog(wnd, 1);
+		   }break;
+			// Message not handled (default behaviour follows)
+			default:
+				return FALSE;
+		}
+		// Message handled
+		return TRUE;
+	}
 	int config_func(VDXFilterActivation *fdata, const VDXFilterFunctions *ffuncs, VDXHWND wnd){
-		return 0;
+		// Show dialog and return result
+		return DialogBoxParamW(DLL_INSTANCE, MAKEINTRESOURCE(ID_CONFIG_DIALOG), reinterpret_cast<HWND>(wnd), config_event_handler, reinterpret_cast<LPARAM>(fdata->filter_data));
 	}
 	// Filter description
+	void create_description(LVSData *inst_data, char *buf, int maxlen = 128){
+		// Fill description buffer with loaded filename
+		if(inst_data->filename)
+			_snprintf(buf, maxlen, " Script:'%s'", inst_data->filename);
+		else
+			_snprintf(buf, maxlen, " Script:''");
+	}
 	void description_func(const VDXFilterActivation *fdata, const VDXFilterFunctions *ffuncs, char *buf){
-
+		create_description(reinterpret_cast<LVSData*>(fdata->filter_data), buf);
 	}
 	void description2_func(const VDXFilterActivation *fdata, const VDXFilterFunctions *ffuncs, char *buf, int maxlen){
-
+		create_description(reinterpret_cast<LVSData*>(fdata->filter_data), buf, maxlen);
 	}
 	// Filter start
 	int start_func(VDXFilterActivation *fdata, const VDXFilterFunctions *ffuncs){
+		LVSData *inst_data = reinterpret_cast<LVSData*>(fdata->filter_data);
+		// Free previous render data (in case of buggy twice start function call)
+		if(inst_data->lvs){
+			delete inst_data->lvs;
+			inst_data->lvs = NULL;
+			delete inst_data->image;
+			inst_data->image = NULL;
+		}
+		// Get colorspace (RGB or RGBA?)
+		bool has_alpha = version < 12 ? true : (fdata->src.mpPixmapLayout->format == nsVDXPixmap::kPixFormat_XRGB8888 ? true : false);
+		// Create LVS instance
+		try{
+			inst_data->lvs = new LVS(inst_data->filename, fdata->src.w, fdata->src.h, has_alpha, static_cast<double>(fdata->src.mFrameRateHi) / fdata->src.mFrameRateLo, fdata->src.mFrameCount);
+		}catch(std::exception e){
+			ffuncs->Except(FILTER_NAME" initialization failed: %s", e.what());
+			return 1;
+		}
+		// Create image buffer (4-bytes per pixel for cairo stride alignment)
+		inst_data->image = new unsigned char[fdata->src.h * fdata->src.w << 2];
+		// Success
 		return 0;
 	}
 	// Filter end
 	int end_func(VDXFilterActivation *fdata, const VDXFilterFunctions *ffuncs){
+		LVSData *inst_data = reinterpret_cast<LVSData*>(fdata->filter_data);
+		// Free render data
+		if(inst_data->lvs){
+			delete inst_data->lvs;
+			inst_data->lvs = NULL;
+			delete inst_data->image;
+			inst_data->image = NULL;
+		}
+		// Success
 		return 0;
 	}
 }
@@ -68,7 +221,7 @@ VDXFilterDefinition lvs_filter_definition = {
 	FILTER_DESC_LONG,	// desc
 	FILTER_AUTHOR,	// maker
 	NULL,	// private data
-	sizeof(vdub::lvs_data),	// inst_data_size
+	sizeof(vdub::LVSData),	// inst_data_size
 
 	vdub::init_func,	// initProc
 	vdub::deinit_func,	// deinitProc

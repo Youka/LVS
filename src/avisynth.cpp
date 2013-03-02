@@ -82,7 +82,7 @@ class LVSFilteredClip : public GenericVideoFilter{
 			// Filter samples
 			try{
 				// Send samples data through filter process
-				this->lvs->RenderOnSamples(reinterpret_cast<__int16*>(buf), start, count);
+				this->lvs->RenderOnSamples(reinterpret_cast<float*>(buf), start, count);
 			}catch(std::exception e){
 				// Show UTF8 error message
 				wchar_t *werr = utf8_to_utf16(e.what());
@@ -116,12 +116,12 @@ AVSValue LVSExecute(AVSValue args, void* user_data, IScriptEnvironment* env){
 		}catch(IScriptEnvironment::NotFound e){
 			env->ThrowError("Couldn't convert video to RGB colorspace!");
 		}
-	// Convert audio to 16 bits sample size
-	if(audio_file && clip_info.SampleType() !=  SAMPLE_INT16)
+	// Convert audio to float sample size
+	if(audio_file && clip_info.SampleType() !=  SAMPLE_FLOAT)
 		try{
-			clip = env->Invoke("ConvertAudioTo16bit", clip).AsClip();
+			clip = env->Invoke("ConvertAudioToFloat", clip).AsClip();
 		}catch(IScriptEnvironment::NotFound e){
-			env->ThrowError("Couldn't convert audio to 16 bits sample size!");
+			env->ThrowError("Couldn't convert audio to float sample size!");
 		}
 	// Return filtered clip
 	return new LVSFilteredClip(env, clip, video_file, audio_file);
