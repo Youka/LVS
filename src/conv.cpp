@@ -34,3 +34,11 @@ void image_to_avisynth_frame(unsigned char *image_data, int image_stride, unsign
 		frame_data -= frame_pitch;
 	}
 }
+
+void vdub_frame_to_image(){
+
+}
+
+void image_to_vdub_frame(){
+
+}

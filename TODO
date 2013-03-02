@@ -1,4 +1,3 @@
-* write image converters for interfaces
-* implent vdub interface frame processing
+* write image converters for frame processing of interfaces
 * implent dshow interface
 * write LVS base class

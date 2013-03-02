@@ -56,9 +56,25 @@ namespace vdub{
 	// Filter running
 	int run_func(const VDXFilterActivation *fdata, const VDXFilterFunctions *ffuncs){
 		LVSData *inst_data = reinterpret_cast<LVSData*>(fdata->filter_data);
-
-		// TODO
-
+		// Get frame & image row sizes
+		int image_stride = fdata->src.w << 2;
+		// Convert source frame to image
+		vdub_frame_to_image();
+		// Filter image
+		try{
+			// Send image data through filter process
+			inst_data->lvs->RenderOnFrame(inst_data->image, fdata->src.mFrameNumber);
+		}catch(std::exception e){
+			// Show UTF8 error message
+			wchar_t *werr = utf8_to_utf16(e.what());
+			int choice = MessageBoxW(0, werr, FILTER_NAMEW L" video error", MB_OKCANCEL | MB_DEFBUTTON2 | MB_ICONWARNING);
+			delete[] werr;
+			// Throw exception to GUI
+			ffuncs->Except(e.what());
+			return 1;
+		}
+		// Convert image to destination frame
+		image_to_vdub_frame();
 		// Success
 		return 0;
 	}

@@ -47,6 +47,7 @@
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32_EXTRA_LEAN"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
+				EnableEnhancedInstructionSet="2"
 				WarningLevel="1"
 				DebugInformationFormat="3"
 			/>
