@@ -55,6 +55,7 @@ namespace vdub{
 	}
 	// Filter running
 	int run_func(const VDXFilterActivation *fdata, const VDXFilterFunctions *ffuncs){
+		LVSData *inst_data = reinterpret_cast<LVSData*>(fdata->filter_data);
 
 		// TODO
 
@@ -175,6 +176,11 @@ namespace vdub{
 	// Filter start
 	int start_func(VDXFilterActivation *fdata, const VDXFilterFunctions *ffuncs){
 		LVSData *inst_data = reinterpret_cast<LVSData*>(fdata->filter_data);
+		// Check video informations
+		if(fdata->pfsi == NULL)
+			ffuncs->Except("Video informations are missing!");
+		// Get colorspace (RGB or RGBA?)
+		bool has_alpha = version < 12 ? true : (fdata->src.mpPixmapLayout->format == nsVDXPixmap::kPixFormat_XRGB8888 ? true : false);
 		// Free previous render data (in case of buggy twice start function call)
 		if(inst_data->lvs){
 			delete inst_data->lvs;
@@ -182,8 +188,6 @@ namespace vdub{
 			delete inst_data->image;
 			inst_data->image = NULL;
 		}
-		// Get colorspace (RGB or RGBA?)
-		bool has_alpha = version < 12 ? true : (fdata->src.mpPixmapLayout->format == nsVDXPixmap::kPixFormat_XRGB8888 ? true : false);
 		// Create LVS instance
 		try{
 			inst_data->lvs = new LVS(inst_data->filename, fdata->src.w, fdata->src.h, has_alpha, static_cast<double>(fdata->src.mFrameRateHi) / fdata->src.mFrameRateLo, fdata->src.mFrameCount);
