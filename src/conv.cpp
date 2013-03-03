@@ -42,3 +42,11 @@ void vdub_frame_to_image(){
 void image_to_vdub_frame(){
 
 }
+
+void dshow_frame_to_image(){
+
+}
+
+void image_to_dshow_frame(){
+
+}

@@ -8,3 +8,5 @@ void avisynth_frame_to_image(unsigned char *frame_data, int frame_pitch, unsigne
 void image_to_avisynth_frame(unsigned char *image_data, int image_stride, unsigned char *frame_data, int frame_pitch, int rowsize, int height);
 void vdub_frame_to_image();
 void image_to_vdub_frame();
+void dshow_frame_to_image();
+void image_to_dshow_frame();

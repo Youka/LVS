@@ -67,7 +67,7 @@ namespace vdub{
 		}catch(std::exception e){
 			// Show UTF8 error message
 			wchar_t *werr = utf8_to_utf16(e.what());
-			int choice = MessageBoxW(0, werr, FILTER_NAMEW L" video error", MB_OKCANCEL | MB_DEFBUTTON2 | MB_ICONWARNING);
+			MessageBoxW(0, werr, FILTER_NAMEW L" video error", MB_OK | MB_ICONWARNING);
 			delete[] werr;
 			// Throw exception to GUI
 			ffuncs->Except(e.what());

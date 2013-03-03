@@ -37,8 +37,6 @@ interface ILVSVideoFilterConfiguration : public IUnknown{
 // Filter property page
 class LVSVideoFilterPropertyPage : public CBasePropertyPage{
 	private:
-		// Constructor (see 'CreateInstance')
-		LVSVideoFilterPropertyPage(IUnknown *unknown) : CBasePropertyPage(FILTER_PROP_NAMEW, unknown, ID_CONFIG_DIALOG, ID_CONFIG_TITLE), config(NULL){}
 		// Data interface of filter
 		ILVSVideoFilterConfiguration *config;
 		// Configuration dialog event handling
@@ -52,7 +50,9 @@ class LVSVideoFilterPropertyPage : public CBasePropertyPage{
 					SetWindowLongPtrA(wnd, DWLP_USER, reinterpret_cast<LONG_PTR>(config));
 					// Set default filename
 					HWND edit = GetDlgItem(wnd, ID_CONFIG_FILENAME);
-					wchar_t *filenamew = utf8_to_utf16(config->GetFile());
+					char *filename = config->GetFile();
+					wchar_t *filenamew = utf8_to_utf16(filename);
+					delete[] filename;
 					SendMessageW(edit, WM_SETTEXT, 0, reinterpret_cast<LPARAM>(filenamew));
 					delete[] filenamew;
 					SendMessageW(edit, EM_SETSEL, 0, -1);
@@ -97,18 +97,18 @@ class LVSVideoFilterPropertyPage : public CBasePropertyPage{
 							config->SetFile(text_buf_utf8);
 							delete[] text_buf_utf8;
 							// Close dialog
-							EndDialog(wnd, 0);
+							EndDialog(wnd, S_OK);
 						}break;
 						// 'Cancel' button
 						case IDCANCEL:{
 							// Close dialog
-							EndDialog(wnd, 1);
+							EndDialog(wnd, E_UNEXPECTED);
 						}break;
 					}
 				}break;
 				// Dialog closure ('X' button)
 				case WM_CLOSE:{
-					EndDialog(wnd, 1);
+					EndDialog(wnd, E_UNEXPECTED);
 			   }break;
 				// Message not handled (default behaviour follows)
 				default:
@@ -117,6 +117,8 @@ class LVSVideoFilterPropertyPage : public CBasePropertyPage{
 			// Message handled
 			return TRUE;
 		}
+		// Constructor (see 'CreateInstance')
+		LVSVideoFilterPropertyPage(IUnknown *unknown) : CBasePropertyPage(FILTER_PROP_NAMEW, unknown, ID_CONFIG_DIALOG, ID_CONFIG_TITLE), config(NULL){}
 	public:
 		// Create class instance
 		static CUnknown* CALLBACK CreateInstance(LPUNKNOWN unknown, HRESULT *result){
@@ -132,11 +134,13 @@ class LVSVideoFilterPropertyPage : public CBasePropertyPage{
 			// Get interface to filter data
 			if(!this->config)
 				return unknown->QueryInterface(IID_ILVSVideoFilterConfiguration, reinterpret_cast<void**>(&this->config));
+			else
+				return VFW_E_NO_INTERFACE;
 		}
 		// On property page disconnection
 		HRESULT OnDisconnect(){
 			// Got interface to filter data?
-			CheckPointer(this->config, E_UNEXPECTED);
+			CheckPointer(this->config, E_ACCESSDENIED);
 			// Free reference to filter data interface
 			this->config->Release();
 			this->config = NULL;
@@ -184,11 +188,27 @@ class LVSVideoFilterPropertyPage : public CBasePropertyPage{
 // Filter
 class LVSVideoFilter : public CVideoTransformFilter, public ILVSVideoFilterConfiguration, public ISpecifyPropertyPages{
 	private:
+		// LVS instance for filtering process
+		LVS *lvs;
+		// Image buffer for frame conversion
+		unsigned char *image;
+		// Critical section for save configuration access from other interfaces
+		CCritSec  crit_section;
+		// Configuration
+		char *filename;
 		// Constructor (see 'CreateInstance')
 		LVSVideoFilter(IUnknown *unknown) : CVideoTransformFilter(FILTER_NAMEW, unknown, CLSID_LVSVideoFilter), lvs(NULL), image(NULL){
 			// Initialize configuration with an empty string
 			this->filename = new char;
 			*this->filename = '\0';
+		}
+	public:
+		// Create class instance
+		static CUnknown* CALLBACK CreateInstance(LPUNKNOWN unknown, HRESULT *result){
+			LVSVideoFilter *filter = new LVSVideoFilter(unknown);
+			if(!filter)
+				*result = E_OUTOFMEMORY;
+			return filter;
 		}
 		// Destructor
 		~LVSVideoFilter(){
@@ -202,25 +222,239 @@ class LVSVideoFilter : public CVideoTransformFilter, public ILVSVideoFilterConfi
 			if(this->filename)
 				delete[] this->filename;
 		}
-		// LVS instance for filtering process
-		LVS *lvs;
-		// Image buffer for frame conversion
-		unsigned char *image;
-		// Critical section for save configuration access from other interfaces
-		CCritSec  crit_section;
-		// Configuration
-		char *filename;
-	public:
-		// Create class instance
-		static CUnknown* CALLBACK CreateInstance(LPUNKNOWN unknown, HRESULT *result){
-			LVSVideoFilter *filter = new LVSVideoFilter(unknown);
-			if(!filter)
-				*result = E_OUTOFMEMORY;
-			return filter;
+		// Check validation of input media stream
+		HRESULT CheckInputType(const CMediaType *In){
+			// Valid pointer?
+			CheckPointer(In, E_POINTER);
+			// Valid stream type?
+			if (In->majortype != MEDIATYPE_Video || (In->subtype != MEDIASUBTYPE_RGB24 && In->subtype != MEDIASUBTYPE_RGB32) ||
+				In->formattype != FORMAT_VideoInfo || In->cbFormat < sizeof(VIDEOINFOHEADER))
+				return VFW_E_TYPE_NOT_ACCEPTED;
+			// Valid bitmap?
+			VIDEOINFOHEADER *header = reinterpret_cast<VIDEOINFOHEADER*>(In->pbFormat);
+			if (header->bmiHeader.biBitCount != 24 && header->bmiHeader.biBitCount != 32)
+				return VFW_E_TYPE_NOT_ACCEPTED;
+			// Media type accepted
+			return S_OK;
 		}
-
-		// TODO
-
+		// Prefered output media stream type
+		HRESULT GetMediaType(int position, CMediaType *Out){
+			// Valid pointer?
+			CheckPointer(Out, E_POINTER);
+			// Input pin isn't connected
+			if(!m_pInput->IsConnected())
+				return VFW_E_NOT_CONNECTED;
+			// Item pick error
+			if (position < 0)
+				return E_ACCESSDENIED;
+			// No further items
+			if(position > 0)
+				return VFW_S_NO_MORE_ITEMS;
+			// Output type = input type
+			HRESULT hr = m_pInput->ConnectionMediaType(Out);
+			if (FAILED(hr))
+				return hr;
+			// Output accepted
+			return S_OK;
+		}
+		// Checks compatibility of input & output pin
+		HRESULT CheckTransform(const CMediaType *In, const CMediaType *Out){
+			// Valid pointers?
+			CheckPointer(In, E_POINTER);
+			CheckPointer(Out, E_POINTER);
+			// In- & output the same?
+			if(this->CheckInputType(In) == S_OK && *In == *Out)
+				return S_OK;
+			else
+				return VFW_E_INVALIDMEDIATYPE;
+		}
+		// Allocate buffers for in- & output
+		HRESULT DecideBufferSize(IMemAllocator *alloc, ALLOCATOR_PROPERTIES *props){
+			// Valid pointers?
+			CheckPointer(alloc, E_POINTER);
+			CheckPointer(props, E_POINTER);
+			// Input pin isn't connected
+			if (!m_pInput->IsConnected())
+				return VFW_E_NOT_CONNECTED;
+			// Set buffer size
+			props->cBuffers = 1;
+			props->cbBuffer = m_pInput->CurrentMediaType().GetSampleSize();
+			// Allocate buffer memory
+			ALLOCATOR_PROPERTIES actual;
+			HRESULT hr = alloc->SetProperties(props,&actual);
+			if (FAILED(hr))
+				return hr;
+			// Enough memory allocated?
+			if (actual.cBuffers < props->cBuffers ||
+				actual.cbBuffer < props->cbBuffer)
+						return E_OUTOFMEMORY;
+			// Got memory
+			return S_OK;
+		}
+		// Frame processing
+		HRESULT Transform(IMediaSample *In, IMediaSample *Out){
+			// Valid pointers?
+			CheckPointer(In, E_POINTER);
+			CheckPointer(Out, E_POINTER);
+			// Set output size
+			Out->SetActualDataLength(In->GetActualDataLength());
+			// Declarations
+			BYTE *src, *dst;
+			LONGLONG start, end;
+			HRESULT hr;
+			// Get time
+			hr = In->GetMediaTime(&start, &end);
+			if(FAILED(hr))
+				return hr;
+			// Get frame pointers
+			hr = In->GetPointer(&src);
+			if(FAILED(hr))
+				return hr;
+			hr = Out->GetPointer(&dst);
+			if(FAILED(hr))
+				return hr;
+			// Convert source frame to image
+			dshow_frame_to_image();
+			// Filter image
+			try{
+				// Send image data through filter process
+				this->lvs->RenderOnFrame(this->image, start-1);
+			}catch(std::exception e){
+				// Show UTF8 error message
+				wchar_t *werr = utf8_to_utf16(e.what());
+				MessageBoxW(0, werr, FILTER_NAMEW L" video error", MB_OK | MB_ICONWARNING);
+				delete[] werr;
+				// Return error code
+				return E_FAIL;
+			}
+			// Convert image to destination frame
+			image_to_dshow_frame();
+			// Frame successfully filtered
+			return S_OK;
+		}
+		// Start frame streaming
+		HRESULT StartStreaming(){
+			// Get video info
+			VIDEOINFOHEADER *video = reinterpret_cast<VIDEOINFOHEADER*>(this->m_pInput->CurrentMediaType().pbFormat);
+			BITMAPINFOHEADER *bmp = &video->bmiHeader;
+			double fps = 10.0e+07L / video->AvgTimePerFrame;
+			unsigned long frames = this->m_pInput->CurrentStopTime() / video->AvgTimePerFrame;
+			// Free previous render data (in case of buggy twice start function call)
+			if(this->lvs){
+				delete this->lvs;
+				this->lvs = NULL;
+				delete[] this->image;
+				this->image = NULL;
+			}
+			// Create LVS instance
+			try{
+				this->lvs = new LVS(this->filename, bmp->biWidth, bmp->biHeight, bmp->biBitCount == 32, fps, frames);
+			}catch(std::exception e){
+				// Show UTF8 error message
+				wchar_t *werr = utf8_to_utf16(e.what());
+				MessageBoxW(0, werr, FILTER_NAMEW L" initialization failed", MB_OK | MB_ICONWARNING);
+				delete[] werr;
+				// Return error code
+				return VFW_E_WRONG_STATE;
+			}
+			// Create image buffer (4-bytes per pixel for cairo stride alignment)
+			this->image = new unsigned char[bmp->biHeight * bmp->biWidth << 2];
+			// Continue with default behaviour
+			return CVideoTransformFilter::StartStreaming();
+		}
+		// Stop frame streaming
+		HRESULT StopStreaming(){
+			// Free render data
+			if(this->lvs){
+				delete this->lvs;
+				this->lvs = NULL;
+				delete[] this->image;
+				this->image = NULL;
+			}
+			// Continue with default behaviour
+			return CVideoTransformFilter::StopStreaming();
+		}
+		// Number of filter pins
+		int GetPinCount(){
+			return 2;
+		}
+		// Get filter pins
+		CBasePin* GetPin(int n){
+			// Pick pin by index
+			switch(n){
+				case 0:
+					// Input pin
+					if (!this->m_pInput){
+						// Create new one
+						HRESULT hr = S_OK;
+						this->m_pInput = new CTransformInputPin(L"Video input", this, &hr, L"Video input");
+						if (FAILED(hr))
+							return NULL;
+					}
+					return this->m_pInput;
+				case 1:
+					// Output pin
+					if (!this->m_pOutput){
+						// Create new one
+						HRESULT hr = S_OK;
+						this->m_pOutput = new CTransformOutputPin(L"Video output", this, &hr, L"Video output");
+						if (FAILED(hr))
+							return NULL;
+					}
+					return this->m_pOutput;
+				default:
+					// Not expected pin
+					return NULL;
+			}
+		}
+		// Define COM object base methods
+		DECLARE_IUNKNOWN;
+		// Answer to interface requests from outside
+		HRESULT CALLBACK NonDelegatingQueryInterface(REFIID riid, __deref_out void **ppv){
+			// Valid pointer?
+			CheckPointer(ppv, E_POINTER);
+			// Return filter configuration interface
+			if(riid == IID_ILVSVideoFilterConfiguration)
+				return GetInterface(static_cast<ILVSVideoFilterConfiguration*>(this), ppv);
+			// Return filter property page interface
+			if(riid == IID_ISpecifyPropertyPages)
+				return GetInterface(static_cast<ISpecifyPropertyPages*>(this), ppv);
+			// Return default interfaces
+			return CVideoTransformFilter::NonDelegatingQueryInterface(riid, ppv);
+		}
+		// Define property pages belonging to this filter
+		HRESULT CALLBACK GetPages(CAUUID *pages){
+			// Valid pointer?
+			CheckPointer(pages, E_POINTER);
+			// Number of property pages
+			pages->cElems = 1;
+			// Allocate managed memory of COM for property pages
+			pages->pElems = (GUID*)CoTaskMemAlloc(sizeof(GUID));
+			if(!pages->pElems)
+				return E_OUTOFMEMORY;
+			// Set property page
+			*pages->pElems = CLSID_LVSVideoFilterPropertyPage;
+			// Successfully defined filter property page
+			return S_OK;
+		}
+		// Filter configuration interface
+		char* GetFile(){
+			// Lock critical section for thread-safety
+			CAutoLock lock(&this->crit_section);
+			// Copy filename
+			char *filename = new char[strlen(this->filename)+1];
+			strcpy(filename, this->filename);
+			// Return copy
+			return filename;
+		}
+		void SetFile(char *filename){
+			// Lock critical section for thread-safety
+			CAutoLock lock(&this->crit_section);
+			// Copy parameter to filename
+			delete[] this->filename;
+			this->filename = new char[strlen(filename)+1];
+			strcpy(this->filename, filename);
+		}
 };
 
 // Filter pins
