@@ -1,6 +1,6 @@
 #pragma once
 
-#include <lua.h>
+#include <lua.hpp>
 
 // Lua instance
 class Lua{
@@ -29,6 +29,11 @@ static void luaL_error2(lua_State *L, const char *msg = 0){
 		luaL_error(L, "Bad arguments to function '%s'!", ar.name);
 	}else
 		luaL_error(L, msg);
+}
+
+static void luaL_typerror(lua_State *L, int narg, const char *expected){
+	const char *msg = lua_pushfstring(L, "%s expected, got %s", expected, luaL_typename(L, narg));
+	luaL_argerror(L, narg, msg);
 }
 
 // Lua boolean functions

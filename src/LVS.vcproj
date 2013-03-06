@@ -151,6 +151,14 @@
 				RelativePath=".\LVS.hpp"
 				>
 			</File>
+			<File
+				RelativePath=".\LVSMediaBase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\LVSMediaBase.hpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Information"

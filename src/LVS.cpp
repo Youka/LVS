@@ -14,7 +14,7 @@ LVS::LVS(const char* video_file, int width, int height, bool has_alpha, double f
 }
 
 void LVS::RenderOnFrame(CairoImage *image, int frame_number){
-	// TEST START (for avisynth)
+	// TEST START
 	cairo_surface_t *surf = cairo_image_surface_create_for_data(*image, CAIRO_FORMAT_ARGB32, 720, 480, 2880);
 	cairo_t *ctx = cairo_create(surf);
 
