@@ -152,11 +152,27 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LVSAudio.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\LVSAudio.hpp"
+				>
+			</File>
+			<File
 				RelativePath=".\LVSMediaBase.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\LVSMediaBase.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\LVSVideo.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\LVSVideo.hpp"
 				>
 			</File>
 		</Filter>

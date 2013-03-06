@@ -22,8 +22,7 @@ class LVSFilteredClip : public GenericVideoFilter{
 			// Create LVS instance
 			try{
 				this->lvs = new LVS(video_file, this->vi.width, this->vi.height, this->vi.IsRGB32(), static_cast<double>(this->vi.fps_numerator) / this->vi.fps_denominator, this->vi.num_frames,
-													audio_file, this->vi.nchannels, this->vi.audio_samples_per_second, this->vi.num_audio_samples,
-													env);
+													audio_file, this->vi.nchannels, this->vi.audio_samples_per_second, this->vi.num_audio_samples);
 			}catch(std::exception e){
 				env->ThrowError(FILTER_NAME" initialization failed: %s", e.what());
 			}

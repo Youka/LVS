@@ -1,4 +1,5 @@
 #include "LVSMediaBase.hpp"
+#include <windows.h>
 #include "textconv.hpp"
 #include <exception>
 
@@ -11,10 +12,10 @@ LVSMediaBase::LVSMediaBase(){
 	const int buf_len = 256;
 	wchar_t buf[buf_len];
 	GetModuleFileNameW(DLL_INSTANCE, buf, buf_len);
-	// Extract filename without extension
+	// Get filename pointer to extension character
 	wchar_t *ext = wcsrchr(buf, L'.');
 	if(ext){
-		// Build filename with .lua extension
+		// Change filename extension to '.lua'
 		if(ext - buf + 5 <= buf_len){
 			wcscpy(ext, L".lua");
 			// Convert filename to UTF-8
