@@ -11,7 +11,7 @@ class LVS{
 		// Audio process
 		LVSAudio *audio_proc;
 	public:
-		// Get video + audio + script environment
+		// Get video + audio
 		LVS(const char* video_file, int width, int height, bool has_alpha, double fps, int frames,
 				const char* audio_file, int channels, int sample_rate, __int64 samples);
 		// Get only video
@@ -19,7 +19,7 @@ class LVS{
 		// Free video & audio process
 		~LVS();
 		// Render on frame
-		void RenderOnFrame(CairoImage* data, int frame_number);
+		void RenderOnFrame(CairoImage* image, int frame_number);
 		// Render on samples
 		void RenderOnSamples(float* buf, __int64 start, __int64 count);
 };

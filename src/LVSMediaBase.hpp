@@ -4,7 +4,7 @@
 
 // Base class for LVS video&audio class
 class LVSMediaBase{
-	private:
+	protected:
 		// Lua environment
 		Lua L;
 	public:

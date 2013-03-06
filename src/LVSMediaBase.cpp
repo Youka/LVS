@@ -18,16 +18,21 @@ LVSMediaBase::LVSMediaBase(){
 		// Change filename extension to '.lua'
 		if(ext - buf + 5 <= buf_len){
 			wcscpy(ext, L".lua");
-			// Convert filename to UTF-8
-			char *filename = utf16_to_utf8(buf);
-			// Load Lua file
-			if(luaL_dofile(L, filename)){
+			// File valid?
+			FILE *f = _wfopen(buf, L"r");
+			if(f){
+				fclose(f);
+				// Convert filename to UTF-8
+				char *filename = utf16_to_utf8(buf);
+				// Load Lua file
+				if(luaL_dofile(this->L, filename)){
+					delete[] filename;
+					throw std::exception(lua_tostring(this->L, -1));
+				}
+				// Free resources
 				delete[] filename;
-				throw std::exception(lua_tostring(L, -1));
+				lua_gc(this->L, LUA_GCCOLLECT, 0);
 			}
-			// Free resources
-			delete[] filename;
-			lua_gc(L, LUA_GCCOLLECT, 0);
 		}
 	}
 }

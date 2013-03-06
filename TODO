@@ -1,1 +1,3 @@
-* write LVS base class
+* design audio & video processing in Lua
+* write audio class
+* write video class
