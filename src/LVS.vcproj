@@ -168,11 +168,11 @@
 			Name="Utilities"
 			>
 			<File
-				RelativePath=".\conv.cpp"
+				RelativePath=".\image.hpp"
 				>
 			</File>
 			<File
-				RelativePath=".\conv.hpp"
+				RelativePath=".\textconv.hpp"
 				>
 			</File>
 		</Filter>

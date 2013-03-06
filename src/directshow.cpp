@@ -10,8 +10,9 @@
 #include <Commdlg.h>
 // Include utilities
 #include "fileinfo.hpp"
+#include "textconv.hpp"
+#include "image.hpp"
 #include <exception>
-#include "conv.hpp"
 
 // DLL instance getter for VC compilers
 extern "C" IMAGE_DOS_HEADER __ImageBase;
@@ -191,7 +192,7 @@ class LVSVideoFilter : public CVideoTransformFilter, public ILVSVideoFilterConfi
 		// LVS instance for filtering process
 		LVS *lvs;
 		// Image buffer for frame conversion
-		unsigned char *image;
+		CairoImage *image;
 		// Critical section for save configuration access from other interfaces
 		CCritSec  crit_section;
 		// Configuration
@@ -217,7 +218,7 @@ class LVSVideoFilter : public CVideoTransformFilter, public ILVSVideoFilterConfi
 				delete this->lvs;
 			// Free image buffer
 			if(this->image)
-				delete[] this->image;
+				delete this->image;
 			// Free configuration
 			if(this->filename)
 				delete[] this->filename;
@@ -314,7 +315,7 @@ class LVSVideoFilter : public CVideoTransformFilter, public ILVSVideoFilterConfi
 			if(FAILED(hr))
 				return hr;
 			// Convert source frame to image
-			dshow_frame_to_image();
+			this->image->load_dshow_frame();
 			// Filter image
 			try{
 				// Send image data through filter process
@@ -328,7 +329,7 @@ class LVSVideoFilter : public CVideoTransformFilter, public ILVSVideoFilterConfi
 				return E_FAIL;
 			}
 			// Convert image to destination frame
-			image_to_dshow_frame();
+			this->image->save_dshow_frame();
 			// Frame successfully filtered
 			return S_OK;
 		}
@@ -358,7 +359,7 @@ class LVSVideoFilter : public CVideoTransformFilter, public ILVSVideoFilterConfi
 				return VFW_E_WRONG_STATE;
 			}
 			// Create image buffer (4-bytes per pixel for cairo stride alignment)
-			this->image = new unsigned char[bmp->biHeight * bmp->biWidth << 2];
+			this->image = new CairoImage(bmp->biWidth, bmp->biHeight, bmp->biBitCount == 32);
 			// Continue with default behaviour
 			return CVideoTransformFilter::StartStreaming();
 		}
@@ -368,7 +369,7 @@ class LVSVideoFilter : public CVideoTransformFilter, public ILVSVideoFilterConfi
 			if(this->lvs){
 				delete this->lvs;
 				this->lvs = NULL;
-				delete[] this->image;
+				delete this->image;
 				this->image = NULL;
 			}
 			// Continue with default behaviour

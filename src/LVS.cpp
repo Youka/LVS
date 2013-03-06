@@ -13,9 +13,9 @@ LVS::LVS(const char* video_file, int width, int height, bool has_alpha, double f
 
 }
 
-void LVS::RenderOnFrame(unsigned char* data, int frame_number){
+void LVS::RenderOnFrame(CairoImage *image, int frame_number){
 	// TEST START
-	cairo_surface_t *surf = cairo_image_surface_create_for_data(data, CAIRO_FORMAT_RGB24, 400, 200, 1600);
+	cairo_surface_t *surf = cairo_image_surface_create_for_data(*image, CAIRO_FORMAT_RGB24, 400, 200, 1600);
 	cairo_t *ctx = cairo_create(surf);
 
 	cairo_rectangle(ctx, 20, 20, 50, 50);

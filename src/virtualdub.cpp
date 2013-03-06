@@ -8,8 +8,9 @@
 #include <Commdlg.h>
 // Include utilities
 #include "fileinfo.hpp"
+#include "textconv.hpp"
+#include "image.hpp"
 #include <exception>
-#include "conv.hpp"
 #include <cstdio>
 
 // DLL instance getter for VC compilers
@@ -23,7 +24,7 @@ namespace vdub{
 	// Filter instance data container
 	struct LVSData{
 		LVS *lvs;
-		unsigned char *image;
+		CairoImage *image;
 		char *filename;
 	};
 	// Filter initialization
@@ -45,7 +46,7 @@ namespace vdub{
 			inst_data->lvs = NULL;
 		}
 		if(inst_data->image){
-			delete[] inst_data->image;
+			delete inst_data->image;
 			inst_data->image = NULL;
 		}
 		if(inst_data->filename){
@@ -56,10 +57,8 @@ namespace vdub{
 	// Filter running
 	int run_func(const VDXFilterActivation *fdata, const VDXFilterFunctions *ffuncs){
 		LVSData *inst_data = reinterpret_cast<LVSData*>(fdata->filter_data);
-		// Get frame & image row sizes
-		int image_stride = fdata->src.w << 2;
 		// Convert source frame to image
-		vdub_frame_to_image();
+		inst_data->image->load_vdub_frame();
 		// Filter image
 		try{
 			// Send image data through filter process
@@ -74,7 +73,7 @@ namespace vdub{
 			return 1;
 		}
 		// Convert image to destination frame
-		image_to_vdub_frame();
+		inst_data->image->save_vdub_frame();
 		// Success
 		return 0;
 	}
@@ -211,8 +210,8 @@ namespace vdub{
 			ffuncs->Except(FILTER_NAME" initialization failed: %s", e.what());
 			return 1;
 		}
-		// Create image buffer (4-bytes per pixel for cairo stride alignment)
-		inst_data->image = new unsigned char[fdata->src.h * fdata->src.w << 2];
+		// Create image buffer
+		inst_data->image = new CairoImage(fdata->src.w, fdata->src.h, has_alpha);
 		// Success
 		return 0;
 	}

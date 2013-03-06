@@ -5,8 +5,9 @@
 #include "LVS.hpp"
 // Include utilities
 #include "fileinfo.hpp"
+#include "textconv.hpp"
+#include "image.hpp"
 #include <exception>
-#include "conv.hpp"
 
 // Clip with frames & samples filter
 class LVSFilteredClip : public GenericVideoFilter{
@@ -14,7 +15,7 @@ class LVSFilteredClip : public GenericVideoFilter{
 		// LVS instance for filtering process
 		LVS *lvs;
 		// Image buffer for frame conversion
-		unsigned char *image;
+		CairoImage *image;
 	public:
 		// Clip constructor
 		LVSFilteredClip(IScriptEnvironment* env, PClip clip, const char* video_file, const char* audio_file) : GenericVideoFilter(clip), lvs(0), image(0){
@@ -26,8 +27,8 @@ class LVSFilteredClip : public GenericVideoFilter{
 			}catch(std::exception e){
 				env->ThrowError(FILTER_NAME" initialization failed: %s", e.what());
 			}
-			// Create image buffer (4-bytes per pixel for cairo stride alignment)
-			this->image = new unsigned char[this->vi.width * this->vi.height << 2];
+			// Create image buffer
+			this->image = new CairoImage(this->vi.width, this->vi.height, this->vi.IsRGB32());
 		}
 		// Clip destructor
 		~LVSFilteredClip(){
@@ -36,17 +37,15 @@ class LVSFilteredClip : public GenericVideoFilter{
 				delete this->lvs;
 			// Free image buffer
 			if(this->image)
-				delete[] this->image;
+				delete this->image;
 		}
 		// Frames callback
 		PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env){
 			// Get current frame from child clip & add writing support
 			PVideoFrame frame = this->child->GetFrame(n, env);
 			env->MakeWritable(&frame);
-			// Get frame & image row sizes
-			int rowsize = frame->GetRowSize(), pitch = frame->GetPitch(), stride = this->vi.width << 2;
 			// Convert frame to image
-			avisynth_frame_to_image(frame->GetWritePtr(), pitch, this->image, stride, rowsize, this->vi.height);
+			this->image->load_avisynth_frame(frame->GetWritePtr(), frame->GetPitch());
 			// Filter image
 			try{
 				// Send image data through filter process
@@ -61,7 +60,7 @@ class LVSFilteredClip : public GenericVideoFilter{
 					env->ThrowError(e.what());
 			}
 			// Convert image to frame
-			image_to_avisynth_frame(this->image, stride, frame->GetWritePtr(), pitch, rowsize, this->vi.height);
+			this->image->save_avisynth_frame(frame->GetWritePtr(), frame->GetPitch());
 			// Return filtered frame
 			return frame;
 		}
