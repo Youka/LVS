@@ -315,7 +315,7 @@ class LVSVideoFilter : public CVideoTransformFilter, public ILVSVideoFilterConfi
 			if(FAILED(hr))
 				return hr;
 			// Convert source frame to image
-			this->image->load_dshow_frame();
+			this->image->Load(src, 0, CairoImage::DSHOW);
 			// Filter image
 			try{
 				// Send image data through filter process
@@ -329,7 +329,7 @@ class LVSVideoFilter : public CVideoTransformFilter, public ILVSVideoFilterConfi
 				return E_FAIL;
 			}
 			// Convert image to destination frame
-			this->image->save_dshow_frame();
+			this->image->Save(dst, 0, CairoImage::DSHOW);
 			// Frame successfully filtered
 			return S_OK;
 		}
@@ -521,7 +521,7 @@ CFactoryTemplate g_Templates[] = {
 		NULL, NULL		//Unneeded
 	}
 };
-int g_cTemplates = sizeof(g_Templates) / sizeof(CFactoryTemplate);	// Number of filter definitions
+int g_cTemplates = sizeof(g_Templates) / sizeof(CFactoryTemplate);	// Number of COM objects
 
 // Register filter to server
 STDAPI DllRegisterServer(){

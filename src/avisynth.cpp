@@ -45,7 +45,7 @@ class LVSFilteredClip : public GenericVideoFilter{
 			PVideoFrame frame = this->child->GetFrame(n, env);
 			env->MakeWritable(&frame);
 			// Convert frame to image
-			this->image->load_avisynth_frame(frame->GetWritePtr(), frame->GetPitch());
+			this->image->Load(frame->GetWritePtr(), frame->GetPitch(), CairoImage::AVS);
 			// Filter image
 			try{
 				// Send image data through filter process
@@ -60,7 +60,7 @@ class LVSFilteredClip : public GenericVideoFilter{
 					env->ThrowError(e.what());
 			}
 			// Convert image to frame
-			this->image->save_avisynth_frame(frame->GetWritePtr(), frame->GetPitch());
+			this->image->Save(frame->GetWritePtr(), frame->GetPitch(), CairoImage::AVS);
 			// Return filtered frame
 			return frame;
 		}

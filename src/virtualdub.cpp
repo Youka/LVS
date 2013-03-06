@@ -58,7 +58,7 @@ namespace vdub{
 	int run_func(const VDXFilterActivation *fdata, const VDXFilterFunctions *ffuncs){
 		LVSData *inst_data = reinterpret_cast<LVSData*>(fdata->filter_data);
 		// Convert source frame to image
-		inst_data->image->load_vdub_frame();
+		inst_data->image->Load(reinterpret_cast<unsigned char*>(fdata->src.data), fdata->src.pitch, CairoImage::VDUB);
 		// Filter image
 		try{
 			// Send image data through filter process
@@ -73,7 +73,7 @@ namespace vdub{
 			return 1;
 		}
 		// Convert image to destination frame
-		inst_data->image->save_vdub_frame();
+		inst_data->image->Save(reinterpret_cast<unsigned char*>(fdata->dst.data), fdata->dst.pitch, CairoImage::VDUB);
 		// Success
 		return 0;
 	}

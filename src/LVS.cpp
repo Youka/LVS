@@ -14,12 +14,12 @@ LVS::LVS(const char* video_file, int width, int height, bool has_alpha, double f
 }
 
 void LVS::RenderOnFrame(CairoImage *image, int frame_number){
-	// TEST START
-	cairo_surface_t *surf = cairo_image_surface_create_for_data(*image, CAIRO_FORMAT_RGB24, 400, 200, 1600);
+	// TEST START (for avisynth)
+	cairo_surface_t *surf = cairo_image_surface_create_for_data(*image, CAIRO_FORMAT_ARGB32, 720, 480, 2880);
 	cairo_t *ctx = cairo_create(surf);
 
-	cairo_rectangle(ctx, 20, 20, 50, 50);
-	cairo_set_source_rgb(ctx, 1, 1, 0.5);
+	cairo_rectangle(ctx, 300, 20, 50, 50);
+	cairo_set_source_rgba(ctx, 1, 1, 0.5, 0.7);
 	cairo_fill(ctx);
 
 	cairo_destroy(ctx);
