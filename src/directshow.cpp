@@ -347,10 +347,15 @@ class LVSVideoFilter : public CVideoTransformFilter, public ILVSVideoFilterConfi
 				delete[] this->image;
 				this->image = NULL;
 			}
+			// Create filename buffer
+			char *filename = this->GetFile();
 			// Create LVS instance
 			try{
-				this->lvs = new LVS(this->filename, bmp->biWidth, bmp->biHeight, bmp->biBitCount == 32, fps, frames);
+				this->lvs = new LVS(filename, bmp->biWidth, bmp->biHeight, bmp->biBitCount == 32, fps, frames);
+				delete[] filename;
 			}catch(std::exception e){
+				// Free filename buffer
+				delete[] filename;
 				// Show UTF8 error message
 				wchar_t *werr = utf8_to_utf16(e.what());
 				MessageBoxW(0, werr, FILTER_NAMEW L" initialization failed", MB_OK | MB_ICONWARNING);

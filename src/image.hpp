@@ -4,11 +4,11 @@
 
 struct CairoImage{
 	// Dimension
-	int width, height, stride;
+	const int width, height, stride;
 	// RGB or RGBA?
-	bool has_alpha;
+	const bool has_alpha;
 	// Pixel data
-	unsigned char *data;
+	const unsigned char *data;
 	// Constructor / initialize image information & data
 	CairoImage(int width, int height, bool has_alpha) : width(width), height(height), stride(width<<2), has_alpha(has_alpha), data(new unsigned char[stride*height]){}
 	// Destructor / free image data
@@ -17,14 +17,14 @@ struct CairoImage{
 	}
 	// Data access
 	operator unsigned char*(){
-		return this->data;
+		return const_cast<unsigned char*>(this->data);
 	}
 	// Frame types
 	enum API{AVS = 0, VDUB, DSHOW};
 	// Load from frame
 	void Load(register unsigned char *frame, int pitch, API api){
 		// Image pointer
-		register unsigned char *image = this->data;
+		register unsigned char *image = const_cast<unsigned char*>(this->data);
 		// Load by API
 		switch(api){
 			case AVS:{
@@ -84,7 +84,7 @@ struct CairoImage{
 	// Save to frame
 	void Save(register unsigned char *frame, int pitch, API api){
 		// Image pointer
-		register unsigned char *image = this->data;
+		register unsigned char *image = const_cast<unsigned char*>(this->data);
 		// Save by API
 		switch(api){
 			case AVS:{
