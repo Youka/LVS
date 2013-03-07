@@ -70,7 +70,7 @@ class LVSFilteredClip : public GenericVideoFilter{
 			// Filter samples
 			try{
 				// Send samples data through filter process
-				this->lvs->RenderOnSamples(reinterpret_cast<float*>(buf), start, count);
+				this->lvs->RenderOnSamples(reinterpret_cast<float*>(buf), count * this->vi.nchannels, start);
 			}catch(std::exception e){
 				// Show UTF8 error message
 				wchar_t *werr = utf8_to_utf16(e.what());

@@ -21,5 +21,5 @@ class LVS{
 		// Render on frame
 		void RenderOnFrame(CairoImage* image, int frame_number);
 		// Render on samples
-		void RenderOnSamples(float* buf, __int64 start, __int64 count);
+		void RenderOnSamples(float* buf, __int64 buf_size, __int64 start_sample);
 };

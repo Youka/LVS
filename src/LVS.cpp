@@ -36,8 +36,8 @@ void LVS::RenderOnFrame(CairoImage *image, int frame_number){
 		this->video_proc->Render(image, frame_number);
 }
 
-void LVS::RenderOnSamples(float* buf, __int64 start, __int64 count){
+void LVS::RenderOnSamples(float* buf, __int64 buf_size, __int64 start_sample){
 	// Pass samples to audio process
 	if(this->audio_proc)
-		this->audio_proc->Render(buf, start, count);
+		this->audio_proc->Render(buf, buf_size, start_sample);
 }

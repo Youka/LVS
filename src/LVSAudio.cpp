@@ -11,8 +11,45 @@ LVSAudio::LVSAudio(const char* script, int channels, int sample_rate, __int64 sa
 		throw std::exception(lua_tostring(this->L, -1));
 }
 
-void LVSAudio::Render(float* buf, __int64 start, __int64 count){
-
-	// TODO
-
+void LVSAudio::Render(float* buf, __int64 buf_size, __int64 start_sample){
+	// Create and fill table with samples data
+	lua_createtable(this->L, buf_size, 0);
+	for(__int64 i = 0; i < buf_size; i++){
+		lua_pushnumber(this->L, buf[i]);
+		lua_rawseti(this->L, -2, i+1);
+	}
+	// Get render function
+	lua_getglobal(this->L, "GetSamples");
+	if(lua_isfunction(this->L, -1)){
+		// Push function arguments
+		lua_pushvalue(this->L, -2);	// Samples reference
+		lua_pushnumber(this->L, buf_size);	// Samples number
+		lua_pushnumber(this->L, start_sample);	// Start sample index
+		// Call render function
+		if(lua_pcall(this->L, 3, 0, 0)){
+			// Pop samples table & error string from stack and throw error
+			std::exception e(lua_tostring(this->L, -1));
+			lua_pop(this->L, 2);
+			throw e;
+		}
+		// Run garbage collection
+		lua_gc(this->L, LUA_GCCOLLECT, 0);
+	}else{
+		// Pop samples table & non-function from stack and throw error
+		lua_pop(this->L, 2);
+		throw std::exception("Function 'GetSamples' is missing!");
+	}
+	// Get samples data back from samples table
+	for(__int64 i = 0; i < buf_size; i++){
+		lua_rawgeti(this->L, -1, i+1);
+		if(!lua_isnumber(this->L, -1)){
+			// Pop table element & samples table and throw error
+			lua_pop(this->L, 2);
+			throw std::exception("Samples must be numbers!");
+		}
+		buf[i] = lua_tonumber(this->L, -1);
+		lua_pop(this->L, 1);
+	}
+	// Remove samples table
+	lua_pop(this->L, 1);
 }

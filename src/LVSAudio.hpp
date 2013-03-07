@@ -8,5 +8,5 @@ class LVSAudio : public LVSMediaBase{
 		// Prepare and call audio script
 		LVSAudio(const char* script, int channels, int sample_rate, __int64 samples);
 		// Call samples render function
-		void Render(float* buf, __int64 start, __int64 count);
+		void Render(float* buf, __int64 buf_size, __int64 start_sample);
 };
