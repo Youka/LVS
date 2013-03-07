@@ -39,7 +39,9 @@ void LVSMediaBase::LoadExternalLibs(){
 				// Load Lua file
 				if(luaL_dofile(this->L, filename)){
 					delete[] filename;
-					throw std::exception(lua_tostring(this->L, -1));
+					std::exception e(lua_tostring(this->L, -1));
+					lua_pop(this->L, 1);
+					throw e;
 				}
 				// Free resources
 				delete[] filename;

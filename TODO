@@ -1,3 +1,2 @@
-* design audio & video processing in Lua
-* write audio class
-* write video class
+* write video class render function
+* write & implent Lua libraries

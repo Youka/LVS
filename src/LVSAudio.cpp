@@ -7,17 +7,18 @@ LVSAudio::LVSAudio(const char* script, int channels, int sample_rate, __int64 sa
 	lua_pushnumber(this->L, sample_rate); lua_setglobal(this->L, "AUDIO_SAMPLE_RATE");
 	lua_pushnumber(this->L, samples); lua_setglobal(this->L, "AUDIO_SAMPLES");
 	// Load script
-	if(luaL_dofile(this->L, script))
-		throw std::exception(lua_tostring(this->L, -1));
+	if(luaL_dofile(this->L, script)){
+		std::exception e(lua_tostring(this->L, -1));
+		lua_pop(this->L, 1);
+		throw e;
+	}
+	// Free resources
+	lua_gc(this->L, LUA_GCCOLLECT, 0);
 }
 
 void LVSAudio::Render(float* buf, __int64 buf_size, __int64 start_sample){
 	// Create and fill table with samples data
-	lua_createtable(this->L, buf_size, 0);
-	for(__int64 i = 0; i < buf_size; i++){
-		lua_pushnumber(this->L, buf[i]);
-		lua_rawseti(this->L, -2, i+1);
-	}
+	lua_pushtable<float>(this->L, buf, buf_size);
 	// Get render function
 	lua_getglobal(this->L, "GetSamples");
 	if(lua_isfunction(this->L, -1)){

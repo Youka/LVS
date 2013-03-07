@@ -13,8 +13,13 @@ LVSVideo::LVSVideo(const char* script, int width, int height, bool has_alpha, do
 	lua_pushnumber(this->L, fps); lua_setglobal(this->L, "VIDEO_FPS");
 	lua_pushnumber(this->L, frames); lua_setglobal(this->L, "VIDEO_FRAMES");
 	// Load script
-	if(luaL_dofile(this->L, script))
-		throw std::exception(lua_tostring(this->L, -1));
+	if(luaL_dofile(this->L, script)){
+		std::exception e(lua_tostring(this->L, -1));
+		lua_pop(this->L, 1);
+		throw e;
+	}
+	// Free resources
+	lua_gc(this->L, LUA_GCCOLLECT, 0);
 }
 
 void LVSVideo::Render(CairoImage* image, int frame_number){
