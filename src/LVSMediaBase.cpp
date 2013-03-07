@@ -30,7 +30,7 @@ void LVSMediaBase::LoadExternalLibs(){
 		// Change filename extension to '.lua'
 		if(ext - buf + 5 <= buf_len){
 			wcscpy(ext, L".lua");
-			// File valid?
+			// File exists?
 			FILE *f = _wfopen(buf, L"r");
 			if(f){
 				fclose(f);

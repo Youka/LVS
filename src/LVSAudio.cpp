@@ -39,7 +39,7 @@ void LVSAudio::Render(float* buf, __int64 buf_size, __int64 start_sample){
 		lua_pop(this->L, 2);
 		throw std::exception("Function 'GetSamples' is missing!");
 	}
-	// Get samples data back from samples table
+	// Get samples data back from samples table and remove him
 	for(__int64 i = 0; i < buf_size; i++){
 		lua_rawgeti(this->L, -1, i+1);
 		if(!lua_isnumber(this->L, -1)){
@@ -50,6 +50,5 @@ void LVSAudio::Render(float* buf, __int64 buf_size, __int64 start_sample){
 		buf[i] = lua_tonumber(this->L, -1);
 		lua_pop(this->L, 1);
 	}
-	// Remove samples table
 	lua_pop(this->L, 1);
 }
