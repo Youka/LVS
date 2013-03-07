@@ -417,7 +417,7 @@ class LVSVideoFilter : public CVideoTransformFilter, public ILVSVideoFilterConfi
 			// Return filter configuration interface
 			if(riid == IID_ILVSVideoFilterConfiguration)
 				return GetInterface(static_cast<ILVSVideoFilterConfiguration*>(this), ppv);
-			// Return filter property page interface
+			// Return filter property page getter interface
 			if(riid == IID_ISpecifyPropertyPages)
 				return GetInterface(static_cast<ISpecifyPropertyPages*>(this), ppv);
 			// Return default interfaces
@@ -461,10 +461,12 @@ class LVSVideoFilter : public CVideoTransformFilter, public ILVSVideoFilterConfi
 // Filter pins
 const AMOVIESETUP_MEDIATYPE sudPinTypes[] =
 {
+	// Support RGB colorspace
 	{
 		&MEDIATYPE_Video,
 		&MEDIASUBTYPE_RGB24
 	},
+	// Support RGBA colorspace
 	{
 		&MEDIATYPE_Video,
 		&MEDIASUBTYPE_RGB32

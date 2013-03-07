@@ -10,4 +10,8 @@ class LVSMediaBase{
 	public:
 		// Initialize Lua environment
 		LVSMediaBase();
+	private:
+		// Lua libraries loaders
+		void LoadInternalLibs();
+		void LoadExternalLibs();
 };

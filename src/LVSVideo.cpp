@@ -12,16 +12,15 @@ LVSVideo::LVSVideo(const char* script, int width, int height, bool has_alpha, do
 	lua_pushnumber(this->L, has_alpha); lua_setglobal(this->L, "VIDEO_WITH_ALPHA");
 	lua_pushnumber(this->L, fps); lua_setglobal(this->L, "VIDEO_FPS");
 	lua_pushnumber(this->L, frames); lua_setglobal(this->L, "VIDEO_FRAMES");
-	// Set libraries
-
-	// TODO
-
 	// Load script
 	if(luaL_dofile(this->L, script))
 		throw std::exception(lua_tostring(this->L, -1));
 }
 
 void LVSVideo::Render(CairoImage* image, int frame_number){
+
+	// TODO
+
 	// TEST START
 	cairo_surface_t *surf = cairo_image_surface_create_for_data(*image, CAIRO_FORMAT_ARGB32, 720, 480, 2880);
 	cairo_t *ctx = cairo_create(surf);

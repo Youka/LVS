@@ -8,6 +8,18 @@ extern "C" IMAGE_DOS_HEADER __ImageBase;
 #define DLL_INSTANCE reinterpret_cast<HINSTANCE>(&__ImageBase)
 
 LVSMediaBase::LVSMediaBase(){
+	// Register additional libraries
+	this->LoadInternalLibs();
+	this->LoadExternalLibs();
+}
+
+void LVSMediaBase::LoadInternalLibs(){
+
+	// TODO
+
+}
+
+void LVSMediaBase::LoadExternalLibs(){
 	// Get plugin filename
 	const int buf_len = 256;
 	wchar_t buf[buf_len];
