@@ -31,11 +31,10 @@ void LVSVideo::Render(CairoImage* image, int frame_number){
 	cairo_surface_t *surf = cairo_image_surface_create_for_data(*image, CAIRO_FORMAT_ARGB32, 720, 480, 2880);
 	cairo_t *ctx = cairo_create(surf);
 
-	cairo_select_font_face(ctx, "Arial", CAIRO_FONT_SLANT_ITALIC, CAIRO_FONT_WEIGHT_BOLD);
-	cairo_set_font_size(ctx, 50);
-	cairo_move_to(ctx, 300, 50);
+	cairo_translate(ctx, 350, 50);
+	cairo_win32_text_path(ctx, L"Hello world!", L"Times New Roman", 50, true, true, true, true);
 	cairo_set_source_rgba(ctx, 1, 1, 0.5, 0.7);
-	cairo_show_text(ctx, "Hello world!");
+	cairo_fill(ctx);
 
 	cairo_destroy(ctx);
 	cairo_surface_destroy(surf);
