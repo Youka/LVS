@@ -1,2 +1,3 @@
+* write cairo text path creator (for windows)
 * write video class render function
 * write & implent Lua libraries
