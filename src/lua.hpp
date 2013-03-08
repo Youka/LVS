@@ -92,8 +92,20 @@ template <class T> static void lua_pushtable(lua_State *L, T *t, unsigned long i
 }
 
 // Lua macros
-#define LUA_REGISTER_FUNC(func) lua_register(L, #func, l_##func)
-#define LUA_REGISTER_VAR(var) lua_pushnumber(L, var); lua_setglobal(L, #var)
+#define LUA_REGISTER_VAR(var) lua_pushnumber(L, var); lua_setglobal(L, #var);
+#define LUA_REGISTER_FUNC(func) lua_register(L, #func, l_##func);
+#define LUA_REGISTER_LIB_FUNC(lib, func) \
+	lua_getglobal(L, #lib); \
+	if(lua_istable(L, -1)){ \
+		lua_pushcfunction(L, l_##lib##_##func); lua_setfield(L, -2, #func); \
+		lua_pop(L, 1); \
+	}else{ \
+		lua_pop(L, 1); \
+		lua_createtable(L, 0, 1); \
+		lua_pushcfunction(L, l_##lib##_##func); lua_setfield(L, -2, #func); \
+		lua_setglobal(L, #lib); \
+	}
+
 #define LUA_FUNC(func) int l_##func(lua_State *L)
 #define LUA_FUNC_1ARG(func, param_n) \
 int l_ ## func (lua_State *L){ \
@@ -107,6 +119,7 @@ int l_ ## func (lua_State *L){ \
 #define LUA_FUNC_NARG(func, param_n) \
 int l_ ## func (lua_State *L){ \
 	if(lua_gettop(L) != param_n){
+
 #define LUA_FUNC_END \
 	}else \
 		luaL_error2(L); \

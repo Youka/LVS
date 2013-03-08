@@ -7,6 +7,7 @@
 
 LVSVideo::LVSVideo(const char* script, int width, int height, bool has_alpha, double fps, int frames){
 	// Set global video informations
+	lua_pushstring(this->L, script); lua_setglobal(this->L, "VIDEO_SCRIPT");
 	lua_pushnumber(this->L, width); lua_setglobal(this->L, "VIDEO_WIDTH");
 	lua_pushnumber(this->L, height); lua_setglobal(this->L, "VIDEO_HEIGHT");
 	lua_pushnumber(this->L, has_alpha); lua_setglobal(this->L, "VIDEO_WITH_ALPHA");

@@ -136,6 +136,18 @@
 				>
 			</File>
 			<File
+				RelativePath=".\lbase2.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\lgraphic.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\llibs.hpp"
+				>
+			</File>
+			<File
 				RelativePath=".\lua.hpp"
 				>
 			</File>

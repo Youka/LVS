@@ -3,6 +3,7 @@
 
 LVSAudio::LVSAudio(const char* script, int channels, int sample_rate, __int64 samples){
 	// Set global audio informations
+	lua_pushstring(this->L, script); lua_setglobal(this->L, "AUDIO_SCRIPT");
 	lua_pushnumber(this->L, channels); lua_setglobal(this->L, "AUDIO_CHANNELS");
 	lua_pushnumber(this->L, sample_rate); lua_setglobal(this->L, "AUDIO_SAMPLE_RATE");
 	lua_pushnumber(this->L, samples); lua_setglobal(this->L, "AUDIO_SAMPLES");

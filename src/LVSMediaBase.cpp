@@ -1,4 +1,7 @@
 #include "LVSMediaBase.hpp"
+// Include libraries loaders
+#include "llibs.hpp"
+// Include utilities
 #include <windows.h>
 #include "textconv.hpp"
 #include <exception>
@@ -14,9 +17,9 @@ LVSMediaBase::LVSMediaBase(){
 }
 
 void LVSMediaBase::LoadInternalLibs(){
-
-	// TODO
-
+	// Load additional base functions and graphics library
+	luaopen_base2(this->L);
+	luaopen_graphic(this->L);
 }
 
 void LVSMediaBase::LoadExternalLibs(){
