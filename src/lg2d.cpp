@@ -6,18 +6,25 @@
 
 LUA_FUNC_1ARG(image_gc, 1)
 	cairo_surface_t *surface = *reinterpret_cast<cairo_surface_t**>(luaL_checkuserdata(L, 1, LVS_IMAGE));
+	cairo_surface_destroy(surface);
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(image_get_dimension, 1)
+	cairo_surface_t *surface = *reinterpret_cast<cairo_surface_t**>(luaL_checkuserdata(L, 1, LVS_IMAGE));
+	lua_pushnumber(L, cairo_image_surface_get_width(surface));
+	lua_pushnumber(L, cairo_image_surface_get_height(surface));
+
 	// TEST START
 	cairo_t *ctx = cairo_create(surface);
-
 	cairo_translate(ctx, 320, 50);
 	const wchar_t text[] = {L'H', L'e', L'l', L'l', L'o', L' ', L'w', L'o', L'r', L'l', L'd', L'!', 0x3042, 0};
 	cairo_win32_text_path(ctx, text, L"Comic Sans MS", 60, true, true, true, true);
 	cairo_set_source_rgba(ctx, 1, 1, 0.5, 0.7);
 	cairo_fill(ctx);
-
 	cairo_destroy(ctx);
 	// TEST END
-	cairo_surface_destroy(surface);
+
+	return 2;
 LUA_FUNC_END
 
 int luaopen_g2d(lua_State *L){
@@ -29,6 +36,8 @@ int luaopen_g2d(lua_State *L){
 	// Register 'g2d' objects methods
 	luaL_newmetatable(L, LVS_IMAGE);
 	lua_pushcfunction(L, l_image_gc); lua_setfield(L, -2, "__gc");
+	lua_pushvalue(L, -1); lua_setfield(L, -2, "__index");
+	lua_pushcfunction(L, l_image_get_dimension); lua_setfield(L, -2, "get_dimension");
 	lua_pop(L, 1);
 	// Nothing pushed to Lua state
 	return 0;
