@@ -140,7 +140,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\lgraphic.cpp"
+				RelativePath=".\lg2d.cpp"
 				>
 			</File>
 			<File

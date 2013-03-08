@@ -1,9 +1,6 @@
 #include "LVSVideo.hpp"
 #include <exception>
-
-// TEST START
 #include "cairo.hpp"
-// TEST END
 
 LVSVideo::LVSVideo(const char* script, int width, int height, bool has_alpha, double fps, int frames){
 	// Set global video informations
@@ -24,19 +21,25 @@ LVSVideo::LVSVideo(const char* script, int width, int height, bool has_alpha, do
 }
 
 void LVSVideo::Render(CairoImage* image, int frame_number){
-
-	// TODO
-
-	// TEST START
-	cairo_surface_t *surf = cairo_image_surface_create_for_data(*image, CAIRO_FORMAT_ARGB32, 720, 480, 2880);
-	cairo_t *ctx = cairo_create(surf);
-
-	cairo_translate(ctx, 350, 50);
-	cairo_win32_text_path(ctx, L"Hello world!", L"Times New Roman", 50, true, true, true, true);
-	cairo_set_source_rgba(ctx, 1, 1, 0.5, 0.7);
-	cairo_fill(ctx);
-
-	cairo_destroy(ctx);
-	cairo_surface_destroy(surf);
-	// TEST END
+	// Get render function
+	lua_getglobal(this->L, "GetFrame");
+	if(lua_isfunction(this->L, -1)){
+		// Push function arguments
+		cairo_surface_t **ud = lua_createuserdata<cairo_surface_t*>(L, "LVS_IMAGE");	// Cairo surface with frame reference (object methods, including destruction, in 'g2d' library)
+		*ud = cairo_image_surface_create_for_data(const_cast<unsigned char*>(image->data), image->has_alpha ? CAIRO_FORMAT_ARGB32 : CAIRO_FORMAT_RGB24, image->width, image->height, image->stride);
+		lua_pushnumber(this->L, frame_number);	// Frame number
+		// Call render function
+		if(lua_pcall(this->L, 2, 0, 0)){
+			// Pop error string from stack and throw error
+			std::exception e(lua_tostring(this->L, -1));
+			lua_pop(this->L, 1);
+			throw e;
+		}
+		// Run garbage collection
+		lua_gc(this->L, LUA_GCCOLLECT, 0);
+	}else{
+		// Pop non-function from stack and throw error
+		lua_pop(this->L, 1);
+		throw std::exception("Function 'GetFrame' is missing!");
+	}
 }

@@ -15,10 +15,6 @@ struct CairoImage{
 	~CairoImage(){
 		delete[] this->data;
 	}
-	// Data access
-	operator unsigned char*(){
-		return const_cast<unsigned char*>(this->data);
-	}
 	// Frame types
 	enum API{AVS = 0, VDUB, DSHOW};
 	// Load from frame

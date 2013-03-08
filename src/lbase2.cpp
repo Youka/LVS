@@ -87,7 +87,7 @@ LUA_FUNC_END
 int luaopen_base2(lua_State *L){
 	// Register global function 'print'
 	LUA_REGISTER_FUNC(print)
-	// Register 'create' to library 'table'
+	// Register function 'create' to library 'table'
 	LUA_REGISTER_LIB_FUNC(table, create)
 	// Nothing pushed to Lua state
 	return 0;

@@ -19,7 +19,7 @@ LVSMediaBase::LVSMediaBase(){
 void LVSMediaBase::LoadInternalLibs(){
 	// Load additional base functions and graphics library
 	luaopen_base2(this->L);
-	luaopen_graphic(this->L);
+	luaopen_g2d(this->L);
 }
 
 void LVSMediaBase::LoadExternalLibs(){
