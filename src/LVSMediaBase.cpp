@@ -12,8 +12,9 @@ extern "C" IMAGE_DOS_HEADER __ImageBase;
 
 LVSMediaBase::LVSMediaBase(const char* data_string){
 	// Set global userdata string
-	if(data_string)
+	if(data_string){
 		lua_pushstring(this->L, data_string); lua_setglobal(this->L, "USERDATA");
+	}
 	// Register additional libraries
 	this->LoadInternalLibs();
 	this->LoadExternalLibs();
