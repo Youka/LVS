@@ -1,7 +1,7 @@
 #include "LVSAudio.hpp"
 #include <exception>
 
-LVSAudio::LVSAudio(const char* script, int channels, int sample_rate, __int64 samples){
+LVSAudio::LVSAudio(const char* script, int channels, int sample_rate, __int64 samples, const char* data_string) : LVSMediaBase(data_string){
 	// Set global audio informations
 	lua_pushstring(this->L, script); lua_setglobal(this->L, "AUDIO_SCRIPT");
 	lua_pushnumber(this->L, channels); lua_setglobal(this->L, "AUDIO_CHANNELS");

@@ -2,7 +2,7 @@
 #include <exception>
 #include "cairo.hpp"
 
-LVSVideo::LVSVideo(const char* script, int width, int height, bool has_alpha, double fps, int frames){
+LVSVideo::LVSVideo(const char* script, int width, int height, bool has_alpha, double fps, int frames, const char* data_string) : LVSMediaBase(data_string){
 	// Set global video informations
 	lua_pushstring(this->L, script); lua_setglobal(this->L, "VIDEO_SCRIPT");
 	lua_pushnumber(this->L, width); lua_setglobal(this->L, "VIDEO_WIDTH");

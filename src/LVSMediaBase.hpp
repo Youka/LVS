@@ -9,7 +9,7 @@ class LVSMediaBase{
 		Lua L;
 	public:
 		// Initialize Lua environment
-		LVSMediaBase();
+		LVSMediaBase(const char* data_string = 0);
 	private:
 		// Lua libraries loaders
 		void LoadInternalLibs();

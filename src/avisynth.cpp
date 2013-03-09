@@ -18,11 +18,12 @@ class LVSFilteredClip : public GenericVideoFilter{
 		CairoImage *image;
 	public:
 		// Clip constructor
-		LVSFilteredClip(IScriptEnvironment* env, PClip clip, const char* video_file, const char* audio_file) : GenericVideoFilter(clip), lvs(0), image(0){
+		LVSFilteredClip(IScriptEnvironment* env, PClip clip, const char* video_file, const char* audio_file, const char* data_string) : GenericVideoFilter(clip), lvs(0), image(0){
 			// Create LVS instance
 			try{
 				this->lvs = new LVS(video_file, this->vi.width, this->vi.height, this->vi.IsRGB32(), static_cast<double>(this->vi.fps_numerator) / this->vi.fps_denominator, this->vi.num_frames,
-													audio_file, this->vi.nchannels, this->vi.audio_samples_per_second, this->vi.num_audio_samples);
+													audio_file, this->vi.nchannels, this->vi.audio_samples_per_second, this->vi.num_audio_samples,
+													data_string);
 			}catch(std::exception e){
 				env->ThrowError(FILTER_NAME" initialization failed: %s", e.what());
 			}
@@ -89,6 +90,7 @@ AVSValue LVSExecute(AVSValue args, void* user_data, IScriptEnvironment* env){
 	PClip clip = args[0].AsClip();
 	const char *video_file = args[1].AsString(0);
 	const char *audio_file = args[2].AsString(0);
+	const char *data_string = args[3].AsString(0);
 	// Check arguments
 	VideoInfo clip_info = clip->GetVideoInfo();
 	if(!video_file && !audio_file)
@@ -112,7 +114,7 @@ AVSValue LVSExecute(AVSValue args, void* user_data, IScriptEnvironment* env){
 			env->ThrowError("Couldn't convert audio to float sample size!");
 		}
 	// Return filtered clip
-	return new LVSFilteredClip(env, clip, video_file, audio_file);
+	return new LVSFilteredClip(env, clip, video_file, audio_file, data_string);
 }
 
 //Register filter
@@ -120,7 +122,7 @@ extern "C" __declspec(dllexport) const char* __stdcall AvisynthPluginInit2(IScri
 	// Valid avisynth interface version?
 	env->CheckVersion();
 	// Register LVS function
-	env->AddFunction(FILTER_NAME, "c[video]s[audio]s", LVSExecute, 0);
+	env->AddFunction(FILTER_NAME, "c[video]s[audio]s[data]s", LVSExecute, 0);
 	// Return filter description
 	return FILTER_DESC_LONG;
 }

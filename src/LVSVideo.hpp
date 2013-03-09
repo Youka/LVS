@@ -7,7 +7,7 @@
 class LVSVideo : public LVSMediaBase{
 	public:
 		// Prepare and call video script
-		LVSVideo(const char* script, int width, int height, bool has_alpha, double fps, int frames);
+		LVSVideo(const char* script, int width, int height, bool has_alpha, double fps, int frames, const char* data_string = 0);
 		// Call frame render function
 		void Render(CairoImage* image, int frame_number);
 };
