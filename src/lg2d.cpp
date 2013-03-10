@@ -72,7 +72,7 @@ cairo_status_t png_stream_reader(void *closure, unsigned char *data, unsigned in
 LUA_FUNC_1ARG(create_image_from_png, 1)
 	// Get parameter
 	const char *filename = luaL_checkstring(L, 1);
-	// Create image
+	// Create image from png
 	wchar_t *filenamew = utf8_to_utf16(filename);
 	FILE *file = _wfopen(filenamew, L"rb");
 	delete[] filenamew;
@@ -87,6 +87,68 @@ LUA_FUNC_1ARG(create_image_from_png, 1)
 	}
 	// Push image to Lua
 	*lua_createuserdata<cairo_surface_t*>(L, G2D_IMAGE) = surface;
+	return 1;
+LUA_FUNC_END
+
+cairo_status_t png_stream_writer(void *closure, const unsigned char *data, unsigned int length){
+	FILE *file = (FILE*)closure;
+	if(fwrite(data, 1, length, file) == length)
+		return CAIRO_STATUS_SUCCESS;
+	else
+		return CAIRO_STATUS_WRITE_ERROR;
+}
+LUA_FUNC_1ARG(create_png_from_image, 2)
+	// Get parameters
+	cairo_surface_t *surface = *reinterpret_cast<cairo_surface_t**>(luaL_checkuserdata(L, 1, G2D_IMAGE));
+	const char *filename = luaL_checkstring(L, 2);
+	// Create png from image
+	wchar_t *filenamew = utf8_to_utf16(filename);
+	FILE *file = _wfopen(filenamew, L"wb");
+	delete[] filenamew;
+	if(!file)
+		luaL_error2(L, "couldn't create file");
+	cairo_status_t status = cairo_surface_write_to_png_stream(surface, png_stream_writer, file);
+	fclose(file);
+	if(status != CAIRO_STATUS_SUCCESS)
+		luaL_error2(L, cairo_status_to_string(status));
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(create_context, 1)
+	// Get parameter
+	cairo_surface_t *surface = *reinterpret_cast<cairo_surface_t**>(luaL_checkuserdata(L, 1, G2D_IMAGE));
+	// Create context
+	cairo_t *ctx = cairo_create(surface);
+	cairo_status_t status = cairo_status(ctx);
+	if(status != CAIRO_STATUS_SUCCESS){
+		cairo_destroy(ctx);
+		luaL_error2(L, cairo_status_to_string(status));
+	}
+	// Push context to Lua
+	*lua_createuserdata<cairo_t*>(L, G2D_CONTEXT) = ctx;
+	return 1;
+LUA_FUNC_END
+
+LUA_FUNC_2ARG(create_matrix, 0, 6)
+	if(lua_gettop(L) == 0){
+		// Create matrix
+		cairo_matrix_t matrix;
+		cairo_matrix_init_identity(&matrix);
+		// Push matrix to Lua
+		*lua_createuserdata<cairo_matrix_t>(L, G2D_MATRIX) = matrix;
+	}else if(lua_gettop(L) == 6){
+		// Get parameters
+		double xx = luaL_checknumber(L, 1);
+		double yx = luaL_checknumber(L, 2);
+		double xy = luaL_checknumber(L, 3);
+		double yy = luaL_checknumber(L, 4);
+		double x0 = luaL_checknumber(L, 5);
+		double y0 = luaL_checknumber(L, 6);
+		// Create matrix
+		cairo_matrix_t matrix;
+		cairo_matrix_init(&matrix, xx, yx, xy, yy, x0, y0);
+		// Push matrix to Lua
+		*lua_createuserdata<cairo_matrix_t>(L, G2D_MATRIX) = matrix;
+	}
 	return 1;
 LUA_FUNC_END
 
@@ -119,6 +181,9 @@ int luaopen_g2d(lua_State *L){
 		"create_image", l_create_image,
 		"create_sub_image", l_create_sub_image,
 		"create_image_from_png", l_create_image_from_png,
+		"create_png_from_image", l_create_png_from_image,
+		"create_context", l_create_context,
+		"create_matrix", l_create_matrix,
 		0, 0
 	};
 	luaL_setfuncs(L, g2d_lib, 0);
