@@ -240,10 +240,11 @@ LUA_FUNC_END
 LUA_FUNC_1ARG(image_convolution, 2)
 	// Get parameters
 	cairo_surface_t *surface = *reinterpret_cast<cairo_surface_t**>(luaL_checkuserdata(L, 1, G2D_IMAGE));
-	std::auto_ptr<double> convolution_filter(luaL_checktable<double>(L, 2));
-	size_t len = lua_rawlen(L, 2);
-	if(!convolution_filter.get())
+	std::auto_ptr<double> convolution_filter_obj(luaL_checktable<double>(L, 2));
+	double *convolution_filter = convolution_filter_obj.get();
+	if(!convolution_filter)
 		luaL_error2(L, "table shouldn't be empty");
+	size_t filter_size = lua_rawlen(L, 2);
 	lua_getfield(L, 2, "width");
 	if(!lua_isnumber(L, -1)) luaL_error2(L, "table needs a valid field 'width'");
 	int filter_width = lua_tonumber(L, -1);
@@ -254,31 +255,54 @@ LUA_FUNC_1ARG(image_convolution, 2)
 	lua_pop(L, 1);
 	if(filter_width < 1 || !filter_width&0x1 || filter_height < 1 || !filter_height&0x1)
 		luaL_error2(L, "table field(s) invalid");
-	else if(len != filter_width * filter_height)
-		luaL_error2(L, "table fields and elements number don't match");
+	else if(filter_width * filter_height != filter_size)
+		luaL_error2(L, "table fields and elements number don't fit");
 	// Get image data
 	cairo_format_t image_format = cairo_image_surface_get_format(surface);
 	int image_width = cairo_image_surface_get_width(surface);
 	int image_height = cairo_image_surface_get_height(surface);
 	int image_stride = cairo_image_surface_get_stride(surface);
+	unsigned long image_data_size = image_height * image_stride;
 	cairo_surface_flush(surface);
-	unsigned char *image_data = cairo_image_surface_get_data(surface);
+	register unsigned char *image_data = cairo_image_surface_get_data(surface);
 	// Apply convolution filter to image
 	switch(image_format){
 		case CAIRO_FORMAT_ARGB32:{
-
-			// TEST START
-			unsigned long image_size = image_height * image_width;
-			for(unsigned long i = 0; i < image_size; i++){
-				*image_data++ = 255;
-				*image_data++ = 255;
-				*image_data++ = 255;
-				*image_data++ = 255;
-			}
-			// TEST END
-
-			// TODO
-
+			// Image data copy (use copy as source, original as destination)
+			register unsigned char *image_data_copy = new unsigned char[image_data_size];
+			memcpy(image_data_copy, image_data, image_data_size);
+			// Storages for pixel processing
+			unsigned char *src_pixel, *dst_pixel;
+			double accum_r, accum_g, accum_b, accum_a;
+			int image_x, image_y;
+			double convolution;
+			// Iterate through source image pixels
+			for(register int y = 0; y < image_height; y++)
+				for(register int x = 0; x < image_width; x++){
+					// Accumulate pixels by filter rule
+					accum_r = accum_g = accum_b = accum_a = 0;
+					for(int yy = 0; yy < filter_height; yy++)
+						for(int xx = 0; xx < filter_width; xx++){
+							image_x = x - (filter_width >> 1) + xx;
+							image_y = y - (filter_height >> 1) + yy;
+							if(image_x >= 0 && image_x < image_width && image_y >= 0 && image_y < image_height){
+								convolution = convolution_filter[yy * filter_width + xx];
+								src_pixel = image_data_copy + image_y * image_stride + (image_x << 2);
+								accum_b += src_pixel[0] * convolution;
+								accum_g += src_pixel[1] * convolution;
+								accum_r += src_pixel[2] * convolution;
+								accum_a += src_pixel[3] * convolution;
+							}
+						}
+					// Set accumulator to destination image pixel
+					dst_pixel = image_data + y * image_stride + (x << 2);
+					dst_pixel[0] = accum_b > 255 ? 255 : (accum_b < 0 ? 0 : accum_b);
+					dst_pixel[1] = accum_g > 255 ? 255 : (accum_g < 0 ? 0 : accum_g);
+					dst_pixel[2] = accum_r > 255 ? 255 : (accum_r < 0 ? 0 : accum_r);
+					dst_pixel[3] = accum_a > 255 ? 255 : (accum_a < 0 ? 0 : accum_a);
+				}
+			// Free image data copy
+			delete[] image_data_copy;
 		}break;
 		case CAIRO_FORMAT_RGB24:{
 
