@@ -68,13 +68,15 @@ template <class T> static T *lua_createuserdata(lua_State *L, const char* meta_n
 template <class T> static T *luaL_checktable(lua_State *L, int i){
 	if(!lua_istable(L,i))
 		luaL_typerror(L,i,"table");
-	size_t len = lua_objlen(L,i);
-
+	size_t len = lua_rawlen(L,i);
 	if(len > 0){
 		T *table = new T[len];
 		for(int ii = 1; ii <= len; ii++){
 			lua_rawgeti(L, i, ii);
-			luaL_argcheck(L, lua_isnumber(L,-1), i, reinterpret_cast<char*>("invalid table"));
+			if(!lua_isnumber(L,-1)){
+				delete[] table;
+				luaL_argerror(L, i, "invalid table");
+			}
 			table[ii-1] = lua_tonumber(L, -1);
 			lua_pop(L,1);
 		}

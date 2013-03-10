@@ -1,6 +1,7 @@
 #include "llibs.hpp"
 #include "cairo.hpp"
 #include "textconv.hpp"
+#include <memory>
 
 // Objects names
 #define G2D_IMAGE "G2D_IMAGE"
@@ -236,6 +237,94 @@ LUA_FUNC_1ARG(create_source_image, 1)
 	return 1;
 LUA_FUNC_END
 
+LUA_FUNC_1ARG(image_convolution, 2)
+	// Get parameters
+	cairo_surface_t *surface = *reinterpret_cast<cairo_surface_t**>(luaL_checkuserdata(L, 1, G2D_IMAGE));
+	std::auto_ptr<double> convolution_filter(luaL_checktable<double>(L, 2));
+	size_t len = lua_rawlen(L, 2);
+	if(!convolution_filter.get())
+		luaL_error2(L, "table shouldn't be empty");
+	lua_getfield(L, 2, "width");
+	if(!lua_isnumber(L, -1)) luaL_error2(L, "table needs a valid field 'width'");
+	int filter_width = lua_tonumber(L, -1);
+	lua_pop(L, 1);
+	lua_getfield(L, 2, "height");
+	if(!lua_isnumber(L, -1)) luaL_error2(L, "table needs a valid field 'height'");
+	int filter_height = lua_tonumber(L, -1);
+	lua_pop(L, 1);
+	if(filter_width < 1 || !filter_width&0x1 || filter_height < 1 || !filter_height&0x1)
+		luaL_error2(L, "table field(s) invalid");
+	else if(len != filter_width * filter_height)
+		luaL_error2(L, "table fields and elements number don't match");
+	// Get image data
+	cairo_format_t image_format = cairo_image_surface_get_format(surface);
+	int image_width = cairo_image_surface_get_width(surface);
+	int image_height = cairo_image_surface_get_height(surface);
+	int image_stride = cairo_image_surface_get_stride(surface);
+	cairo_surface_flush(surface);
+	unsigned char *image_data = cairo_image_surface_get_data(surface);
+	// Apply convolution filter to image
+	switch(image_format){
+		case CAIRO_FORMAT_ARGB32:{
+
+			// TEST START
+			unsigned long image_size = image_height * image_width;
+			for(unsigned long i = 0; i < image_size; i++){
+				*image_data++ = 255;
+				*image_data++ = 255;
+				*image_data++ = 255;
+				*image_data++ = 255;
+			}
+			// TEST END
+
+			// TODO
+
+		}break;
+		case CAIRO_FORMAT_RGB24:{
+
+			// TODO
+
+		}break;
+		case CAIRO_FORMAT_A8:{
+
+			// TODO
+
+		}break;
+		case CAIRO_FORMAT_A1:{
+
+			// TODO
+
+		}break;
+		default:
+			luaL_error2(L, "image format not supported");
+	}
+	// Set image data as dirty
+	cairo_surface_mark_dirty(surface);
+LUA_FUNC_END
+
+LUA_FUNC_2ARG(text_extents, 3, 7)
+	// Get parameters
+	const char *text = luaL_checkstring(L, 1);
+	const char *face = luaL_checkstring(L, 2);
+	int size = luaL_checknumber(L, 3);
+	bool bold = luaL_optboolean(L, 4, false);
+	bool italic = luaL_optboolean(L, 5, false);
+	bool underline = luaL_optboolean(L, 6, false);
+	bool strikeout = luaL_optboolean(L, 7, false);
+	// Get text extents
+	wchar_t *textw = utf8_to_utf16(text), *facew = utf8_to_utf16(face);
+	cairo_win32_text_extents_t extents = cairo_win32_text_extents(textw, facew, size, bold, italic, underline, strikeout);
+	delete[] textw; delete[] facew;
+	// Push text extents to Lua
+	lua_pushnumber(L, extents.width);
+	lua_pushnumber(L, extents.height);
+	lua_pushnumber(L, extents.ascent);
+	lua_pushnumber(L, extents.descent);
+	lua_pushnumber(L, extents.internal_leading);
+	lua_pushnumber(L, extents.external_leading);
+	return 6;
+LUA_FUNC_END
+
 // IMAGE OBJECT
 LUA_FUNC_1ARG(image_gc, 1)
 	cairo_surface_t *surface = *reinterpret_cast<cairo_surface_t**>(luaL_checkuserdata(L, 1, G2D_IMAGE));
@@ -273,6 +362,8 @@ int luaopen_g2d(lua_State *L){
 		"create_source_radial_gradient", l_create_source_radial_gradient,
 		"create_source_mesh_gradient", l_create_source_mesh_gradient,
 		"create_source_image", l_create_source_image,
+		"image_convolution", l_image_convolution,
+		"text_extents", l_text_extents,
 		0, 0
 	};
 	luaL_setfuncs(L, g2d_lib, 0);
