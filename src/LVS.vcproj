@@ -62,7 +62,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="strmbase.lib winmm.lib cairo-static.lib Lua_5.2.lib"
+				AdditionalDependencies="strmbase.lib winmm.lib cairo-static.lib libpng.lib zlib.lib Lua_5.2.lib"
 				AdditionalLibraryDirectories="libs;temp"
 				ModuleDefinitionFile="directshow.def"
 				GenerateDebugInformation="false"
