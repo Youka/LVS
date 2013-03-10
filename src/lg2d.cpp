@@ -152,6 +152,90 @@ LUA_FUNC_2ARG(create_matrix, 0, 6)
 	return 1;
 LUA_FUNC_END
 
+LUA_FUNC_2ARG(create_source_color, 3, 4)
+	// Get parameters
+	double r = luaL_checknumber(L, 1);
+	double g = luaL_checknumber(L, 2);
+	double b = luaL_checknumber(L, 3);
+	double a = luaL_optnumber(L, 4, 1.0L);
+	// Create source
+	cairo_pattern_t *pattern = cairo_pattern_create_rgba(r, g, b, a);
+	cairo_status_t status = cairo_pattern_status(pattern);
+	if(status != CAIRO_STATUS_SUCCESS){
+		cairo_pattern_destroy(pattern);
+		luaL_error2(L, cairo_status_to_string(status));
+	}
+	// Push source to Lua
+	*lua_createuserdata<cairo_pattern_t*>(L, G2D_SOURCE) = pattern;
+	return 1;
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(create_source_linear_gradient, 4)
+	// Get parameters
+	double x0 = luaL_checknumber(L, 1);
+	double y0 = luaL_checknumber(L, 2);
+	double x1 = luaL_checknumber(L, 3);
+	double y1 = luaL_checknumber(L, 4);
+	// Create source
+	cairo_pattern_t *pattern = cairo_pattern_create_linear(x0, y0, x1, y1);
+	cairo_status_t status = cairo_pattern_status(pattern);
+	if(status != CAIRO_STATUS_SUCCESS){
+		cairo_pattern_destroy(pattern);
+		luaL_error2(L, cairo_status_to_string(status));
+	}
+	// Push source to Lua
+	*lua_createuserdata<cairo_pattern_t*>(L, G2D_SOURCE) = pattern;
+	return 1;
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(create_source_radial_gradient, 6)
+	// Get parameters
+	double cx0 = luaL_checknumber(L, 1);
+	double cy0 = luaL_checknumber(L, 2);
+	double r0 = luaL_checknumber(L, 3);
+	double cx1 = luaL_checknumber(L, 4);
+	double cy1 = luaL_checknumber(L, 5);
+	double r1 = luaL_checknumber(L, 6);
+	// Create source
+	cairo_pattern_t *pattern = cairo_pattern_create_radial(cx0, cy0, r0, cx1, cy1, r1);
+	cairo_status_t status = cairo_pattern_status(pattern);
+	if(status != CAIRO_STATUS_SUCCESS){
+		cairo_pattern_destroy(pattern);
+		luaL_error2(L, cairo_status_to_string(status));
+	}
+	// Push source to Lua
+	*lua_createuserdata<cairo_pattern_t*>(L, G2D_SOURCE) = pattern;
+	return 1;
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(create_source_mesh_gradient, 0)
+	// Create source
+	cairo_pattern_t *pattern = cairo_pattern_create_mesh();
+	cairo_status_t status = cairo_pattern_status(pattern);
+	if(status != CAIRO_STATUS_SUCCESS){
+		cairo_pattern_destroy(pattern);
+		luaL_error2(L, cairo_status_to_string(status));
+	}
+	// Push source to Lua
+	*lua_createuserdata<cairo_pattern_t*>(L, G2D_SOURCE) = pattern;
+	return 1;
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(create_source_image, 1)
+	// Get parameter
+	cairo_surface_t *surface = *reinterpret_cast<cairo_surface_t**>(luaL_checkuserdata(L, 1, G2D_IMAGE));
+	// Create source
+	cairo_pattern_t *pattern = cairo_pattern_create_for_surface(surface);
+	cairo_status_t status = cairo_pattern_status(pattern);
+	if(status != CAIRO_STATUS_SUCCESS){
+		cairo_pattern_destroy(pattern);
+		luaL_error2(L, cairo_status_to_string(status));
+	}
+	// Push source to Lua
+	*lua_createuserdata<cairo_pattern_t*>(L, G2D_SOURCE) = pattern;
+	return 1;
+LUA_FUNC_END
+
 // IMAGE OBJECT
 LUA_FUNC_1ARG(image_gc, 1)
 	cairo_surface_t *surface = *reinterpret_cast<cairo_surface_t**>(luaL_checkuserdata(L, 1, G2D_IMAGE));
@@ -184,6 +268,11 @@ int luaopen_g2d(lua_State *L){
 		"create_png_from_image", l_create_png_from_image,
 		"create_context", l_create_context,
 		"create_matrix", l_create_matrix,
+		"create_source_color", l_create_source_color,
+		"create_source_linear_gradient", l_create_source_linear_gradient,
+		"create_source_radial_gradient", l_create_source_radial_gradient,
+		"create_source_mesh_gradient", l_create_source_mesh_gradient,
+		"create_source_image", l_create_source_image,
 		0, 0
 	};
 	luaL_setfuncs(L, g2d_lib, 0);
