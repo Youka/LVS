@@ -1,3 +1,3 @@
 function GetFrame(frame, frame_i)
-	local image = g2d.create_sub_image(frame, 0, 0, VIDEO_WIDTH, 200)
+	local image = g2d.create_image_from_png("check.png")
 end

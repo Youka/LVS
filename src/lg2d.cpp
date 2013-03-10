@@ -1,5 +1,6 @@
 #include "llibs.hpp"
 #include "cairo.hpp"
+#include "textconv.hpp"
 
 // Objects names
 #define G2D_IMAGE "G2D_IMAGE"
@@ -61,14 +62,24 @@ LUA_FUNC_1ARG(create_sub_image, 5)
 	return 1;
 LUA_FUNC_END
 
+cairo_status_t png_stream_reader(void *closure, unsigned char *data, unsigned int length){
+	FILE *file = (FILE*)closure;
+	if(fread(data, 1, length, file) == length)
+		return CAIRO_STATUS_SUCCESS;
+	else
+		return CAIRO_STATUS_READ_ERROR;
+}
 LUA_FUNC_1ARG(create_image_from_png, 1)
 	// Get parameter
 	const char *filename = luaL_checkstring(L, 1);
 	// Create image
-
-	// TODO: add utf-8 support
-
-	cairo_surface_t *surface = cairo_image_surface_create_from_png(filename);
+	wchar_t *filenamew = utf8_to_utf16(filename);
+	FILE *file = _wfopen(filenamew, L"rb");
+	delete[] filenamew;
+	if(!file)
+		luaL_error2(L, "file not found");
+	cairo_surface_t *surface = cairo_image_surface_create_from_png_stream(png_stream_reader, file);
+	fclose(file);
 	cairo_status_t status = cairo_surface_status(surface);
 	if(status != CAIRO_STATUS_SUCCESS){
 		cairo_surface_destroy(surface);
