@@ -1,4 +1,3 @@
 function GetFrame(frame, frame_i)
-	local width, height, format = frame:get_header()
-	frame:get_data(nil, nil, nil, nil)
+	g2d.create_image("ARGB", 100, 100)
 end

@@ -1,58 +1,94 @@
 #include "llibs.hpp"
 #include "cairo.hpp"
 
-// Metatable names
-#define LVS_IMAGE "LVS_IMAGE"
-#define LVS_CONTEXT "LVS_CONTEXT"
-#define LVS_MATRIX "LVS_MATRIX"
-#define LVS_SOURCE "LVS_SOURCE"
+// Objects names
+#define G2D_IMAGE "G2D_IMAGE"
+#define G2D_MATRIX "G2D_MATRIX"
+#define G2D_SOURCE "G2D_SOURCE"
+#define G2D_CONTEXT "G2D_CONTEXT"
 
+// Converters
+cairo_format_t cairo_format_from_string(const char *format_string){
+	if(strcmp(format_string, "ARGB") == 0)
+		return CAIRO_FORMAT_ARGB32;
+	else if(strcmp(format_string, "RGB") == 0)
+		return CAIRO_FORMAT_RGB24;
+	else if(strcmp(format_string, "ALPHA") == 0)
+		return CAIRO_FORMAT_A8;
+	else if(strcmp(format_string, "BINARY") == 0)
+		return CAIRO_FORMAT_A1;
+	else
+		return CAIRO_FORMAT_INVALID;
+}
+
+// G2D LIBRARY
+LUA_FUNC_1ARG(image_create, 3)
+	// Get parameters
+	cairo_format_t format = cairo_format_from_string(luaL_checkstring(L, 1));
+	int width = luaL_checknumber(L, 2);
+	int height = luaL_checknumber(L, 3);
+	// Create image
+	cairo_surface_t *surface = cairo_image_surface_create(format, width, height);
+	cairo_status_t status = cairo_surface_status(surface);
+	if(status != CAIRO_STATUS_SUCCESS){
+		cairo_surface_destroy(surface);
+		luaL_error2(L, cairo_status_to_string(status));
+	}
+	// Push image to Lua
+	*lua_createuserdata<cairo_surface_t*>(L, G2D_IMAGE) = surface;
+	return 1;
+LUA_FUNC_END
+
+// IMAGE OBJECT
 LUA_FUNC_1ARG(image_gc, 1)
-	cairo_surface_t *surface = *reinterpret_cast<cairo_surface_t**>(luaL_checkuserdata(L, 1, LVS_IMAGE));
+	cairo_surface_t *surface = *reinterpret_cast<cairo_surface_t**>(luaL_checkuserdata(L, 1, G2D_IMAGE));
 	cairo_surface_destroy(surface);
 LUA_FUNC_END
 
-LUA_FUNC_1ARG(image_get_header, 1)
-	cairo_surface_t *surface = *reinterpret_cast<cairo_surface_t**>(luaL_checkuserdata(L, 1, LVS_IMAGE));
-	lua_pushnumber(L, cairo_image_surface_get_width(surface));
-	lua_pushnumber(L, cairo_image_surface_get_height(surface));
-	switch(cairo_image_surface_get_format(surface)){
-		case CAIRO_FORMAT_ARGB32: lua_pushstring(L, "RGBA"); break;
-		case  CAIRO_FORMAT_RGB24: lua_pushstring(L, "RGB"); break;
-		case CAIRO_FORMAT_A8: lua_pushstring(L, "ALPHA"); break;
-		case CAIRO_FORMAT_A1: lua_pushstring(L, "BINARY"); break;
-		default: lua_pushstring(L, "INVALID");
-	}
-	return 3;
+// MATRIX OBJECT
+
+// SOURCE OBJECT
+LUA_FUNC_1ARG(source_gc, 1)
+	cairo_pattern_t *pattern = *reinterpret_cast<cairo_pattern_t**>(luaL_checkuserdata(L, 1, G2D_SOURCE));
+	cairo_pattern_destroy(pattern);
 LUA_FUNC_END
 
-LUA_FUNC_1ARG(image_get_data, 5)
-	cairo_surface_t *surface = *reinterpret_cast<cairo_surface_t**>(luaL_checkuserdata(L, 1, LVS_IMAGE));
-
-	// TEST START
-	cairo_t *ctx = cairo_create(surface);
-	cairo_translate(ctx, 320, 50);
-	const wchar_t text[] = {L'H', L'e', L'l', L'l', L'o', L' ', L'w', L'o', L'r', L'l', L'd', L'!', 0x3042, 0};
-	cairo_win32_text_path(ctx, text, L"Comic Sans MS", 60, true, true, true, true);
-	cairo_set_source_rgba(ctx, 1, 1, 0.5, 0.7);
-	cairo_fill(ctx);
+// CONTEXT OBJECT
+LUA_FUNC_1ARG(context_gc, 1)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
 	cairo_destroy(ctx);
-	// TEST END
-
 LUA_FUNC_END
 
+// Register
 int luaopen_g2d(lua_State *L){
-	// Register 'g2d' library
+	// Create 'g2d' table
+	lua_newtable(L);
+	// Register 'g2d' functions to table
 	const luaL_Reg g2d_lib[] = {
+		"create_image", l_image_create,
 		0, 0
 	};
 	luaL_setfuncs(L, g2d_lib, 0);
-	// Register 'g2d' objects methods
-	luaL_newmetatable(L, LVS_IMAGE);
-	lua_pushcfunction(L, l_image_gc); lua_setfield(L, -2, "__gc");
+	// Set table to  global name 'g2d'
+	lua_setglobal(L, "g2d");
+	// Define image object methods
+	luaL_newmetatable(L, G2D_IMAGE);
 	lua_pushvalue(L, -1); lua_setfield(L, -2, "__index");
-	lua_pushcfunction(L, l_image_get_header); lua_setfield(L, -2, "get_header");
-	lua_pushcfunction(L, l_image_get_data); lua_setfield(L, -2, "get_data");
+	lua_pushcfunction(L, l_image_gc); lua_setfield(L, -2, "__gc");
+	lua_pop(L, 1);
+	// Define matrix object methods
+	luaL_newmetatable(L, G2D_MATRIX);
+	lua_pushvalue(L, -1); lua_setfield(L, -2, "__index");
+	lua_pop(L, 1);
+	// Define source object methods
+	luaL_newmetatable(L, G2D_SOURCE);
+	lua_pushvalue(L, -1); lua_setfield(L, -2, "__index");
+	lua_pushcfunction(L, l_source_gc); lua_setfield(L, -2, "__gc");
+	lua_pop(L, 1);
+	// Define context object methods
+	luaL_newmetatable(L, G2D_CONTEXT);
+	lua_pushvalue(L, -1); lua_setfield(L, -2, "__index");
+	lua_pushcfunction(L, l_context_gc); lua_setfield(L, -2, "__gc");
 	lua_pop(L, 1);
 	// Nothing pushed to Lua state
 	return 0;
