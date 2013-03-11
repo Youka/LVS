@@ -65,13 +65,13 @@ template <class T> static T *lua_createuserdata(lua_State *L, const char* meta_n
 }
 
 // Lua table functions
-template <class T> static T *luaL_checktable(lua_State *L, int i){
+template <class T> static T *luaL_checktable(lua_State *L, int i, unsigned int *len){
 	if(!lua_istable(L,i))
 		luaL_typerror(L,i,"table");
-	size_t len = lua_rawlen(L,i);
-	if(len > 0){
-		T *table = new T[len];
-		for(int ii = 1; ii <= len; ii++){
+	*len = lua_rawlen(L,i);
+	if(*len > 0){
+		T *table = new T[*len];
+		for(int ii = 1; ii <= *len; ii++){
 			lua_rawgeti(L, i, ii);
 			if(!lua_isnumber(L,-1)){
 				delete[] table;

@@ -250,11 +250,9 @@ LUA_FUNC_END
 LUA_FUNC_1ARG(image_convolution, 2)
 	// Get parameters
 	cairo_surface_t *surface = *reinterpret_cast<cairo_surface_t**>(luaL_checkuserdata(L, 1, G2D_IMAGE));
-	double *convolution_filter = luaL_checktable<double>(L, 2);
+	size_t filter_size;
+	double *convolution_filter = luaL_checktable<double>(L, 2, &filter_size);
 	std::auto_ptr<double> convolution_filter_obj(convolution_filter);
-	if(!convolution_filter)
-		luaL_error2(L, "table shouldn't be empty");
-	size_t filter_size = lua_rawlen(L, 2);
 	lua_getfield(L, 2, "width");
 	if(!lua_isnumber(L, -1)) luaL_error2(L, "table needs a valid field 'width'");
 	int filter_width = lua_tonumber(L, -1);
@@ -447,7 +445,7 @@ LUA_FUNC_1ARG(image_get_data, 5)
 	// Further area data
 	int area_width = x1-x0;
 	int area_height = y1-y0;
-	// Create & return Lua pixels table of image area
+	// Create & return image data table of image area
 	switch(image_format){
 		case CAIRO_FORMAT_ARGB32:{
 			lua_createtable(L, area_width * area_height << 2, 0);
@@ -486,8 +484,9 @@ LUA_FUNC_1ARG(image_get_data, 5)
 			unsigned char *row;
 			for(int y = y0; y < y1; y++){
 				row = image_data + y * image_stride + x0;
-				for(int x = 0; x < area_width; x++)
+				for(int x = 0; x < area_width; x++){
 					lua_pushnumber(L, *row++); lua_rawseti(L, -2, ++table_index);	// A
+				}
 			}
 			return 1;
 		}break;
@@ -508,9 +507,89 @@ LUA_FUNC_1ARG(image_get_data, 5)
 LUA_FUNC_END
 
 LUA_FUNC_1ARG(image_set_data, 6)
-
-	// TODO
-
+	// Get parameters
+	cairo_surface_t *surface = *reinterpret_cast<cairo_surface_t**>(luaL_checkuserdata(L, 1, G2D_IMAGE));
+	int x0 = luaL_checknumber(L, 2);
+	int y0 = luaL_checknumber(L, 3);
+	int x1 = luaL_checknumber(L, 4);
+	int y1 = luaL_checknumber(L, 5);
+	if(x0 < 0 || y0 < 0 ||
+		x1 <= x0 || y1 <= y0 ||
+		x1 > cairo_image_surface_get_width(surface) || y1 > cairo_image_surface_get_height(surface))
+		luaL_error2(L, "invalid area");
+	size_t new_data_size;
+	unsigned char *new_data = luaL_checktable<unsigned char>(L, 6, &new_data_size);
+	std::auto_ptr<unsigned char> new_data_obj(new_data);
+	// Get image data
+	cairo_format_t image_format = cairo_image_surface_get_format(surface);
+	int image_stride = cairo_image_surface_get_stride(surface);
+	cairo_surface_flush(surface);
+	register unsigned char *image_data = cairo_image_surface_get_data(surface);
+	// Further area data
+	int area_width = x1-x0;
+	int area_height = y1-y0;
+	// Set image data table to image area
+	switch(image_format){
+		case CAIRO_FORMAT_ARGB32:{
+			if(area_width * area_height << 2 != new_data_size)
+				luaL_error2(L, "wrong table size");
+			unsigned char *row;
+			for(int y = y0; y < y1; y++){
+				row = image_data + y * image_stride + (x0 << 2);
+				for(int x = 0; x < area_width; x++){
+					row[3] = *new_data++;	// A
+					row[2] = *new_data++;	// R
+					row[1] = *new_data++;	// G
+					row[0] = *new_data++;	// B
+					row += 4;
+				}
+			}
+		}break;
+		case CAIRO_FORMAT_RGB24:{
+			if(area_width * area_height * 3 != new_data_size)
+				luaL_error2(L, "wrong table size");
+			unsigned char *row;
+			for(int y = y0; y < y1; y++){
+				row = image_data + y * image_stride + (x0 << 2);
+				for(int x = 0; x < area_width; x++){
+					row[2] = *new_data++;	// R
+					row[1] = *new_data++;	// G
+					row[0] = *new_data++;	// B
+					row += 4;
+				}
+			}
+		}break;
+		case CAIRO_FORMAT_A8:{
+			if(area_width * area_height != new_data_size)
+				luaL_error2(L, "wrong table size");
+			unsigned char *row;
+			for(int y = y0; y < y1; y++){
+				row = image_data + y * image_stride + x0;
+				for(int x = 0; x < area_width; x++)
+					*row++ = *new_data++;	// A
+			}
+		}break;
+		case CAIRO_FORMAT_A1:{
+			if(area_width * area_height != new_data_size)
+				luaL_error2(L, "wrong table size");
+			unsigned char *row, dst, mask, src;
+			for(int y = y0; y < y1; y++){
+				row = image_data + y * image_stride;
+				for(int x = x0; x < x1; x++){
+					div_t quot_rem = div(x, 8);
+					mask = 0x1 << quot_rem.rem;
+					src = *new_data++;
+					dst = row[quot_rem.quot] & mask;
+					if(src && !dst)
+						row[quot_rem.quot] |= mask;	// A
+					else if(!src && dst)
+						row[quot_rem.quot] &= ~mask;	// A
+				}
+			}
+		}break;
+	}
+	// Set image data as dirty
+	cairo_surface_mark_dirty(surface);
 LUA_FUNC_END
 
 // MATRIX OBJECT
