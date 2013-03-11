@@ -493,15 +493,21 @@ LUA_FUNC_1ARG(image_get_data, 5)
 		}break;
 		case CAIRO_FORMAT_A1:{
 			lua_createtable(L, area_width * area_height, 0);
-
-			// TODO (hint: 4-byte aligned data)
-
+			int table_index = 0;
+			unsigned char *row;
+			for(int y = y0; y < y1; y++){
+				row = image_data + y * image_stride;
+				for(int x = x0; x < x1; x++){
+					div_t quot_rem = div(x, 8);
+					lua_pushnumber(L, row[quot_rem.quot] >> quot_rem.rem & 0x1); lua_rawseti(L, -2, ++table_index);	// A
+				}
+			}
 			return 1;
 		}break;
 	}
 LUA_FUNC_END
 
-LUA_FUNC_1ARG(image_set_data, 5)
+LUA_FUNC_1ARG(image_set_data, 6)
 
 	// TODO
 
