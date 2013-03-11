@@ -10,7 +10,7 @@
 #define G2D_CONTEXT "G2D_CONTEXT"
 
 // Converters
-cairo_format_t cairo_format_from_string(const char *format_string){
+inline cairo_format_t cairo_format_from_string(const char *format_string){
 	if(strcmp(format_string, "ARGB") == 0)
 		return CAIRO_FORMAT_ARGB32;
 	else if(strcmp(format_string, "RGB") == 0)
@@ -21,6 +21,16 @@ cairo_format_t cairo_format_from_string(const char *format_string){
 		return CAIRO_FORMAT_A1;
 	else
 		return CAIRO_FORMAT_INVALID;
+}
+
+ inline const char* cairo_format_to_string(cairo_format_t format){
+	 switch(format){
+		case CAIRO_FORMAT_ARGB32: return "ARGB";
+		case CAIRO_FORMAT_RGB24: return "RGB";
+		case CAIRO_FORMAT_A8: return "ALPHA";
+		case CAIRO_FORMAT_A1: return "BINARY";
+		default: return "UNKNOWN";
+	 }
 }
 
 // G2D LIBRARY
@@ -240,8 +250,8 @@ LUA_FUNC_END
 LUA_FUNC_1ARG(image_convolution, 2)
 	// Get parameters
 	cairo_surface_t *surface = *reinterpret_cast<cairo_surface_t**>(luaL_checkuserdata(L, 1, G2D_IMAGE));
-	std::auto_ptr<double> convolution_filter_obj(luaL_checktable<double>(L, 2));
-	double *convolution_filter = convolution_filter_obj.get();
+	double *convolution_filter = luaL_checktable<double>(L, 2);
+	std::auto_ptr<double> convolution_filter_obj(convolution_filter);
 	if(!convolution_filter)
 		luaL_error2(L, "table shouldn't be empty");
 	size_t filter_size = lua_rawlen(L, 2);
@@ -305,19 +315,64 @@ LUA_FUNC_1ARG(image_convolution, 2)
 			delete[] image_data_copy;
 		}break;
 		case CAIRO_FORMAT_RGB24:{
-
-			// TODO
-
+			// Image data copy (use copy as source, original as destination)
+			register unsigned char *image_data_copy = new unsigned char[image_data_size];
+			memcpy(image_data_copy, image_data, image_data_size);
+			// Storages for pixel processing
+			unsigned char *src_pixel, *dst_pixel;
+			double accum_r, accum_g, accum_b;
+			int image_x, image_y;
+			double convolution;
+			// Iterate through source image pixels
+			for(register int y = 0; y < image_height; y++)
+				for(register int x = 0; x < image_width; x++){
+					// Accumulate pixels by filter rule
+					accum_r = accum_g = accum_b = 0;
+					for(int yy = 0; yy < filter_height; yy++)
+						for(int xx = 0; xx < filter_width; xx++){
+							image_x = x - (filter_width >> 1) + xx;
+							image_y = y - (filter_height >> 1) + yy;
+							if(image_x >= 0 && image_x < image_width && image_y >= 0 && image_y < image_height){
+								convolution = convolution_filter[yy * filter_width + xx];
+								src_pixel = image_data_copy + image_y * image_stride + (image_x << 2);
+								accum_b += src_pixel[0] * convolution;
+								accum_g += src_pixel[1] * convolution;
+								accum_r += src_pixel[2] * convolution;
+							}
+						}
+					// Set accumulator to destination image pixel
+					dst_pixel = image_data + y * image_stride + (x << 2);
+					dst_pixel[0] = accum_b > 255 ? 255 : (accum_b < 0 ? 0 : accum_b);
+					dst_pixel[1] = accum_g > 255 ? 255 : (accum_g < 0 ? 0 : accum_g);
+					dst_pixel[2] = accum_r > 255 ? 255 : (accum_r < 0 ? 0 : accum_r);
+				}
+			// Free image data copy
+			delete[] image_data_copy;
 		}break;
 		case CAIRO_FORMAT_A8:{
-
-			// TODO
-
-		}break;
-		case CAIRO_FORMAT_A1:{
-
-			// TODO
-
+			// Image data copy (use copy as source, original as destination)
+			register unsigned char *image_data_copy = new unsigned char[image_data_size];
+			memcpy(image_data_copy, image_data, image_data_size);
+			// Storages for pixel processing
+			double accum;
+			int image_x, image_y;
+			// Iterate through source image pixels
+			for(register int y = 0; y < image_height; y++)
+				for(register int x = 0; x < image_width; x++){
+					// Accumulate pixels by filter rule
+					accum = 0;
+					for(int yy = 0; yy < filter_height; yy++)
+						for(int xx = 0; xx < filter_width; xx++){
+							image_x = x - (filter_width >> 1) + xx;
+							image_y = y - (filter_height >> 1) + yy;
+							if(image_x >= 0 && image_x < image_width && image_y >= 0 && image_y < image_height)
+								accum += image_data_copy[image_x * image_stride + image_x] * convolution_filter[yy * filter_width + xx];
+						}
+					// Set accumulator to destination image pixel
+					image_data[ y * image_stride + x] = accum > 255 ? 255 : (accum < 0 ? 0 : accum);
+				}
+			// Free image data copy
+			delete[] image_data_copy;
 		}break;
 		default:
 			luaL_error2(L, "image format not supported");
@@ -353,6 +408,103 @@ LUA_FUNC_END
 LUA_FUNC_1ARG(image_gc, 1)
 	cairo_surface_t *surface = *reinterpret_cast<cairo_surface_t**>(luaL_checkuserdata(L, 1, G2D_IMAGE));
 	cairo_surface_destroy(surface);
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(image_get_width, 1)
+	cairo_surface_t *surface = *reinterpret_cast<cairo_surface_t**>(luaL_checkuserdata(L, 1, G2D_IMAGE));
+	lua_pushnumber(L, cairo_image_surface_get_width(surface));
+	return 1;
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(image_get_height, 1)
+	cairo_surface_t *surface = *reinterpret_cast<cairo_surface_t**>(luaL_checkuserdata(L, 1, G2D_IMAGE));
+	lua_pushnumber(L, cairo_image_surface_get_height(surface));
+	return 1;
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(image_get_format, 1)
+	cairo_surface_t *surface = *reinterpret_cast<cairo_surface_t**>(luaL_checkuserdata(L, 1, G2D_IMAGE));
+	lua_pushstring(L, cairo_format_to_string(cairo_image_surface_get_format(surface)));
+	return 1;
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(image_get_data, 5)
+	// Get parameters
+	cairo_surface_t *surface = *reinterpret_cast<cairo_surface_t**>(luaL_checkuserdata(L, 1, G2D_IMAGE));
+	int x0 = luaL_checknumber(L, 2);
+	int y0 = luaL_checknumber(L, 3);
+	int x1 = luaL_checknumber(L, 4);
+	int y1 = luaL_checknumber(L, 5);
+	if(x0 < 0 || y0 < 0 ||
+		x1 <= x0 || y1 <= y0 ||
+		x1 > cairo_image_surface_get_width(surface) || y1 > cairo_image_surface_get_height(surface))
+		luaL_error2(L, "invalid area");
+	// Get image data
+	cairo_format_t image_format = cairo_image_surface_get_format(surface);
+	int image_stride = cairo_image_surface_get_stride(surface);
+	cairo_surface_flush(surface);
+	register unsigned char *image_data = cairo_image_surface_get_data(surface);
+	// Further area data
+	int area_width = x1-x0;
+	int area_height = y1-y0;
+	// Create & return Lua pixels table of image area
+	switch(image_format){
+		case CAIRO_FORMAT_ARGB32:{
+			lua_createtable(L, area_width * area_height << 2, 0);
+			int table_index = 0;
+			unsigned char *row;
+			for(int y = y0; y < y1; y++){
+				row = image_data + y * image_stride + (x0 << 2);
+				for(int x = 0; x < area_width; x++){
+					lua_pushnumber(L, row[3]); lua_rawseti(L, -2, ++table_index);	// A
+					lua_pushnumber(L, row[2]); lua_rawseti(L, -2, ++table_index);	// R
+					lua_pushnumber(L, row[1]); lua_rawseti(L, -2, ++table_index);	// G
+					lua_pushnumber(L, row[0]); lua_rawseti(L, -2, ++table_index);	// B
+					row += 4;
+				}
+			}
+			return 1;
+		}break;
+		case CAIRO_FORMAT_RGB24:{
+			lua_createtable(L, area_width * area_height * 3, 0);
+			int table_index = 0;
+			unsigned char *row;
+			for(int y = y0; y < y1; y++){
+				row = image_data + y * image_stride + (x0 << 2);
+				for(int x = 0; x < area_width; x++){
+					lua_pushnumber(L, row[2]); lua_rawseti(L, -2, ++table_index);	// R
+					lua_pushnumber(L, row[1]); lua_rawseti(L, -2, ++table_index);	// G
+					lua_pushnumber(L, row[0]); lua_rawseti(L, -2, ++table_index);	// B
+					row += 4;
+				}
+			}
+			return 1;
+		}break;
+		case CAIRO_FORMAT_A8:{
+			lua_createtable(L, area_width * area_height, 0);
+			int table_index = 0;
+			unsigned char *row;
+			for(int y = y0; y < y1; y++){
+				row = image_data + y * image_stride + x0;
+				for(int x = 0; x < area_width; x++)
+					lua_pushnumber(L, *row++); lua_rawseti(L, -2, ++table_index);	// A
+			}
+			return 1;
+		}break;
+		case CAIRO_FORMAT_A1:{
+			lua_createtable(L, area_width * area_height, 0);
+
+			// TODO (hint: 4-byte aligned data)
+
+			return 1;
+		}break;
+	}
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(image_set_data, 5)
+
+	// TODO
+
 LUA_FUNC_END
 
 // MATRIX OBJECT
@@ -397,6 +549,11 @@ int luaopen_g2d(lua_State *L){
 	luaL_newmetatable(L, G2D_IMAGE);
 	lua_pushvalue(L, -1); lua_setfield(L, -2, "__index");
 	lua_pushcfunction(L, l_image_gc); lua_setfield(L, -2, "__gc");
+	lua_pushcfunction(L, l_image_get_width); lua_setfield(L, -2, "get_width");
+	lua_pushcfunction(L, l_image_get_height); lua_setfield(L, -2, "get_height");
+	lua_pushcfunction(L, l_image_get_format); lua_setfield(L, -2, "get_format");
+	lua_pushcfunction(L, l_image_get_data); lua_setfield(L, -2, "get_data");
+	lua_pushcfunction(L, l_image_set_data); lua_setfield(L, -2, "set_data");
 	lua_pop(L, 1);
 	// Define matrix object methods
 	luaL_newmetatable(L, G2D_MATRIX);
