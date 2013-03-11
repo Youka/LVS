@@ -366,10 +366,10 @@ LUA_FUNC_1ARG(image_convolution, 2)
 							image_x = x - (filter_width >> 1) + xx;
 							image_y = y - (filter_height >> 1) + yy;
 							if(image_x >= 0 && image_x < image_width && image_y >= 0 && image_y < image_height)
-								accum += image_data_copy[image_x * image_stride + image_x] * convolution_filter[yy * filter_width + xx];
+								accum += image_data_copy[image_y * image_stride + image_x] * convolution_filter[yy * filter_width + xx];
 						}
 					// Set accumulator to destination image pixel
-					image_data[ y * image_stride + x] = accum > 255 ? 255 : (accum < 0 ? 0 : accum);
+					image_data[y * image_stride + x] = accum > 255 ? 255 : (accum < 0 ? 0 : accum);
 				}
 			// Free image data copy
 			delete[] image_data_copy;
