@@ -581,7 +581,7 @@ LUA_FUNC_1ARG(image_set_data, 6)
 		}break;
 	}
 	// Set image data as dirty
-	cairo_surface_mark_dirty(surface);
+	cairo_surface_mark_dirty_rectangle(surface, x0, y0, area_width, area_height);
 LUA_FUNC_END
 
 // MATRIX OBJECT
@@ -744,6 +744,66 @@ LUA_FUNC_2ARG(source_add_mesh, 19, 25)
 		luaL_error2(L, cairo_status_to_string(status));
 LUA_FUNC_END
 
+LUA_FUNC_1ARG(source_get_mesh, 2)
+	cairo_pattern_t *pattern = *reinterpret_cast<cairo_pattern_t**>(luaL_checkuserdata(L, 1, G2D_SOURCE));
+	unsigned int index = luaL_checknumber(L, 2);
+	// Get mesh points
+	cairo_path_t *path = cairo_mesh_pattern_get_path(pattern, index);
+	if(path->status == CAIRO_STATUS_INVALID_INDEX)
+		return 0;
+	else if(path->status != CAIRO_STATUS_SUCCESS)
+		luaL_error2(L, cairo_status_to_string(path->status));
+	// Get mesh colors
+	double r0, g0, b0, a0, r1, g1, b1, a1, r2, g2, b2, a2, r3, g3, b3, a3;
+	cairo_mesh_pattern_get_corner_color_rgba(pattern, index, 0, &r0, &g0, &b0, &a0);
+	cairo_mesh_pattern_get_corner_color_rgba(pattern, index, 1, &r1, &g1, &b1, &a1);
+	cairo_mesh_pattern_get_corner_color_rgba(pattern, index, 2, &r2, &g2, &b2, &a2);
+	cairo_mesh_pattern_get_corner_color_rgba(pattern, index, 3, &r3, &g3, &b3, &a3);
+	// Push points and colors to Lua
+	lua_pushnumber(L, path->data[1].point.x);
+	lua_pushnumber(L, path->data[1].point.y);
+	lua_pushnumber(L, r0);
+	lua_pushnumber(L, g0);
+	lua_pushnumber(L, b0);
+	lua_pushnumber(L, a0);
+	lua_pushnumber(L, path->data[5].point.x);
+	lua_pushnumber(L, path->data[5].point.y);
+	lua_pushnumber(L, r1);
+	lua_pushnumber(L, g1);
+	lua_pushnumber(L, b1);
+	lua_pushnumber(L, a1);
+	lua_pushnumber(L, path->data[9].point.x);
+	lua_pushnumber(L, path->data[9].point.y);
+	lua_pushnumber(L, r2);
+	lua_pushnumber(L, g2);
+	lua_pushnumber(L, b2);
+	lua_pushnumber(L, a2);
+	lua_pushnumber(L, path->data[13].point.x);
+	lua_pushnumber(L, path->data[13].point.y);
+	lua_pushnumber(L, r3);
+	lua_pushnumber(L, g3);
+	lua_pushnumber(L, b3);
+	lua_pushnumber(L, a3);
+	return 24;
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(source_get_image, 1)
+	cairo_pattern_t *pattern = *reinterpret_cast<cairo_pattern_t**>(luaL_checkuserdata(L, 1, G2D_SOURCE));
+	cairo_surface_t *surface;
+	cairo_status_t status = cairo_pattern_get_surface(pattern, &surface);
+	if(status != CAIRO_STATUS_SUCCESS)
+		luaL_error2(L, cairo_status_to_string(status));
+	// Create image copy
+	cairo_surface_t *new_surface = cairo_image_surface_create(cairo_image_surface_get_format(surface), cairo_image_surface_get_width(surface), cairo_image_surface_get_height(surface));
+	cairo_surface_flush(surface); cairo_surface_flush(new_surface);
+	unsigned char *surface_data = cairo_image_surface_get_data(surface), *new_surface_data = cairo_image_surface_get_data(new_surface);
+	memcpy(new_surface_data, surface_data, cairo_image_surface_get_height(surface) * cairo_image_surface_get_stride(surface));
+	cairo_surface_mark_dirty(new_surface);
+	// Push image to Lua
+	*lua_createuserdata<cairo_surface_t*>(L, G2D_IMAGE) = new_surface;
+	return 1;
+LUA_FUNC_END
+
 // CONTEXT OBJECT
 LUA_FUNC_1ARG(context_gc, 1)
 	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
@@ -776,6 +836,7 @@ int luaopen_g2d(lua_State *L){
 	lua_setglobal(L, "g2d");
 	// Define image object methods
 	luaL_newmetatable(L, G2D_IMAGE);
+	lua_pushstring(L, G2D_IMAGE); lua_setfield(L, -2, "__metatable");
 	lua_pushvalue(L, -1); lua_setfield(L, -2, "__index");
 	lua_pushcfunction(L, l_image_gc); lua_setfield(L, -2, "__gc");
 	lua_pushcfunction(L, l_image_get_width); lua_setfield(L, -2, "get_width");
@@ -786,6 +847,7 @@ int luaopen_g2d(lua_State *L){
 	lua_pop(L, 1);
 	// Define matrix object methods
 	luaL_newmetatable(L, G2D_MATRIX);
+	lua_pushstring(L, G2D_MATRIX); lua_setfield(L, -2, "__metatable");
 	lua_pushvalue(L, -1); lua_setfield(L, -2, "__index");
 	lua_pushcfunction(L, l_matrix_get_data); lua_setfield(L, -2, "get_data");
 	lua_pushcfunction(L, l_matrix_set_data); lua_setfield(L, -2, "set_data");
@@ -800,6 +862,7 @@ int luaopen_g2d(lua_State *L){
 	lua_pop(L, 1);
 	// Define source object methods
 	luaL_newmetatable(L, G2D_SOURCE);
+	lua_pushstring(L, G2D_SOURCE); lua_setfield(L, -2, "__metatable");
 	lua_pushvalue(L, -1); lua_setfield(L, -2, "__index");
 	lua_pushcfunction(L, l_source_gc); lua_setfield(L, -2, "__gc");
 	lua_pushcfunction(L, l_source_add_color); lua_setfield(L, -2, "add_color");
@@ -807,9 +870,12 @@ int luaopen_g2d(lua_State *L){
 	lua_pushcfunction(L, l_source_get_points); lua_setfield(L, -2, "get_points");
 	lua_pushcfunction(L, l_source_get_circles); lua_setfield(L, -2, "get_circles");
 	lua_pushcfunction(L, l_source_add_mesh); lua_setfield(L, -2, "add_mesh");
+	lua_pushcfunction(L, l_source_get_mesh); lua_setfield(L, -2, "get_mesh");
+	lua_pushcfunction(L, l_source_get_image); lua_setfield(L, -2, "get_image");
 	lua_pop(L, 1);
 	// Define context object methods
 	luaL_newmetatable(L, G2D_CONTEXT);
+	lua_pushstring(L, G2D_CONTEXT); lua_setfield(L, -2, "__metatable");
 	lua_pushvalue(L, -1); lua_setfield(L, -2, "__index");
 	lua_pushcfunction(L, l_context_gc); lua_setfield(L, -2, "__gc");
 	lua_pop(L, 1);
