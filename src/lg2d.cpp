@@ -10,7 +10,7 @@
 #define G2D_SOURCE "G2D_SOURCE"
 #define G2D_CONTEXT "G2D_CONTEXT"
 
-// Converters
+// Type<->string converters
 inline cairo_format_t cairo_format_from_string(const char *format_string){
 	if(strcmp(format_string, "ARGB") == 0)
 		return CAIRO_FORMAT_ARGB32;
@@ -24,15 +24,69 @@ inline cairo_format_t cairo_format_from_string(const char *format_string){
 		return CAIRO_FORMAT_INVALID;
 }
 
- inline const char* cairo_format_to_string(cairo_format_t format){
-	 switch(format){
+inline const char* cairo_format_to_string(cairo_format_t format){
+	switch(format){
 		case CAIRO_FORMAT_ARGB32: return "ARGB";
 		case CAIRO_FORMAT_RGB24: return "RGB";
 		case CAIRO_FORMAT_A8: return "ALPHA";
 		case CAIRO_FORMAT_A1: return "BINARY";
 		default: return "UNKNOWN";
-	 }
+	}
 }
+
+inline cairo_extend_t cairo_extend_from_string(const char *extend_string){
+	if(strcmp(extend_string, "NONE") == 0)
+		return CAIRO_EXTEND_NONE;
+	else if(strcmp(extend_string, "REPEAT") == 0)
+		return CAIRO_EXTEND_REPEAT;
+	else if(strcmp(extend_string, "MIRROR") == 0)
+		return CAIRO_EXTEND_REFLECT;
+	else if(strcmp(extend_string, "FLOW") == 0)
+		return CAIRO_EXTEND_PAD;
+	else
+		return CAIRO_EXTEND_NONE;
+}
+
+inline const char* cairo_extend_to_string(cairo_extend_t extend){
+	switch(extend){
+		case CAIRO_EXTEND_NONE: return "NONE";
+		case CAIRO_EXTEND_REPEAT: return "REPEAT";
+		case CAIRO_EXTEND_REFLECT: return "MIRROR";
+		case CAIRO_EXTEND_PAD: return "FLOW";
+		default: return "UNKNOWN";
+	}
+}
+
+inline cairo_filter_t cairo_filter_from_string(const char *filter_string){
+	if(strcmp(filter_string, "FAST") == 0)
+		return CAIRO_FILTER_FAST;
+	else if(strcmp(filter_string, "GOOD") == 0)
+		return CAIRO_FILTER_GOOD;
+	else if(strcmp(filter_string, "BEST") == 0)
+		return CAIRO_FILTER_BEST;
+	else
+		return CAIRO_FILTER_BEST;
+}
+
+inline const char* cairo_filter_to_string(cairo_filter_t filter){
+	switch(filter){
+		case CAIRO_FILTER_FAST: return "FAST";
+		case CAIRO_FILTER_GOOD: return "GOOD";
+		case CAIRO_FILTER_BEST: return "BEST";
+		default: return "UNKNOWN";
+	}
+}
+
+ inline const char* cairo_pattern_type_to_string(cairo_pattern_type_t type){
+	 switch(type){
+		case CAIRO_PATTERN_TYPE_SOLID: return "COLOR";
+		case CAIRO_PATTERN_TYPE_LINEAR: return "LINEAR_GRADIENT";
+		case CAIRO_PATTERN_TYPE_RADIAL: return "RADIAL_GRADIENT";
+		case CAIRO_PATTERN_TYPE_MESH: return "MESH_GRADIENT";
+		case  CAIRO_PATTERN_TYPE_SURFACE: return "IMAGE";
+		default: return "UNKNOWN";
+	 }
+ }
 
 // G2D LIBRARY
 LUA_FUNC_1ARG(create_image, 3)
@@ -613,7 +667,9 @@ LUA_FUNC_END
 
 LUA_FUNC_1ARG(matrix_invert, 1)
 	cairo_matrix_t *matrix = reinterpret_cast<cairo_matrix_t*>(luaL_checkuserdata(L, 1, G2D_MATRIX));
-	cairo_matrix_invert(matrix);
+	cairo_status_t status = cairo_matrix_invert(matrix);
+	if(status != CAIRO_STATUS_SUCCESS)
+				luaL_error2(L, cairo_status_to_string(status));
 LUA_FUNC_END
 
 LUA_FUNC_1ARG(matrix_multiply, 7)
@@ -671,6 +727,7 @@ LUA_FUNC_END
 
 LUA_FUNC_2ARG(source_get_color, 1, 2)
 	cairo_pattern_t *pattern = *reinterpret_cast<cairo_pattern_t**>(luaL_checkuserdata(L, 1, G2D_SOURCE));
+	// Get color of source color
 	if(lua_gettop(L) == 1){
 		double r, g, b, a;
 		cairo_status_t status = cairo_pattern_get_rgba(pattern, &r, &g, &b, &a);
@@ -681,6 +738,7 @@ LUA_FUNC_2ARG(source_get_color, 1, 2)
 		lua_pushnumber(L, b);
 		lua_pushnumber(L, a);
 		return 4;
+	// Get color of source linear gradient or source radial gradient
 	}else{
 		double pct, r, g, b, a;
 		cairo_status_t status = cairo_pattern_get_color_stop_rgba(pattern, luaL_checknumber(L, 2), &pct, &r, &g, &b, &a);
@@ -804,6 +862,62 @@ LUA_FUNC_1ARG(source_get_image, 1)
 	return 1;
 LUA_FUNC_END
 
+LUA_FUNC_1ARG(source_get_extender, 1)
+	cairo_pattern_t *pattern = *reinterpret_cast<cairo_pattern_t**>(luaL_checkuserdata(L, 1, G2D_SOURCE));
+	lua_pushstring(L, cairo_extend_to_string(cairo_pattern_get_extend(pattern)));
+	return 1;
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(source_set_extender, 2)
+	cairo_pattern_t *pattern = *reinterpret_cast<cairo_pattern_t**>(luaL_checkuserdata(L, 1, G2D_SOURCE));
+	cairo_pattern_set_extend(pattern, cairo_extend_from_string(luaL_checkstring(L, 2)));
+	cairo_status_t status = cairo_pattern_status(pattern);
+	if(status != CAIRO_STATUS_SUCCESS)
+		luaL_error2(L, cairo_status_to_string(status));
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(source_get_filter, 1)
+	cairo_pattern_t *pattern = *reinterpret_cast<cairo_pattern_t**>(luaL_checkuserdata(L, 1, G2D_SOURCE));
+	lua_pushstring(L, cairo_filter_to_string(cairo_pattern_get_filter(pattern)));
+	return 1;
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(source_set_filter, 2)
+	cairo_pattern_t *pattern = *reinterpret_cast<cairo_pattern_t**>(luaL_checkuserdata(L, 1, G2D_SOURCE));
+	cairo_pattern_set_filter(pattern, cairo_filter_from_string(luaL_checkstring(L, 2)));
+	cairo_status_t status = cairo_pattern_status(pattern);
+	if(status != CAIRO_STATUS_SUCCESS)
+		luaL_error2(L, cairo_status_to_string(status));
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(source_get_matrix, 1)
+	cairo_pattern_t *pattern = *reinterpret_cast<cairo_pattern_t**>(luaL_checkuserdata(L, 1, G2D_SOURCE));
+	// Get matrix
+	cairo_matrix_t matrix;
+	cairo_pattern_get_matrix(pattern, &matrix);
+	// Push matrix to Lua
+	*lua_createuserdata<cairo_matrix_t>(L, G2D_MATRIX) = matrix;
+	return 1;
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(source_set_matrix, 2)
+	cairo_pattern_t *pattern = *reinterpret_cast<cairo_pattern_t**>(luaL_checkuserdata(L, 1, G2D_SOURCE));
+	cairo_matrix_t *matrix = reinterpret_cast<cairo_matrix_t*>(luaL_checkuserdata(L, 2, G2D_MATRIX));
+	// Create inverted matrix for pattern space to user space (see 'cairo_pattern_set_matrix' description)
+	cairo_matrix_t inverted_matrix = *matrix;
+	cairo_status_t status = cairo_matrix_invert(&inverted_matrix);
+	if(status != CAIRO_STATUS_SUCCESS)
+		luaL_error2(L, cairo_status_to_string(status));
+	// Set matrix to pattern
+	cairo_pattern_set_matrix(pattern, &inverted_matrix);
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(source_get_type, 1)
+	cairo_pattern_t *pattern = *reinterpret_cast<cairo_pattern_t**>(luaL_checkuserdata(L, 1, G2D_SOURCE));
+	lua_pushstring(L, cairo_pattern_type_to_string(cairo_pattern_get_type(pattern)));
+	return 1;
+LUA_FUNC_END
+
 // CONTEXT OBJECT
 LUA_FUNC_1ARG(context_gc, 1)
 	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
@@ -872,6 +986,13 @@ int luaopen_g2d(lua_State *L){
 	lua_pushcfunction(L, l_source_add_mesh); lua_setfield(L, -2, "add_mesh");
 	lua_pushcfunction(L, l_source_get_mesh); lua_setfield(L, -2, "get_mesh");
 	lua_pushcfunction(L, l_source_get_image); lua_setfield(L, -2, "get_image");
+	lua_pushcfunction(L, l_source_get_extender); lua_setfield(L, -2, "get_extender");
+	lua_pushcfunction(L, l_source_set_extender); lua_setfield(L, -2, "set_extender");
+	lua_pushcfunction(L, l_source_get_filter); lua_setfield(L, -2, "get_filter");
+	lua_pushcfunction(L, l_source_set_filter); lua_setfield(L, -2, "set_filter");
+	lua_pushcfunction(L, l_source_get_matrix); lua_setfield(L, -2, "get_matrix");
+	lua_pushcfunction(L, l_source_set_matrix); lua_setfield(L, -2, "set_matrix");
+	lua_pushcfunction(L, l_source_get_type); lua_setfield(L, -2, "get_type");
 	lua_pop(L, 1);
 	// Define context object methods
 	luaL_newmetatable(L, G2D_CONTEXT);
