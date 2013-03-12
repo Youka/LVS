@@ -661,6 +661,89 @@ LUA_FUNC_1ARG(source_gc, 1)
 	cairo_pattern_destroy(pattern);
 LUA_FUNC_END
 
+LUA_FUNC_2ARG(source_add_color, 5, 6)
+	cairo_pattern_t *pattern = *reinterpret_cast<cairo_pattern_t**>(luaL_checkuserdata(L, 1, G2D_SOURCE));
+	cairo_pattern_add_color_stop_rgba(pattern, luaL_checknumber(L, 2), luaL_checknumber(L, 3), luaL_checknumber(L, 4), luaL_checknumber(L, 5), luaL_optnumber(L, 6, 1.0L));
+	cairo_status_t status = cairo_pattern_status(pattern);
+	if(status != CAIRO_STATUS_SUCCESS)
+		luaL_error2(L, cairo_status_to_string(status));
+LUA_FUNC_END
+
+LUA_FUNC_2ARG(source_get_color, 1, 2)
+	cairo_pattern_t *pattern = *reinterpret_cast<cairo_pattern_t**>(luaL_checkuserdata(L, 1, G2D_SOURCE));
+	if(lua_gettop(L) == 1){
+		double r, g, b, a;
+		cairo_status_t status = cairo_pattern_get_rgba(pattern, &r, &g, &b, &a);
+		if(status != CAIRO_STATUS_SUCCESS)
+			luaL_error2(L, cairo_status_to_string(status));
+		lua_pushnumber(L, r);
+		lua_pushnumber(L, g);
+		lua_pushnumber(L, b);
+		lua_pushnumber(L, a);
+		return 4;
+	}else{
+		double pct, r, g, b, a;
+		cairo_status_t status = cairo_pattern_get_color_stop_rgba(pattern, luaL_checknumber(L, 2), &pct, &r, &g, &b, &a);
+		if(status == CAIRO_STATUS_INVALID_INDEX)
+			return 0;
+		else if(status != CAIRO_STATUS_SUCCESS)
+			luaL_error2(L, cairo_status_to_string(status));
+		lua_pushnumber(L, pct);
+		lua_pushnumber(L, r);
+		lua_pushnumber(L, g);
+		lua_pushnumber(L, b);
+		lua_pushnumber(L, a);
+		return 5;
+	}
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(source_get_points, 1)
+	cairo_pattern_t *pattern = *reinterpret_cast<cairo_pattern_t**>(luaL_checkuserdata(L, 1, G2D_SOURCE));
+	double x0, y0, x1, y1;
+	cairo_status_t status = cairo_pattern_get_linear_points(pattern, &x0, &y0, &x1, &y1);
+	if(status != CAIRO_STATUS_SUCCESS)
+		luaL_error2(L, cairo_status_to_string(status));
+	lua_pushnumber(L, x0);
+	lua_pushnumber(L, y0);
+	lua_pushnumber(L, x1);
+	lua_pushnumber(L, y1);
+	return 4;
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(source_get_circles, 1)
+	cairo_pattern_t *pattern = *reinterpret_cast<cairo_pattern_t**>(luaL_checkuserdata(L, 1, G2D_SOURCE));
+	double x0, y0, r0, x1, y1, r1;
+	cairo_status_t status = cairo_pattern_get_radial_circles(pattern, &x0, &y0, &r0, &x1, &y1, &r1);
+	if(status != CAIRO_STATUS_SUCCESS)
+		luaL_error2(L, cairo_status_to_string(status));
+	lua_pushnumber(L, x0);
+	lua_pushnumber(L, y0);
+	lua_pushnumber(L, r0);
+	lua_pushnumber(L, x1);
+	lua_pushnumber(L, y1);
+	lua_pushnumber(L, r1);
+	return 6;
+LUA_FUNC_END
+
+LUA_FUNC_2ARG(source_add_mesh, 19, 25)
+	cairo_pattern_t *pattern = *reinterpret_cast<cairo_pattern_t**>(luaL_checkuserdata(L, 1, G2D_SOURCE));
+	cairo_mesh_pattern_begin_patch(pattern);
+	cairo_mesh_pattern_move_to(pattern, luaL_checknumber(L, 2), luaL_checknumber(L, 3));
+	cairo_mesh_pattern_set_corner_color_rgba(pattern, 0, luaL_checknumber(L, 4), luaL_checknumber(L, 5), luaL_checknumber(L, 6), luaL_checknumber(L, 7));
+	cairo_mesh_pattern_line_to(pattern, luaL_checknumber(L, 8), luaL_checknumber(L, 9));
+	cairo_mesh_pattern_set_corner_color_rgba(pattern, 1, luaL_checknumber(L, 10), luaL_checknumber(L, 11), luaL_checknumber(L, 12), luaL_checknumber(L, 13));
+	cairo_mesh_pattern_line_to(pattern, luaL_checknumber(L, 14), luaL_checknumber(L, 15));
+	cairo_mesh_pattern_set_corner_color_rgba(pattern, 2, luaL_checknumber(L, 16), luaL_checknumber(L, 17), luaL_checknumber(L, 18), luaL_checknumber(L, 19));
+	if(lua_gettop(L) == 25){
+		cairo_mesh_pattern_line_to(pattern, luaL_checknumber(L, 20), luaL_checknumber(L, 21));
+		cairo_mesh_pattern_set_corner_color_rgba(pattern, 3, luaL_checknumber(L, 22), luaL_checknumber(L, 23), luaL_checknumber(L, 24), luaL_checknumber(L, 25));
+	}
+	cairo_mesh_pattern_end_patch(pattern);
+	cairo_status_t status = cairo_pattern_status(pattern);
+	if(status != CAIRO_STATUS_SUCCESS)
+		luaL_error2(L, cairo_status_to_string(status));
+LUA_FUNC_END
+
 // CONTEXT OBJECT
 LUA_FUNC_1ARG(context_gc, 1)
 	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
@@ -719,6 +802,11 @@ int luaopen_g2d(lua_State *L){
 	luaL_newmetatable(L, G2D_SOURCE);
 	lua_pushvalue(L, -1); lua_setfield(L, -2, "__index");
 	lua_pushcfunction(L, l_source_gc); lua_setfield(L, -2, "__gc");
+	lua_pushcfunction(L, l_source_add_color); lua_setfield(L, -2, "add_color");
+	lua_pushcfunction(L, l_source_get_color); lua_setfield(L, -2, "get_color");
+	lua_pushcfunction(L, l_source_get_points); lua_setfield(L, -2, "get_points");
+	lua_pushcfunction(L, l_source_get_circles); lua_setfield(L, -2, "get_circles");
+	lua_pushcfunction(L, l_source_add_mesh); lua_setfield(L, -2, "add_mesh");
 	lua_pop(L, 1);
 	// Define context object methods
 	luaL_newmetatable(L, G2D_CONTEXT);
