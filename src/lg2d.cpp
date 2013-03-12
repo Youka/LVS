@@ -2,6 +2,7 @@
 #include "cairo.hpp"
 #include "textconv.hpp"
 #include <memory>
+#define M_PI       3.14159265358979323846	// From "math.h"
 
 // Objects names
 #define G2D_IMAGE "G2D_IMAGE"
@@ -142,21 +143,12 @@ LUA_FUNC_END
 LUA_FUNC_2ARG(create_matrix, 0, 6)
 	if(lua_gettop(L) == 0){
 		// Create matrix
-		cairo_matrix_t matrix;
-		cairo_matrix_init_identity(&matrix);
+		cairo_matrix_t matrix = {1, 0, 0, 1, 0, 0};
 		// Push matrix to Lua
 		*lua_createuserdata<cairo_matrix_t>(L, G2D_MATRIX) = matrix;
 	}else if(lua_gettop(L) == 6){
-		// Get parameters
-		double xx = luaL_checknumber(L, 1);
-		double yx = luaL_checknumber(L, 2);
-		double xy = luaL_checknumber(L, 3);
-		double yy = luaL_checknumber(L, 4);
-		double x0 = luaL_checknumber(L, 5);
-		double y0 = luaL_checknumber(L, 6);
 		// Create matrix
-		cairo_matrix_t matrix;
-		cairo_matrix_init(&matrix, xx, yx, xy, yy, x0, y0);
+		cairo_matrix_t matrix = {luaL_checknumber(L, 1), luaL_checknumber(L, 2), luaL_checknumber(L, 3), luaL_checknumber(L, 4), luaL_checknumber(L, 5), luaL_checknumber(L, 6)};
 		// Push matrix to Lua
 		*lua_createuserdata<cairo_matrix_t>(L, G2D_MATRIX) = matrix;
 	}
@@ -593,6 +585,75 @@ LUA_FUNC_1ARG(image_set_data, 6)
 LUA_FUNC_END
 
 // MATRIX OBJECT
+LUA_FUNC_1ARG(matrix_get_data, 1)
+	cairo_matrix_t *matrix = reinterpret_cast<cairo_matrix_t*>(luaL_checkuserdata(L, 1, G2D_MATRIX));
+	lua_pushnumber(L, matrix->xx);
+	lua_pushnumber(L, matrix->yx);
+	lua_pushnumber(L, matrix->xy);
+	lua_pushnumber(L, matrix->yy);
+	lua_pushnumber(L, matrix->x0);
+	lua_pushnumber(L, matrix->y0);
+	return 6;
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(matrix_set_data, 7)
+	cairo_matrix_t *matrix = reinterpret_cast<cairo_matrix_t*>(luaL_checkuserdata(L, 1, G2D_MATRIX));
+	matrix->xx = luaL_checknumber(L, 2);
+	matrix->yx = luaL_checknumber(L, 3);
+	matrix->xy = luaL_checknumber(L, 4);
+	matrix->yy = luaL_checknumber(L, 5);
+	matrix->x0 = luaL_checknumber(L, 6);
+	matrix->y0 = luaL_checknumber(L, 7);
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(matrix_identity, 1)
+	cairo_matrix_t *matrix = reinterpret_cast<cairo_matrix_t*>(luaL_checkuserdata(L, 1, G2D_MATRIX));
+	cairo_matrix_init_identity(matrix);
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(matrix_invert, 1)
+	cairo_matrix_t *matrix = reinterpret_cast<cairo_matrix_t*>(luaL_checkuserdata(L, 1, G2D_MATRIX));
+	cairo_matrix_invert(matrix);
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(matrix_multiply, 7)
+	cairo_matrix_t *matrix = reinterpret_cast<cairo_matrix_t*>(luaL_checkuserdata(L, 1, G2D_MATRIX));
+	cairo_matrix_t a = {luaL_checknumber(L, 2), luaL_checknumber(L, 3), luaL_checknumber(L, 4), luaL_checknumber(L, 5), luaL_checknumber(L, 6), luaL_checknumber(L, 7)};
+	cairo_matrix_t b = *matrix;
+	cairo_matrix_multiply(matrix, &a, &b);
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(matrix_translate, 3)
+	cairo_matrix_t *matrix = reinterpret_cast<cairo_matrix_t*>(luaL_checkuserdata(L, 1, G2D_MATRIX));
+	cairo_matrix_translate(matrix, luaL_checknumber(L, 2), luaL_checknumber(L, 3));
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(matrix_scale, 3)
+	cairo_matrix_t *matrix = reinterpret_cast<cairo_matrix_t*>(luaL_checkuserdata(L, 1, G2D_MATRIX));
+	cairo_matrix_scale(matrix, luaL_checknumber(L, 2), luaL_checknumber(L, 3));
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(matrix_rotate, 2)
+	cairo_matrix_t *matrix = reinterpret_cast<cairo_matrix_t*>(luaL_checkuserdata(L, 1, G2D_MATRIX));
+	cairo_matrix_rotate(matrix, luaL_checknumber(L, 2) / 180.0L * M_PI);
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(matrix_shear, 3)
+	cairo_matrix_t *matrix = reinterpret_cast<cairo_matrix_t*>(luaL_checkuserdata(L, 1, G2D_MATRIX));
+	cairo_matrix_t a = {1, luaL_checknumber(L, 2), luaL_checknumber(L, 3), 1, 0, 0};
+	cairo_matrix_t b = *matrix;
+	cairo_matrix_multiply(matrix, &a, &b);
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(matrix_transform, 3)
+	cairo_matrix_t *matrix = reinterpret_cast<cairo_matrix_t*>(luaL_checkuserdata(L, 1, G2D_MATRIX));
+	double x = luaL_checknumber(L, 2);
+	double y = luaL_checknumber(L, 3);
+	cairo_matrix_transform_point(matrix, &x, &y);
+	lua_pushnumber(L, x);
+	lua_pushnumber(L, y);
+	return 2;
+LUA_FUNC_END
 
 // SOURCE OBJECT
 LUA_FUNC_1ARG(source_gc, 1)
@@ -643,6 +704,16 @@ int luaopen_g2d(lua_State *L){
 	// Define matrix object methods
 	luaL_newmetatable(L, G2D_MATRIX);
 	lua_pushvalue(L, -1); lua_setfield(L, -2, "__index");
+	lua_pushcfunction(L, l_matrix_get_data); lua_setfield(L, -2, "get_data");
+	lua_pushcfunction(L, l_matrix_set_data); lua_setfield(L, -2, "set_data");
+	lua_pushcfunction(L, l_matrix_identity); lua_setfield(L, -2, "identity");
+	lua_pushcfunction(L, l_matrix_invert); lua_setfield(L, -2, "invert");
+	lua_pushcfunction(L, l_matrix_multiply); lua_setfield(L, -2, "multiply");
+	lua_pushcfunction(L, l_matrix_translate); lua_setfield(L, -2, "translate");
+	lua_pushcfunction(L, l_matrix_scale); lua_setfield(L, -2, "scale");
+	lua_pushcfunction(L, l_matrix_rotate); lua_setfield(L, -2, "rotate");
+	lua_pushcfunction(L, l_matrix_shear); lua_setfield(L, -2, "shear");
+	lua_pushcfunction(L, l_matrix_transform); lua_setfield(L, -2, "transform");
 	lua_pop(L, 1);
 	// Define source object methods
 	luaL_newmetatable(L, G2D_SOURCE);
