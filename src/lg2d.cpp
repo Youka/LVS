@@ -871,9 +871,6 @@ LUA_FUNC_END
 LUA_FUNC_1ARG(source_set_extender, 2)
 	cairo_pattern_t *pattern = *reinterpret_cast<cairo_pattern_t**>(luaL_checkuserdata(L, 1, G2D_SOURCE));
 	cairo_pattern_set_extend(pattern, cairo_extend_from_string(luaL_checkstring(L, 2)));
-	cairo_status_t status = cairo_pattern_status(pattern);
-	if(status != CAIRO_STATUS_SUCCESS)
-		luaL_error2(L, cairo_status_to_string(status));
 LUA_FUNC_END
 
 LUA_FUNC_1ARG(source_get_filter, 1)
@@ -885,9 +882,6 @@ LUA_FUNC_END
 LUA_FUNC_1ARG(source_set_filter, 2)
 	cairo_pattern_t *pattern = *reinterpret_cast<cairo_pattern_t**>(luaL_checkuserdata(L, 1, G2D_SOURCE));
 	cairo_pattern_set_filter(pattern, cairo_filter_from_string(luaL_checkstring(L, 2)));
-	cairo_status_t status = cairo_pattern_status(pattern);
-	if(status != CAIRO_STATUS_SUCCESS)
-		luaL_error2(L, cairo_status_to_string(status));
 LUA_FUNC_END
 
 LUA_FUNC_1ARG(source_get_matrix, 1)
@@ -895,6 +889,10 @@ LUA_FUNC_1ARG(source_get_matrix, 1)
 	// Get matrix
 	cairo_matrix_t matrix;
 	cairo_pattern_get_matrix(pattern, &matrix);
+	// Invert matrix for pattern space to user space (see 'cairo_pattern_set_matrix' description)
+	cairo_status_t status = cairo_matrix_invert(&matrix);
+	if(status != CAIRO_STATUS_SUCCESS)
+		luaL_error2(L, cairo_status_to_string(status));
 	// Push matrix to Lua
 	*lua_createuserdata<cairo_matrix_t>(L, G2D_MATRIX) = matrix;
 	return 1;
@@ -922,6 +920,35 @@ LUA_FUNC_END
 LUA_FUNC_1ARG(context_gc, 1)
 	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
 	cairo_destroy(ctx);
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(context_get_matrix, 1)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	cairo_matrix_t matrix;
+	cairo_get_matrix(ctx, &matrix);
+	*lua_createuserdata<cairo_matrix_t>(L, G2D_MATRIX) = matrix;
+	return 1;
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(context_set_matrix, 2)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	cairo_matrix_t *matrix = reinterpret_cast<cairo_matrix_t*>(luaL_checkuserdata(L, 2, G2D_MATRIX));
+	cairo_set_matrix(ctx, matrix);
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(context_get_source, 1)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+
+	// TODO
+
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(context_set_source, 1)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	cairo_pattern_t *pattern = *reinterpret_cast<cairo_pattern_t**>(luaL_checkuserdata(L, 2, G2D_SOURCE));
+
+	// TODO
+
 LUA_FUNC_END
 
 // Register
@@ -999,6 +1026,10 @@ int luaopen_g2d(lua_State *L){
 	lua_pushstring(L, G2D_CONTEXT); lua_setfield(L, -2, "__metatable");
 	lua_pushvalue(L, -1); lua_setfield(L, -2, "__index");
 	lua_pushcfunction(L, l_context_gc); lua_setfield(L, -2, "__gc");
+	lua_pushcfunction(L, l_context_get_matrix); lua_setfield(L, -2, "get_matrix");
+	lua_pushcfunction(L, l_context_set_matrix); lua_setfield(L, -2, "set_matrix");
+	lua_pushcfunction(L, l_context_get_source); lua_setfield(L, -2, "get_source");
+	lua_pushcfunction(L, l_context_set_source); lua_setfield(L, -2, "set_source");
 	lua_pop(L, 1);
 	// Nothing pushed to Lua state
 	return 0;
