@@ -1,7 +1,7 @@
 #include "llibs.hpp"
 #include "cairo.hpp"
 #include "textconv.hpp"
-#include <memory>
+#include <memory>	// For smart pointers
 #define M_PI       3.14159265358979323846	// From "math.h"
 
 // Objects names
@@ -77,16 +77,115 @@ inline const char* cairo_filter_to_string(cairo_filter_t filter){
 	}
 }
 
- inline const char* cairo_pattern_type_to_string(cairo_pattern_type_t type){
-	 switch(type){
+inline const char* cairo_pattern_type_to_string(cairo_pattern_type_t type){
+	switch(type){
 		case CAIRO_PATTERN_TYPE_SOLID: return "COLOR";
 		case CAIRO_PATTERN_TYPE_LINEAR: return "LINEAR_GRADIENT";
 		case CAIRO_PATTERN_TYPE_RADIAL: return "RADIAL_GRADIENT";
 		case CAIRO_PATTERN_TYPE_MESH: return "MESH_GRADIENT";
 		case  CAIRO_PATTERN_TYPE_SURFACE: return "IMAGE";
 		default: return "UNKNOWN";
-	 }
- }
+	}
+}
+
+inline cairo_fill_rule_t cairo_fill_rule_from_string(const char *fill_rule_string){
+	if(strcmp(fill_rule_string, "WINDING") == 0)
+		return CAIRO_FILL_RULE_WINDING;
+	else if(strcmp(fill_rule_string, "ODD") == 0)
+		return CAIRO_FILL_RULE_EVEN_ODD;
+	else
+		return CAIRO_FILL_RULE_WINDING;
+}
+
+
+inline const char* cairo_fill_rule_to_string(cairo_fill_rule_t fill_rule){
+	switch(fill_rule){
+		case CAIRO_FILL_RULE_WINDING: return "WINDING";
+		case CAIRO_FILL_RULE_EVEN_ODD: return "ODD";
+		default: return "UNKNOWN";
+	}
+}
+
+inline cairo_line_cap_t cairo_line_cap_from_string(const char *line_cap_string){
+	if(strcmp(line_cap_string, "FLAT") == 0)
+		return CAIRO_LINE_CAP_BUTT;
+	else if(strcmp(line_cap_string, "ROUND") == 0)
+		return CAIRO_LINE_CAP_ROUND;
+	else if(strcmp(line_cap_string, "SQUARE") == 0)
+		return CAIRO_LINE_CAP_SQUARE;
+	else
+		return CAIRO_LINE_CAP_BUTT;
+}
+
+inline const char* cairo_line_cap_to_string(cairo_line_cap_t line_cap){
+	switch(line_cap){
+		case CAIRO_LINE_CAP_BUTT: return "FLAT";
+		case CAIRO_LINE_CAP_ROUND: return "ROUND";
+		case CAIRO_LINE_CAP_SQUARE: return "SQUARE";
+		default: return "UNKNOWN";
+	}
+}
+
+inline cairo_line_join_t cairo_line_join_from_string(const char *line_join_string){
+	if(strcmp(line_join_string, "MITER") == 0)
+		return CAIRO_LINE_JOIN_MITER;
+	else if(strcmp(line_join_string, "ROUND") == 0)
+		return CAIRO_LINE_JOIN_ROUND;
+	else if(strcmp(line_join_string, "BEVEL") == 0)
+		return CAIRO_LINE_JOIN_BEVEL;
+	else
+		return CAIRO_LINE_JOIN_MITER;
+}
+
+inline const char* cairo_line_join_to_string(cairo_line_join_t line_join){
+	switch(line_join){
+		case CAIRO_LINE_JOIN_MITER: return "MITER";
+		case CAIRO_LINE_JOIN_ROUND: return "ROUND";
+		case CAIRO_LINE_JOIN_BEVEL: return "BEVEL";
+		default: return "UNKNOWN";
+	}
+}
+
+inline cairo_operator_t cairo_operator_from_string(const char *op_string){
+	if(strcmp(op_string, "SOURCE") == 0)
+		return CAIRO_OPERATOR_SOURCE;
+	else if(strcmp(op_string, "OVER") == 0)
+		return CAIRO_OPERATOR_OVER;
+	else if(strcmp(op_string, "INSIDE") == 0)
+		return CAIRO_OPERATOR_IN;
+	else if(strcmp(op_string, "OUTSIDE") == 0)
+		return CAIRO_OPERATOR_OUT;
+	else if(strcmp(op_string, "MIX") == 0)
+		return CAIRO_OPERATOR_ATOP;
+	else if(strcmp(op_string, "XOR") == 0)
+		return CAIRO_OPERATOR_XOR;
+	else if(strcmp(op_string, "ADD") == 0)
+		return CAIRO_OPERATOR_ADD;
+	else if(strcmp(op_string, "SATURATE") == 0)
+		return CAIRO_OPERATOR_SATURATE;
+	else if(strcmp(op_string, "MULTIPLY") == 0)
+		return CAIRO_OPERATOR_MULTIPLY;
+	else if(strcmp(op_string, "DIFFERENCE") == 0)
+		return CAIRO_OPERATOR_DIFFERENCE;
+	else
+		return CAIRO_OPERATOR_OVER;
+}
+
+inline const char* cairo_operator_to_string(cairo_operator_t op){
+	switch(op){
+		case CAIRO_OPERATOR_SOURCE: return "SOURCE";
+		case CAIRO_OPERATOR_OVER: return "OVER";
+		case CAIRO_OPERATOR_IN: return "INSIDE";
+		case CAIRO_OPERATOR_OUT: return "OUTSIDE";
+		case CAIRO_OPERATOR_ATOP: return "MIX";
+		case CAIRO_OPERATOR_XOR: return "XOR";
+		case CAIRO_OPERATOR_ADD: return "ADD";
+		case CAIRO_OPERATOR_SATURATE: return "SATURATE";
+		case CAIRO_OPERATOR_MULTIPLY: return "MULTIPLY";
+		case CAIRO_OPERATOR_DIFFERENCE: return "DIFFERENCE";
+		default: return "UNKNOWN";
+	}
+}
 
 // G2D LIBRARY
 LUA_FUNC_1ARG(create_image, 3)
@@ -979,6 +1078,118 @@ LUA_FUNC_1ARG(context_set_antialiasing, 2)
 	cairo_set_antialias(ctx, luaL_checkboolean(L, 2) ? CAIRO_ANTIALIAS_DEFAULT : CAIRO_ANTIALIAS_NONE);
 LUA_FUNC_END
 
+LUA_FUNC_1ARG(context_get_fill_rule, 1)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	lua_pushstring(L, cairo_fill_rule_to_string(cairo_get_fill_rule(ctx)));
+	return 1;
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(context_set_fill_rule, 2)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	cairo_set_fill_rule(ctx, cairo_fill_rule_from_string(luaL_checkstring(L, 2)));
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(context_get_dash, 1)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	int dash_n = cairo_get_dash_count(ctx);
+	if(dash_n == 0){
+		lua_pushnumber(L, 0);
+		lua_newtable(L);
+	}else{
+		double *dashes = new double[dash_n];
+		double offset;
+		cairo_get_dash(ctx, dashes, &offset);
+		lua_pushnumber(L, offset);
+		lua_pushtable(L, dashes, dash_n);
+		delete[] dashes;
+	}
+	return 2;
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(context_set_dash, 3)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	double offset = luaL_checknumber(L, 2);
+	unsigned int dash_n;
+	double *dashes = luaL_checktable<double>(L, 3, &dash_n);
+	cairo_set_dash(ctx, dashes, dash_n, offset);
+	if(dashes)
+		delete[] dashes;
+	cairo_status_t status = cairo_status(ctx);
+	if(status != CAIRO_STATUS_SUCCESS)
+		luaL_error2(L, cairo_status_to_string(status));
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(context_get_line_cap, 1)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	lua_pushstring(L, cairo_line_cap_to_string(cairo_get_line_cap(ctx)));
+	return 1;
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(context_set_line_cap, 2)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	cairo_set_line_cap(ctx, cairo_line_cap_from_string(luaL_checkstring(L, 2)));
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(context_get_line_join, 1)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	lua_pushstring(L, cairo_line_join_to_string(cairo_get_line_join(ctx)));
+	return 1;
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(context_set_line_join, 2)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	cairo_set_line_join(ctx, cairo_line_join_from_string(luaL_checkstring(L, 2)));
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(context_get_miter_limit, 1)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	lua_pushnumber(L, cairo_get_miter_limit(ctx));
+	return 1;
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(context_set_miter_limit, 2)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	cairo_set_miter_limit(ctx, luaL_checknumber(L, 2));
+	cairo_status_t status = cairo_status(ctx);
+	if(status != CAIRO_STATUS_SUCCESS)
+		luaL_error2(L, cairo_status_to_string(status));
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(context_get_line_width, 1)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	lua_pushnumber(L, cairo_get_line_width(ctx));
+	return 1;
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(context_set_line_width, 2)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	cairo_set_line_width(ctx, luaL_checknumber(L, 2));
+	cairo_status_t status = cairo_status(ctx);
+	if(status != CAIRO_STATUS_SUCCESS)
+		luaL_error2(L, cairo_status_to_string(status));
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(context_get_composition, 1)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	lua_pushstring(L, cairo_operator_to_string(cairo_get_operator(ctx)));
+	return 1;
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(context_set_composition, 2)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	cairo_set_operator(ctx, cairo_operator_from_string(luaL_checkstring(L, 2)));
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(context_clip_from_path, 1)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	cairo_clip(ctx);
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(context_clip_clear, 1)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	cairo_reset_clip(ctx);
+LUA_FUNC_END
+
 // Register
 int luaopen_g2d(lua_State *L){
 	// Create 'g2d' table
@@ -1062,6 +1273,22 @@ int luaopen_g2d(lua_State *L){
 	lua_pushcfunction(L, l_context_pop_state); lua_setfield(L, -2, "pop_state");
 	lua_pushcfunction(L, l_context_get_antialiasing); lua_setfield(L, -2, "get_antialiasing");
 	lua_pushcfunction(L, l_context_set_antialiasing); lua_setfield(L, -2, "set_antialiasing");
+	lua_pushcfunction(L, l_context_get_fill_rule); lua_setfield(L, -2, "get_fill_rule");
+	lua_pushcfunction(L, l_context_set_fill_rule); lua_setfield(L, -2, "set_fill_rule");
+	lua_pushcfunction(L, l_context_get_dash); lua_setfield(L, -2, "get_dash");
+	lua_pushcfunction(L, l_context_set_dash); lua_setfield(L, -2, "set_dash");
+	lua_pushcfunction(L, l_context_get_line_cap); lua_setfield(L, -2, "get_line_cap");
+	lua_pushcfunction(L, l_context_set_line_cap); lua_setfield(L, -2, "set_line_cap");
+	lua_pushcfunction(L, l_context_get_line_join); lua_setfield(L, -2, "get_line_join");
+	lua_pushcfunction(L, l_context_set_line_join); lua_setfield(L, -2, "set_line_join");
+	lua_pushcfunction(L, l_context_get_miter_limit); lua_setfield(L, -2, "get_miter_limit");
+	lua_pushcfunction(L, l_context_set_miter_limit); lua_setfield(L, -2, "set_miter_limit");
+	lua_pushcfunction(L, l_context_get_line_width); lua_setfield(L, -2, "get_line_width");
+	lua_pushcfunction(L, l_context_set_line_width); lua_setfield(L, -2, "set_line_width");
+	lua_pushcfunction(L, l_context_get_composition); lua_setfield(L, -2, "get_composition");
+	lua_pushcfunction(L, l_context_set_composition); lua_setfield(L, -2, "set_composition");
+	lua_pushcfunction(L, l_context_clip_from_path); lua_setfield(L, -2, "clip_from_path");
+	lua_pushcfunction(L, l_context_clip_clear); lua_setfield(L, -2, "clip_clear");
 	lua_pop(L, 1);
 	// Nothing pushed to Lua state
 	return 0;

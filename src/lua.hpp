@@ -75,6 +75,7 @@ template <class T> static T *luaL_checktable(lua_State *L, int i, unsigned int *
 			lua_rawgeti(L, i, ii);
 			if(!lua_isnumber(L,-1)){
 				delete[] table;
+				lua_pop(L,1);
 				luaL_argerror(L, i, "invalid table");
 			}
 			table[ii-1] = lua_tonumber(L, -1);
