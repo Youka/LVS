@@ -1190,6 +1190,125 @@ LUA_FUNC_1ARG(context_clip_clear, 1)
 	cairo_reset_clip(ctx);
 LUA_FUNC_END
 
+LUA_FUNC_1ARG(context_clip_get_rectangles, 1)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	// Get clip rectangles
+	cairo_rectangle_list_t *rect_list = cairo_copy_clip_rectangle_list(ctx);
+	if(rect_list->status != CAIRO_STATUS_SUCCESS){
+		cairo_rectangle_list_destroy(rect_list);
+		luaL_error2(L, cairo_status_to_string(rect_list->status));
+	}
+	// Push rectangles to Lua
+	lua_createtable(L, rect_list->num_rectangles, 0);
+	for(int rect_i = 0; rect_i < rect_list->num_rectangles; rect_i++){
+		lua_createtable(L, 0, 4);
+		lua_pushnumber(L, rect_list->rectangles[rect_i].x); lua_setfield(L, -2, "x");
+		lua_pushnumber(L, rect_list->rectangles[rect_i].y); lua_setfield(L, -2, "y");
+		lua_pushnumber(L, rect_list->rectangles[rect_i].width); lua_setfield(L, -2, "width");
+		lua_pushnumber(L, rect_list->rectangles[rect_i].height); lua_setfield(L, -2, "height");
+		lua_rawseti(L, -2, rect_i+1);
+	}
+	return 1;
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(context_clip_bounding, 1)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	double x1, y1, x2, y2;
+	cairo_clip_extents(ctx, &x1, &y1, &x2, &y2);
+	lua_pushnumber(L, x1);
+	lua_pushnumber(L, y1);
+	lua_pushnumber(L, x2);
+	lua_pushnumber(L, y2);
+	return 4;
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(context_clip_contains, 3)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	lua_pushboolean(L, cairo_in_clip(ctx, luaL_checknumber(L, 2), luaL_checknumber(L, 3)));
+	return 1;
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(context_path_move_to, 3)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	cairo_move_to(ctx, luaL_checknumber(L, 2), luaL_checknumber(L, 3));
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(context_path_line_to, 3)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	cairo_line_to(ctx, luaL_checknumber(L, 2), luaL_checknumber(L, 3));
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(context_path_curve_to, 7)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	cairo_curve_to(ctx, luaL_checknumber(L, 2), luaL_checknumber(L, 3), luaL_checknumber(L, 4), luaL_checknumber(L, 5), luaL_checknumber(L, 6), luaL_checknumber(L, 7));
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(context_path_add_rectangle, 5)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	cairo_rectangle(ctx, luaL_checknumber(L, 2), luaL_checknumber(L, 3), luaL_checknumber(L, 4), luaL_checknumber(L, 5));
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(context_path_add_arc, 6)
+	// Get parameters
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	double cx = luaL_checknumber(L, 2);
+	double cy = luaL_checknumber(L, 3);
+	double radius = luaL_checknumber(L, 4);
+	double angle1 = luaL_checknumber(L, 5) / 180.0L * M_PI;
+	double angle2 = luaL_checknumber(L, 6) / 180.0L * M_PI;
+	// Set arc path
+	if(angle2 > angle1)
+		cairo_arc(ctx, cx, cy, radius, angle1, angle2);
+	else if(angle2 < angle1)
+		cairo_arc_negative(ctx, cx, cy, radius, angle1, angle2);
+LUA_FUNC_END
+
+LUA_FUNC_2ARG(context_path_add_text, 4, 8)
+	// Get parameters
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	const char *text = luaL_checkstring(L, 2);
+	const char *face = luaL_checkstring(L, 3);
+	int size = luaL_checknumber(L, 4);
+	bool bold = luaL_optboolean(L, 5, false);
+	bool italic = luaL_optboolean(L, 6, false);
+	bool underline = luaL_optboolean(L, 7, false);
+	bool strikeout = luaL_optboolean(L, 8, false);
+	// Set text path
+	wchar_t *textw = utf8_to_utf16(text), *facew = utf8_to_utf16(face);
+	cairo_win32_text_path(ctx, textw, facew, size, bold, italic, underline, strikeout);
+	delete[] textw; delete[] facew;
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(context_path_close, 1)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	cairo_close_path(ctx);
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(context_path_clear, 1)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	cairo_new_path(ctx);
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(context_path_transform, 3)
+	// Get parameters
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	const char *pre_conversion = luaL_checkstring(L, 2);
+	if(lua_istable(L, 3))
+		luaL_typerror(L, 3, "function");
+	// Get path
+
+	// TODO
+
+	// Transform path points
+
+	// TODO
+
+	// Set path
+
+	// TODO
+
+LUA_FUNC_END
+
 // Register
 int luaopen_g2d(lua_State *L){
 	// Create 'g2d' table
@@ -1289,6 +1408,18 @@ int luaopen_g2d(lua_State *L){
 	lua_pushcfunction(L, l_context_set_composition); lua_setfield(L, -2, "set_composition");
 	lua_pushcfunction(L, l_context_clip_from_path); lua_setfield(L, -2, "clip_from_path");
 	lua_pushcfunction(L, l_context_clip_clear); lua_setfield(L, -2, "clip_clear");
+	lua_pushcfunction(L, l_context_clip_get_rectangles); lua_setfield(L, -2, "clip_get_rectangles");
+	lua_pushcfunction(L, l_context_clip_bounding); lua_setfield(L, -2, "clip_bounding");
+	lua_pushcfunction(L, l_context_clip_contains); lua_setfield(L, -2, "clip_contains");
+	lua_pushcfunction(L, l_context_path_move_to); lua_setfield(L, -2, "path_move_to");
+	lua_pushcfunction(L, l_context_path_line_to); lua_setfield(L, -2, "path_line_to");
+	lua_pushcfunction(L, l_context_path_curve_to); lua_setfield(L, -2, "path_curve_to");
+	lua_pushcfunction(L, l_context_path_add_rectangle); lua_setfield(L, -2, "path_add_rectangle");
+	lua_pushcfunction(L, l_context_path_add_arc); lua_setfield(L, -2, "path_add_arc");
+	lua_pushcfunction(L, l_context_path_add_text); lua_setfield(L, -2, "path_add_text");
+	lua_pushcfunction(L, l_context_path_close); lua_setfield(L, -2, "path_close");
+	lua_pushcfunction(L, l_context_path_clear); lua_setfield(L, -2, "path_clear");
+	lua_pushcfunction(L, l_context_path_transform); lua_setfield(L, -2, "path_transform");
 	lua_pop(L, 1);
 	// Nothing pushed to Lua state
 	return 0;
