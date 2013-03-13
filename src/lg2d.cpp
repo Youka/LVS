@@ -599,10 +599,10 @@ LUA_FUNC_1ARG(image_get_data, 5)
 			for(int y = y0; y < y1; y++){
 				row = image_data + y * image_stride + (x0 << 2);
 				for(int x = 0; x < area_width; x++){
-					lua_pushnumber(L, row[3]); lua_rawseti(L, -2, ++table_index);	// A
 					lua_pushnumber(L, row[2]); lua_rawseti(L, -2, ++table_index);	// R
 					lua_pushnumber(L, row[1]); lua_rawseti(L, -2, ++table_index);	// G
 					lua_pushnumber(L, row[0]); lua_rawseti(L, -2, ++table_index);	// B
+					lua_pushnumber(L, row[3]); lua_rawseti(L, -2, ++table_index);	// A
 					row += 4;
 				}
 			}
@@ -682,10 +682,10 @@ LUA_FUNC_1ARG(image_set_data, 6)
 			for(int y = y0; y < y1; y++){
 				row = image_data + y * image_stride + (x0 << 2);
 				for(int x = 0; x < area_width; x++){
-					row[3] = *new_data++;	// A
 					row[2] = *new_data++;	// R
 					row[1] = *new_data++;	// G
 					row[0] = *new_data++;	// B
+					row[3] = *new_data++;	// A
 					row += 4;
 				}
 			}
@@ -1296,17 +1296,43 @@ LUA_FUNC_1ARG(context_path_transform, 3)
 	if(lua_istable(L, 3))
 		luaL_typerror(L, 3, "function");
 	// Get path
+	cairo_path_t *path;
+	if(strcmp(pre_conversion, "flat") == 0)
+		path = cairo_copy_path_flat(ctx);
+	else if(strcmp(pre_conversion, "segmented") == 0)
+		path = cairo_copy_path_flat(ctx);
 
-	// TODO
+		// TODO
 
+	else
+		path = cairo_copy_path(ctx);
+	if(path->status != CAIRO_STATUS_SUCCESS)
+		luaL_error2(L, cairo_status_to_string(path->status));
 	// Transform path points
+	cairo_path_data_t *data;
+	for(int data_i = 0; data_i < path->num_data; data_i += path->data[data_i].header.length){
+		data = path->data + data_i;
+		switch(data->header.type){
+			case CAIRO_PATH_MOVE_TO:
 
-	// TODO
+				// TODO
 
+				break;
+			case CAIRO_PATH_LINE_TO:
+
+				// TODO
+
+				break;
+			case CAIRO_PATH_CURVE_TO:
+
+				// TODO
+
+				break;
+		}
+	}
 	// Set path
-
-	// TODO
-
+	cairo_new_path(ctx);
+	cairo_append_path(ctx, path);
 LUA_FUNC_END
 
 // Register
