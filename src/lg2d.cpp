@@ -938,17 +938,45 @@ LUA_FUNC_END
 
 LUA_FUNC_1ARG(context_get_source, 1)
 	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
-
-	// TODO
-
+	cairo_pattern_t *pattern = cairo_get_source(ctx);
+	*lua_createuserdata<cairo_pattern_t*>(L, G2D_SOURCE) = cairo_pattern_reference(pattern);
+	return 1;
 LUA_FUNC_END
 
-LUA_FUNC_1ARG(context_set_source, 1)
+LUA_FUNC_1ARG(context_set_source, 2)
 	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
 	cairo_pattern_t *pattern = *reinterpret_cast<cairo_pattern_t**>(luaL_checkuserdata(L, 2, G2D_SOURCE));
+	cairo_set_source(ctx, pattern);
+	cairo_status_t status = cairo_status(ctx);
+	if(status != CAIRO_STATUS_SUCCESS)
+		luaL_error2(L, cairo_status_to_string(status));
+LUA_FUNC_END
 
-	// TODO
+LUA_FUNC_1ARG(context_push_state, 1)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	cairo_save(ctx);
+	cairo_status_t status = cairo_status(ctx);
+	if(status != CAIRO_STATUS_SUCCESS)
+		luaL_error2(L, cairo_status_to_string(status));
+LUA_FUNC_END
 
+LUA_FUNC_1ARG(context_pop_state, 1)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	cairo_restore(ctx);
+	cairo_status_t status = cairo_status(ctx);
+	if(status != CAIRO_STATUS_SUCCESS)
+		luaL_error2(L, cairo_status_to_string(status));
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(context_get_antialiasing, 1)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	lua_pushboolean(L, cairo_get_antialias(ctx) == CAIRO_ANTIALIAS_NONE ? false : true);
+	return 1;
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(context_set_antialiasing, 2)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	cairo_set_antialias(ctx, luaL_checkboolean(L, 2) ? CAIRO_ANTIALIAS_DEFAULT : CAIRO_ANTIALIAS_NONE);
 LUA_FUNC_END
 
 // Register
@@ -1030,6 +1058,10 @@ int luaopen_g2d(lua_State *L){
 	lua_pushcfunction(L, l_context_set_matrix); lua_setfield(L, -2, "set_matrix");
 	lua_pushcfunction(L, l_context_get_source); lua_setfield(L, -2, "get_source");
 	lua_pushcfunction(L, l_context_set_source); lua_setfield(L, -2, "set_source");
+	lua_pushcfunction(L, l_context_push_state); lua_setfield(L, -2, "push_state");
+	lua_pushcfunction(L, l_context_pop_state); lua_setfield(L, -2, "pop_state");
+	lua_pushcfunction(L, l_context_get_antialiasing); lua_setfield(L, -2, "get_antialiasing");
+	lua_pushcfunction(L, l_context_set_antialiasing); lua_setfield(L, -2, "set_antialiasing");
 	lua_pop(L, 1);
 	// Nothing pushed to Lua state
 	return 0;
