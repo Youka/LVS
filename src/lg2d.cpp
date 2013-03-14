@@ -2,6 +2,7 @@
 #include "cairo.hpp"
 #include "textconv.hpp"
 #include <memory>	// For smart pointers
+#include <queue>	// For path splitting
 #define M_PI       3.14159265358979323846	// From "math.h"
 
 // Objects names
@@ -1297,26 +1298,37 @@ LUA_FUNC_1ARG(context_path_transform, 3)
 		luaL_typerror(L, 3, "function");
 	// Get pre-converted path
 	cairo_path_t *path;
-	if(strcmp(pre_conversion, "flat") == 0)
+	if(strcmp(pre_conversion, "flat") == 0 || strcmp(pre_conversion, "segmented") == 0)
 		path = cairo_copy_path_flat(ctx);
-	else if(strcmp(pre_conversion, "segmented") == 0)
-		path = cairo_copy_path_flat(ctx);
-
-		// TODO
-
 	else
 		path = cairo_copy_path(ctx);
 	if(path->status != CAIRO_STATUS_SUCCESS)
 		luaL_error2(L, cairo_status_to_string(path->status));
+	if(strcmp(pre_conversion, "segmented") == 0){
+		// Split path lines into short segments
+		cairo_path_data_t last_path_data;
+		last_path_data.header.type = CAIRO_PATH_CLOSE_PATH;
+		std::queue<cairo_path_data_t> path_data_queue;
+		cairo_path_data_t *data;
+		for(int data_i = 0; data_i < path->num_data; data_i += path->data[data_i].header.length){
+			data = path->data + data_i;
+
+			// TODO
+
+		}
+
+		// TODO
+
+	}
 	// Transform path points
 	cairo_path_data_t *data;
 	for(int data_i = 0; data_i < path->num_data; data_i += path->data[data_i].header.length){
 		data = path->data + data_i;
-		switch(data->header.type){
+		switch(data[0].header.type){
 			case CAIRO_PATH_MOVE_TO:
 			case CAIRO_PATH_LINE_TO:
 				lua_pushvalue(L, 3);
-				lua_pushstring(L, data->header.type == CAIRO_PATH_MOVE_TO ? "move" : "line");
+				lua_pushstring(L, data[0].header.type == CAIRO_PATH_MOVE_TO ? "move" : "line");
 				lua_pushnumber(L, data[1].point.x);
 				lua_pushnumber(L, data[1].point.y);
 				if(lua_pcall(L, 3, 2, 0)){
@@ -1354,6 +1366,72 @@ LUA_FUNC_1ARG(context_path_transform, 3)
 	cairo_new_path(ctx);
 	cairo_append_path(ctx, path);
 	cairo_path_destroy(path);
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(context_path_bounding, 1)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	double x1, y1, x2, y2;
+	cairo_path_extents(ctx, &x1, &y1, &x2, &y2);
+	lua_pushnumber(L, x1);
+	lua_pushnumber(L, y1);
+	lua_pushnumber(L, x2);
+	lua_pushnumber(L, y2);
+	return 4;
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(context_path_fill, 1)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	cairo_fill(ctx);
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(context_path_fill_bounding, 1)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	double x1, y1, x2, y2;
+	cairo_fill_extents(ctx, &x1, &y1, &x2, &y2);
+	lua_pushnumber(L, x1);
+	lua_pushnumber(L, y1);
+	lua_pushnumber(L, x2);
+	lua_pushnumber(L, y2);
+	return 4;
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(context_path_fill_contains, 3)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	lua_pushboolean(L, cairo_in_fill(ctx, luaL_checknumber(L, 2), luaL_checknumber(L, 3)));
+	return 1;
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(context_path_stroke, 1)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	cairo_stroke(ctx);
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(context_path_stroke_bounding, 1)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	double x1, y1, x2, y2;
+	cairo_stroke_extents(ctx, &x1, &y1, &x2, &y2);
+	lua_pushnumber(L, x1);
+	lua_pushnumber(L, y1);
+	lua_pushnumber(L, x2);
+	lua_pushnumber(L, y2);
+	return 4;
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(context_path_stroke_contains, 3)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	lua_pushboolean(L, cairo_in_stroke(ctx, luaL_checknumber(L, 2), luaL_checknumber(L, 3)));
+	return 1;
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(context_paint, 1)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	cairo_paint(ctx);
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(context_masked_paint, 2)
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	cairo_pattern_t *pattern = *reinterpret_cast<cairo_pattern_t**>(luaL_checkuserdata(L, 2, G2D_SOURCE));
+	cairo_mask(ctx, pattern);
 LUA_FUNC_END
 
 // Register
@@ -1467,6 +1545,15 @@ int luaopen_g2d(lua_State *L){
 	lua_pushcfunction(L, l_context_path_close); lua_setfield(L, -2, "path_close");
 	lua_pushcfunction(L, l_context_path_clear); lua_setfield(L, -2, "path_clear");
 	lua_pushcfunction(L, l_context_path_transform); lua_setfield(L, -2, "path_transform");
+	lua_pushcfunction(L, l_context_path_bounding); lua_setfield(L, -2, "path_bounding");
+	lua_pushcfunction(L, l_context_path_fill); lua_setfield(L, -2, "path_fill");
+	lua_pushcfunction(L, l_context_path_fill_bounding); lua_setfield(L, -2, "path_fill_bounding");
+	lua_pushcfunction(L, l_context_path_fill_contains); lua_setfield(L, -2, "path_fill_contains");
+	lua_pushcfunction(L, l_context_path_stroke); lua_setfield(L, -2, "path_stroke");
+	lua_pushcfunction(L, l_context_path_stroke_bounding); lua_setfield(L, -2, "path_stroke_bounding");
+	lua_pushcfunction(L, l_context_path_stroke_contains); lua_setfield(L, -2, "path_stroke_contains");
+	lua_pushcfunction(L, l_context_paint); lua_setfield(L, -2, "paint");
+	lua_pushcfunction(L, l_context_masked_paint); lua_setfield(L, -2, "masked_paint");
 	lua_pop(L, 1);
 	// Nothing pushed to Lua state
 	return 0;

@@ -1,2 +1,2 @@
-* write Lua g2d library
+* implent g2d path transformation
 * accelerate raw image processing (plugin interface transfer & g2d convolution filter)
