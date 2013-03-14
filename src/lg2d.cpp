@@ -1295,7 +1295,7 @@ LUA_FUNC_1ARG(context_path_transform, 3)
 	const char *pre_conversion = luaL_checkstring(L, 2);
 	if(lua_istable(L, 3))
 		luaL_typerror(L, 3, "function");
-	// Get path
+	// Get pre-converted path
 	cairo_path_t *path;
 	if(strcmp(pre_conversion, "flat") == 0)
 		path = cairo_copy_path_flat(ctx);
@@ -1314,25 +1314,46 @@ LUA_FUNC_1ARG(context_path_transform, 3)
 		data = path->data + data_i;
 		switch(data->header.type){
 			case CAIRO_PATH_MOVE_TO:
-
-				// TODO
-
-				break;
 			case CAIRO_PATH_LINE_TO:
-
-				// TODO
-
+				lua_pushvalue(L, 3);
+				lua_pushstring(L, data->header.type == CAIRO_PATH_MOVE_TO ? "move" : "line");
+				lua_pushnumber(L, data[1].point.x);
+				lua_pushnumber(L, data[1].point.y);
+				if(lua_pcall(L, 3, 2, 0)){
+					cairo_path_destroy(path);
+					luaL_error2(L, lua_tostring(L, -1));
+				}
+				if(!lua_isnumber(L, -2) || !lua_isnumber(L, -1)){
+					cairo_path_destroy(path);
+					luaL_error2(L, "path transformation function must return 2 numbers");
+				}
+				data[1].point.x = lua_tonumber(L, -2);
+				data[1].point.y = lua_tonumber(L, -1);
 				break;
 			case CAIRO_PATH_CURVE_TO:
-
-				// TODO
-
+				for(char i = 1; i <= 3; i++){
+					lua_pushvalue(L, 3);
+					lua_pushstring(L, "curve");
+					lua_pushnumber(L, data[i].point.x);
+					lua_pushnumber(L, data[i].point.y);
+					if(lua_pcall(L, 3, 2, 0)){
+						cairo_path_destroy(path);
+						luaL_error2(L, lua_tostring(L, -1));
+					}
+					if(!lua_isnumber(L, -2) || !lua_isnumber(L, -1)){
+						cairo_path_destroy(path);
+						luaL_error2(L, "path transformation function must return 2 numbers");
+					}
+					data[i].point.x = lua_tonumber(L, -2);
+					data[i].point.y = lua_tonumber(L, -1);
+				}
 				break;
 		}
 	}
 	// Set path
 	cairo_new_path(ctx);
 	cairo_append_path(ctx, path);
+	cairo_path_destroy(path);
 LUA_FUNC_END
 
 // Register

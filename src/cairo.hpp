@@ -17,7 +17,7 @@ static cairo_win32_text_extents_t cairo_win32_text_extents(const wchar_t *text, 
 	SetMapMode(dc, MM_TEXT);	// Map for pixels
 	// Create windows font (MSDN: http://msdn.microsoft.com/en-us/library/windows/desktop/dd145037%28v=vs.85%29.aspx)
 	LOGFONTW lf = {0};	// Logfont with default values
-	lf.lfHeight = size << 3;	// Font size (8-fold upscaled)
+	lf.lfHeight = size << 6;	// Font size (64-fold upscaled)
 	lf.lfWeight = bold ? FW_BOLD : FW_NORMAL;	// Bold or nomal weight?
 	lf.lfItalic = italic;	// Italic?
 	lf.lfUnderline = underline;	// Underlined?
@@ -40,9 +40,9 @@ static cairo_win32_text_extents_t cairo_win32_text_extents(const wchar_t *text, 
 	DeleteDC(dc);
 	// Return text extents (8-fold downscaled)
 	cairo_win32_text_extents_t text_extents = {
-		static_cast<double>(sz.cx) / 8, static_cast<double>(sz.cy) / 8,
-		static_cast<double>(metrics.tmAscent) / 8, static_cast<double>(metrics.tmDescent) / 8,
-		static_cast<double>(metrics.tmInternalLeading) / 8, static_cast<double>(metrics.tmExternalLeading) / 8};
+		static_cast<double>(sz.cx) / 64, static_cast<double>(sz.cy) / 64,
+		static_cast<double>(metrics.tmAscent) / 64, static_cast<double>(metrics.tmDescent) / 64,
+		static_cast<double>(metrics.tmInternalLeading) / 64, static_cast<double>(metrics.tmExternalLeading) / 64};
 	return text_extents;
 }
 
@@ -56,7 +56,7 @@ static void cairo_win32_text_path(cairo_t *ctx, const wchar_t *text, const wchar
 	SetBkMode(dc, TRANSPARENT);	// Draw text directly, not the stencil
 	// Create windows font (MSDN: http://msdn.microsoft.com/en-us/library/windows/desktop/dd145037%28v=vs.85%29.aspx)
 	LOGFONTW lf = {0};	// Logfont with default values
-	lf.lfHeight = size << 3;	// Font size (8-fold upscaled)
+	lf.lfHeight = size << 6;	// Font size (64-fold upscaled)
 	lf.lfWeight = bold ? FW_BOLD : FW_NORMAL;	// Bold or nomal weight?
 	lf.lfItalic = italic;	// Italic?
 	lf.lfUnderline = underline;	// Underlined?
@@ -84,25 +84,25 @@ static void cairo_win32_text_path(cairo_t *ctx, const wchar_t *text, const wchar
 	// Free windows objects
 	DeleteObject(font);
 	DeleteDC(dc);
-	// Convert windows path (8-fold downscaled) to cairo path
+	// Convert windows path (64-fold downscaled) to cairo path
 	int point_i = 0;
 	while(point_i < points_n)
 		switch(types[point_i]){
 			case PT_MOVETO:
-				cairo_move_to(ctx, static_cast<double>(points[point_i].x) / 8, static_cast<double>(points[point_i].y) / 8);
+				cairo_move_to(ctx, static_cast<double>(points[point_i].x) / 64, static_cast<double>(points[point_i].y) / 64);
 				point_i++;
 				break;
 			case PT_LINETO:
 			case PT_LINETO | PT_CLOSEFIGURE:
-				cairo_line_to(ctx, static_cast<double>(points[point_i].x) / 8, static_cast<double>(points[point_i].y) / 8);
+				cairo_line_to(ctx, static_cast<double>(points[point_i].x) / 64, static_cast<double>(points[point_i].y) / 64);
 				point_i++;
 				break;
 			case PT_BEZIERTO:
 			case PT_BEZIERTO | PT_CLOSEFIGURE:
 				cairo_curve_to(ctx,
-											static_cast<double>(points[point_i].x) / 8, static_cast<double>(points[point_i].y) / 8,
-											static_cast<double>(points[point_i+1].x) / 8, static_cast<double>(points[point_i+1].y) / 8,
-											static_cast<double>(points[point_i+2].x) / 8, static_cast<double>(points[point_i+2].y) / 8);
+											static_cast<double>(points[point_i].x) / 64, static_cast<double>(points[point_i].y) / 64,
+											static_cast<double>(points[point_i+1].x) / 64, static_cast<double>(points[point_i+1].y) / 64,
+											static_cast<double>(points[point_i+2].x) / 64, static_cast<double>(points[point_i+2].y) / 64);
 				point_i += 3;
 				break;
 		}

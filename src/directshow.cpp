@@ -101,10 +101,10 @@ class LVSVideoFilterPropertyPage : public CBasePropertyPage{
 							EndDialog(wnd, S_OK);
 						}break;
 						// 'Cancel' button
-						case IDCANCEL:{
+						case IDCANCEL:
 							// Close dialog
 							EndDialog(wnd, E_UNEXPECTED);
-						}break;
+							break;
 					}
 				}break;
 				// Dialog closure ('X' button)

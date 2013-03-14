@@ -160,9 +160,9 @@ namespace vdub{
 				}
 			}break;
 			// Dialog closure ('X' button)
-			case WM_CLOSE:{
+			case WM_CLOSE:
 				EndDialog(wnd, 1);
-		   }break;
+				break;
 			// Message not handled (default behaviour follows)
 			default:
 				return FALSE;
