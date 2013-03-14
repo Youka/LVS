@@ -89,6 +89,7 @@ static void cairo_win32_text_path(cairo_t *ctx, const wchar_t *text, const wchar
 	while(point_i < points_n)
 		switch(types[point_i]){
 			case PT_MOVETO:
+				cairo_close_path(ctx);
 				cairo_move_to(ctx, static_cast<double>(points[point_i].x) / 64, static_cast<double>(points[point_i].y) / 64);
 				point_i++;
 				break;
@@ -106,6 +107,7 @@ static void cairo_win32_text_path(cairo_t *ctx, const wchar_t *text, const wchar
 				point_i += 3;
 				break;
 		}
+	cairo_close_path(ctx);
 	// Free path resources
 	if(points_n > 0){
 		delete[] points;
