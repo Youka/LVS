@@ -1290,12 +1290,12 @@ LUA_FUNC_1ARG(context_path_clear, 1)
 	cairo_new_path(ctx);
 LUA_FUNC_END
 
-LUA_FUNC_1ARG(context_path_transform, 3)
+LUA_FUNC_2ARG(context_path_transform, 2, 3)
 	// Get parameters
 	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
-	const char *pre_conversion = luaL_checkstring(L, 2);
-	if(lua_istable(L, 3))
-		luaL_typerror(L, 3, "function");
+	if(lua_istable(L, 2))
+		luaL_typerror(L, 2, "function");
+	const char *pre_conversion = luaL_optstring(L, 3, "");
 	// Get pre-converted path
 	cairo_path_t *path;
 	if(strcmp(pre_conversion, "flat") == 0 || strcmp(pre_conversion, "segmented") == 0)
@@ -1327,7 +1327,7 @@ LUA_FUNC_1ARG(context_path_transform, 3)
 		switch(data[0].header.type){
 			case CAIRO_PATH_MOVE_TO:
 			case CAIRO_PATH_LINE_TO:
-				lua_pushvalue(L, 3);
+				lua_pushvalue(L, 2);
 				lua_pushstring(L, data[0].header.type == CAIRO_PATH_MOVE_TO ? "move" : "line");
 				lua_pushnumber(L, data[1].point.x);
 				lua_pushnumber(L, data[1].point.y);
@@ -1344,7 +1344,7 @@ LUA_FUNC_1ARG(context_path_transform, 3)
 				break;
 			case CAIRO_PATH_CURVE_TO:
 				for(char i = 1; i <= 3; i++){
-					lua_pushvalue(L, 3);
+					lua_pushvalue(L, 2);
 					lua_pushstring(L, "curve");
 					lua_pushnumber(L, data[i].point.x);
 					lua_pushnumber(L, data[i].point.y);
@@ -1381,7 +1381,7 @@ LUA_FUNC_END
 
 LUA_FUNC_1ARG(context_path_fill, 1)
 	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
-	cairo_fill(ctx);
+	cairo_fill_preserve(ctx);
 LUA_FUNC_END
 
 LUA_FUNC_1ARG(context_path_fill_bounding, 1)
@@ -1403,7 +1403,7 @@ LUA_FUNC_END
 
 LUA_FUNC_1ARG(context_path_stroke, 1)
 	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
-	cairo_stroke(ctx);
+	cairo_stroke_preserve(ctx);
 LUA_FUNC_END
 
 LUA_FUNC_1ARG(context_path_stroke_bounding, 1)
