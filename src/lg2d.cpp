@@ -2,7 +2,6 @@
 #include "cairo.hpp"
 #include "textconv.hpp"
 #include <memory>	// For smart pointers
-#include <queue>	// For path splitting
 #define M_PI       3.14159265358979323846	// From "math.h"
 
 // Objects names
@@ -1295,31 +1294,11 @@ LUA_FUNC_2ARG(context_path_transform, 2, 3)
 	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
 	if(lua_istable(L, 2))
 		luaL_typerror(L, 2, "function");
-	const char *pre_conversion = luaL_optstring(L, 3, "");
+	bool is_flat = luaL_optboolean(L, 3, false);
 	// Get pre-converted path
-	cairo_path_t *path;
-	if(strcmp(pre_conversion, "flat") == 0 || strcmp(pre_conversion, "segmented") == 0)
-		path = cairo_copy_path_flat(ctx);
-	else
-		path = cairo_copy_path(ctx);
+	cairo_path_t *path = is_flat ? cairo_copy_path_flat(ctx) : cairo_copy_path(ctx);
 	if(path->status != CAIRO_STATUS_SUCCESS)
 		luaL_error2(L, cairo_status_to_string(path->status));
-	if(strcmp(pre_conversion, "segmented") == 0){
-		// Split path lines into short segments
-		cairo_path_data_t last_path_data;
-		last_path_data.header.type = CAIRO_PATH_CLOSE_PATH;
-		std::queue<cairo_path_data_t> path_data_queue;
-		cairo_path_data_t *data;
-		for(int data_i = 0; data_i < path->num_data; data_i += path->data[data_i].header.length){
-			data = path->data + data_i;
-
-			// TODO
-
-		}
-
-		// TODO
-
-	}
 	// Transform path points
 	cairo_path_data_t *data;
 	for(int data_i = 0; data_i < path->num_data; data_i += path->data[data_i].header.length){
@@ -1358,6 +1337,14 @@ LUA_FUNC_2ARG(context_path_transform, 2, 3)
 					}
 					data[i].point.x = lua_tonumber(L, -2);
 					data[i].point.y = lua_tonumber(L, -1);
+				}
+				break;
+			case CAIRO_PATH_CLOSE_PATH:
+				lua_pushvalue(L, 2);
+				lua_pushstring(L, "close");
+				if(lua_pcall(L, 1, 0, 0)){
+					cairo_path_destroy(path);
+					luaL_error2(L, lua_tostring(L, -1));
 				}
 				break;
 		}

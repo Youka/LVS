@@ -1,2 +1,2 @@
-* implent g2d path transformation
 * accelerate raw image processing (plugin interface transfer & g2d convolution filter)
+* write g2d utility script (convolution filter generation; splitted path iteration; ASS parser)
