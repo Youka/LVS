@@ -12,7 +12,7 @@
 
 // Type<->string converters
 inline cairo_format_t cairo_format_from_string(const char *format_string){
-	if(strcmp(format_string, "ARGB") == 0)
+	if(strcmp(format_string, "RGBA") == 0)
 		return CAIRO_FORMAT_ARGB32;
 	else if(strcmp(format_string, "RGB") == 0)
 		return CAIRO_FORMAT_RGB24;
@@ -26,7 +26,7 @@ inline cairo_format_t cairo_format_from_string(const char *format_string){
 
 inline const char* cairo_format_to_string(cairo_format_t format){
 	switch(format){
-		case CAIRO_FORMAT_ARGB32: return "ARGB";
+		case CAIRO_FORMAT_ARGB32: return "RGBA";
 		case CAIRO_FORMAT_RGB24: return "RGB";
 		case CAIRO_FORMAT_A8: return "ALPHA";
 		case CAIRO_FORMAT_A1: return "BINARY";
@@ -415,111 +415,59 @@ LUA_FUNC_1ARG(image_convolution, 2)
 	int image_width = cairo_image_surface_get_width(surface);
 	int image_height = cairo_image_surface_get_height(surface);
 	int image_stride = cairo_image_surface_get_stride(surface);
-	unsigned long image_data_size = image_height * image_stride;
 	cairo_surface_flush(surface);
-	register unsigned char *image_data = cairo_image_surface_get_data(surface);
-	// Apply convolution filter to image
-	switch(image_format){
-		case CAIRO_FORMAT_ARGB32:{
-			// Image data copy (use copy as source, original as destination)
-			register unsigned char *image_data_copy = new unsigned char[image_data_size];
-			memcpy(image_data_copy, image_data, image_data_size);
-			// Storages for pixel processing
-			unsigned char *src_pixel, *dst_pixel;
-			double accum_r, accum_g, accum_b, accum_a;
-			int image_x, image_y;
-			double convolution;
-			// Iterate through source image pixels
-			for(register int y = 0; y < image_height; y++)
-				for(register int x = 0; x < image_width; x++){
-					// Accumulate pixels by filter rule
-					accum_r = accum_g = accum_b = accum_a = 0;
-					for(int yy = 0; yy < filter_height; yy++)
-						for(int xx = 0; xx < filter_width; xx++){
-							image_x = x - (filter_width >> 1) + xx;
-							image_y = y - (filter_height >> 1) + yy;
-							if(image_x >= 0 && image_x < image_width && image_y >= 0 && image_y < image_height){
-								convolution = convolution_filter[yy * filter_width + xx];
-								src_pixel = image_data_copy + image_y * image_stride + (image_x << 2);
-								accum_b += src_pixel[0] * convolution;
-								accum_g += src_pixel[1] * convolution;
-								accum_r += src_pixel[2] * convolution;
-								accum_a += src_pixel[3] * convolution;
-							}
-						}
-					// Set accumulator to destination image pixel
-					dst_pixel = image_data + y * image_stride + (x << 2);
-					dst_pixel[0] = accum_b > 255 ? 255 : (accum_b < 0 ? 0 : accum_b);
-					dst_pixel[1] = accum_g > 255 ? 255 : (accum_g < 0 ? 0 : accum_g);
-					dst_pixel[2] = accum_r > 255 ? 255 : (accum_r < 0 ? 0 : accum_r);
-					dst_pixel[3] = accum_a > 255 ? 255 : (accum_a < 0 ? 0 : accum_a);
-				}
-			// Free image data copy
-			delete[] image_data_copy;
-		}break;
-		case CAIRO_FORMAT_RGB24:{
-			// Image data copy (use copy as source, original as destination)
-			register unsigned char *image_data_copy = new unsigned char[image_data_size];
-			memcpy(image_data_copy, image_data, image_data_size);
-			// Storages for pixel processing
-			unsigned char *src_pixel, *dst_pixel;
-			double accum_r, accum_g, accum_b;
-			int image_x, image_y;
-			double convolution;
-			// Iterate through source image pixels
-			for(register int y = 0; y < image_height; y++)
-				for(register int x = 0; x < image_width; x++){
-					// Accumulate pixels by filter rule
-					accum_r = accum_g = accum_b = 0;
-					for(int yy = 0; yy < filter_height; yy++)
-						for(int xx = 0; xx < filter_width; xx++){
-							image_x = x - (filter_width >> 1) + xx;
-							image_y = y - (filter_height >> 1) + yy;
-							if(image_x >= 0 && image_x < image_width && image_y >= 0 && image_y < image_height){
-								convolution = convolution_filter[yy * filter_width + xx];
-								src_pixel = image_data_copy + image_y * image_stride + (image_x << 2);
-								accum_b += src_pixel[0] * convolution;
-								accum_g += src_pixel[1] * convolution;
-								accum_r += src_pixel[2] * convolution;
-							}
-						}
-					// Set accumulator to destination image pixel
-					dst_pixel = image_data + y * image_stride + (x << 2);
-					dst_pixel[0] = accum_b > 255 ? 255 : (accum_b < 0 ? 0 : accum_b);
-					dst_pixel[1] = accum_g > 255 ? 255 : (accum_g < 0 ? 0 : accum_g);
-					dst_pixel[2] = accum_r > 255 ? 255 : (accum_r < 0 ? 0 : accum_r);
-				}
-			// Free image data copy
-			delete[] image_data_copy;
-		}break;
-		case CAIRO_FORMAT_A8:{
-			// Image data copy (use copy as source, original as destination)
-			register unsigned char *image_data_copy = new unsigned char[image_data_size];
-			memcpy(image_data_copy, image_data, image_data_size);
-			// Storages for pixel processing
-			double accum;
-			int image_x, image_y;
-			// Iterate through source image pixels
-			for(register int y = 0; y < image_height; y++)
-				for(register int x = 0; x < image_width; x++){
-					// Accumulate pixels by filter rule
-					accum = 0;
-					for(int yy = 0; yy < filter_height; yy++)
-						for(int xx = 0; xx < filter_width; xx++){
-							image_x = x - (filter_width >> 1) + xx;
-							image_y = y - (filter_height >> 1) + yy;
-							if(image_x >= 0 && image_x < image_width && image_y >= 0 && image_y < image_height)
-								accum += image_data_copy[image_y * image_stride + image_x] * convolution_filter[yy * filter_width + xx];
-						}
-					// Set accumulator to destination image pixel
-					image_data[y * image_stride + x] = accum > 255 ? 255 : (accum < 0 ? 0 : accum);
-				}
-			// Free image data copy
-			delete[] image_data_copy;
-		}break;
-		default:
-			luaL_error2(L, "image format not supported");
+	unsigned char *image_data = cairo_image_surface_get_data(surface);
+	// Image data copy (use copy as source, original as destination)
+	unsigned long image_data_size = image_height * image_stride;
+	unsigned char *image_data_copy = new unsigned char[image_data_size];
+	memcpy(image_data_copy, image_data, image_data_size);
+	// Apply convolution filter to image in multiple threads
+	unsigned long cpu_num;
+	{
+		SYSTEM_INFO system_info = {0};
+		GetSystemInfo(&system_info);
+		cpu_num = system_info.dwNumberOfProcessors;
 	}
+	THREAD_DATA *threads_data = new THREAD_DATA[cpu_num];
+	HANDLE *threads = new HANDLE[cpu_num];
+	int image_row_step = image_height / cpu_num;
+	for(unsigned long i = 0; i < cpu_num; i++){
+		// Set current thread data
+		threads_data[i].image_width = image_width;
+		threads_data[i].image_height = image_height;
+		threads_data[i].image_stride = image_stride;
+		threads_data[i].image_first_row = i * image_row_step;
+		threads_data[i].image_last_row = i == cpu_num-1 ? image_height-1 : threads_data[i].image_first_row + image_row_step-1;
+		threads_data[i].image_src = image_data_copy;
+		threads_data[i].image_dst = image_data;
+		threads_data[i].filter_width = filter_width;
+		threads_data[i].filter_height = filter_height;
+		threads_data[i].filter_kernel = convolution_filter;
+		// Run thread for color format
+		switch(image_format){
+			case CAIRO_FORMAT_ARGB32:
+				threads[i] = CreateThread(NULL, 0, cairo_image_surface_convolution_argb, reinterpret_cast<void*>(&threads_data[i]), 0x0, NULL);
+				break;
+			case CAIRO_FORMAT_RGB24:
+				threads[i] = CreateThread(NULL, 0, cairo_image_surface_convolution_rgb, reinterpret_cast<void*>(&threads_data[i]), 0x0, NULL);
+				break;
+			case CAIRO_FORMAT_A8:
+				threads[i] = CreateThread(NULL, 0, cairo_image_surface_convolution_a8, reinterpret_cast<void*>(&threads_data[i]), 0x0, NULL);
+				break;
+			default:
+				threads[i] = NULL;
+		}
+	}
+	for(unsigned long i = 0; i < cpu_num; i++)
+		// Wait for thread to finish and close him afterwards
+		if(threads[i] != NULL){
+			WaitForSingleObject(threads[i], INFINITE);
+			CloseHandle(threads[i]);
+		}
+	delete[] threads_data;
+	delete[] threads;
+	// Free image data copy
+	delete[] image_data_copy;
 	// Set image data as dirty
 	cairo_surface_mark_dirty(surface);
 LUA_FUNC_END
@@ -1295,7 +1243,7 @@ LUA_FUNC_2ARG(context_path_transform, 2, 3)
 	if(lua_istable(L, 2))
 		luaL_typerror(L, 2, "function");
 	bool is_flat = luaL_optboolean(L, 3, false);
-	// Get pre-converted path
+	// Get path
 	cairo_path_t *path = is_flat ? cairo_copy_path_flat(ctx) : cairo_copy_path(ctx);
 	if(path->status != CAIRO_STATUS_SUCCESS)
 		luaL_error2(L, cairo_status_to_string(path->status));

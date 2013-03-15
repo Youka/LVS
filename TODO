@@ -1,2 +1,2 @@
-* accelerate raw image processing (plugin interface transfer & g2d convolution filter)
 * write g2d utility script (convolution filter generation; splitted path iteration; ASS parser)
+* write base script (utf-8 string; table.tostring; ???)
