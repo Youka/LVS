@@ -30,29 +30,39 @@ void LVSMediaBase::LoadExternalLibs(){
 	// Get plugin filename
 	const int buf_len = 256;
 	wchar_t buf[buf_len];
-	GetModuleFileNameW(DLL_INSTANCE, buf, buf_len);
-	// Get filename pointer to extension character
-	wchar_t *ext = wcsrchr(buf, L'.');
-	if(ext){
-		// Change filename extension to '.lua'
-		if(ext - buf + 5 <= buf_len){
-			wcscpy(ext, L".lua");
-			// File exists?
-			FILE *f = _wfopen(buf, L"r");
-			if(f){
-				fclose(f);
-				// Convert filename to UTF-8
-				char *filename = utf16_to_utf8(buf);
-				// Load Lua file
-				if(luaL_dofile(this->L, filename)){
-					delete[] filename;
-					std::exception e(lua_tostring(this->L, -1));
-					lua_pop(this->L, 1);
-					throw e;
-				}
-				// Free resources
-				delete[] filename;
-				lua_gc(this->L, LUA_GCCOLLECT, 0);
+	if(GetModuleFileNameW(DLL_INSTANCE, buf, buf_len) > 0){
+		// Get plugin LVS folder
+		wchar_t *dir_sep = wcsrchr(buf, L'\\');
+		if(dir_sep && dir_sep - buf + 7 <= buf_len){
+			wcscpy(dir_sep+1, L"LVS\\*");
+			// Iterate through folder
+			HANDLE finder;
+			WIN32_FIND_DATAW file_data;
+			finder = FindFirstFileW(buf, &file_data);
+			if(finder != INVALID_HANDLE_VALUE){
+				do{
+					// Valid file?
+					size_t len = wcslen(file_data.cFileName);
+					if((file_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0 &&
+						len > 4 && wcscmp(file_data.cFileName+len-4, L".lua") == 0 &&
+						dir_sep - buf + 6 + len <= buf_len){
+						// Convert filename to UTF-8
+						wcscpy(dir_sep+5, file_data.cFileName);
+						char *filename = utf16_to_utf8(buf);
+						// Load Lua file
+						if(luaL_dofile(this->L, filename)){
+							delete[] filename;
+							FindClose(finder);
+							std::exception e(lua_tostring(this->L, -1));
+							lua_pop(this->L, 1);
+							throw e;
+						}
+						// Free resources
+						lua_gc(this->L, LUA_GCCOLLECT, 0);
+						delete[] filename;
+					}
+				}while(FindNextFileW(finder, &file_data));
+				FindClose(finder);
 			}
 		}
 	}

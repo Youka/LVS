@@ -1,2 +1,3 @@
-* write g2d utility script (convolution filter generation; splitted path iteration; ASS parser)
 * write base script (utf-8 string; table.tostring; ???)
+* write g2d utility script (convolution filter generation; splitted path iteration)
+* write ass script

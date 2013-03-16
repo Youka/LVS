@@ -1,12 +1,8 @@
-local kernel = {width = 17, height = 17}
-do
-	local kernel_size = kernel.width * kernel.height
-	local kernel_value = 1 / kernel_size
-	for i = 1, kernel_size do
-		kernel[i] = kernel_value
-	end
-end
+local white = g2d.create_source_color(1, 1, 1)
 
 function GetFrame(frame, frame_i)
-		g2d.image_convolution(frame, kernel)
+	local ctx = g2d.create_context(frame)
+	ctx:set_source(white)
+	ctx:set_composition("DIFFERENCE")
+	ctx:paint()
 end
