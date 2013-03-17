@@ -54,8 +54,7 @@ g2du = {
 		local kernel = table.create(kernel_size, 2)
 		kernel.width = kernel_wide
 		kernel.height = kernel_wide
-		local sigma_sqr = strength * strength
-		local sigma_sqr2 = 2 * sigma_sqr
+		local sigma_sqr2 = 2 * strength * strength
 		local sigma_sqr2pi = sigma_sqr2 * math.pi
 		local x, y
 		local sum = 0
@@ -133,8 +132,38 @@ g2du = {
 	sapphire = g2d.create_source_color(0.125, 0.25, 0.5),
 	-- Path transformation (in tiny segments)
 	path_transform = function(ctx, filter)
-		
-		-- TODO
-	
+		if getmetatable(ctx) ~= "g2d context" or type(filter) ~= "function" then
+			error("g2d context and function expected", 2)
+		end
+		local new_path, new_path_n = {}, 0
+		local success = pcall(function()
+			ctx:path_transform(function(typ, x, y)
+
+				-- TODO: pass splitted lines
+
+				x, y = filter(typ, x, y)
+				if typ ~= "close" and (type(x) ~= "number" or type(y) ~= "number") then
+					error()
+				end
+				new_path_n = new_path_n + 1
+				new_path[new_path_n] = {typ = typ, x = x, y = y}
+				return 0, 0
+			end, true)
+		end)
+		if not success then
+			error("error in filter function call", 2)
+		end
+		ctx:path_clear()
+		local segment
+		for i=1, new_path_n do
+			segment = new_path[i]
+			if segment.typ == "move" then
+				ctx:path_move_to(segment.x, segment.y)
+			elseif segment.typ == "line" then
+				ctx:path_line_to(segment.x, segment.y)
+			else
+				ctx:path_close()
+			end
+		end
 	end
 }
