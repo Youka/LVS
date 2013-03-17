@@ -46,9 +46,28 @@ g2du = {
 	end,
 	-- Create gaussian blur kernel
 	create_gaussian_blur_kernel = function(strength)
-	
-		-- TODO
-		
+		if type(strength) ~= "number" or strength < 1 or math.floor(strength) ~= strength then
+			error("valid number expected", 2)
+		end
+		local kernel_wide = 1 + 2*strength
+		local kernel_size = kernel_wide * kernel_wide
+		local kernel = table.create(kernel_size, 2)
+		kernel.width = kernel_wide
+		kernel.height = kernel_wide
+		local sigma_sqr = strength * strength
+		local sigma_sqr2 = 2 * sigma_sqr
+		local sigma_sqr2pi = sigma_sqr2 * math.pi
+		local x, y
+		local sum = 0
+		for i=1, kernel_size do
+			x, y = (i-1) % kernel_wide - strength, math.floor((i-1) / kernel_wide) - strength
+			kernel[i] = math.exp(-(x*x+y*y) / sigma_sqr2) / sigma_sqr2pi
+			sum = sum + kernel[i]
+		end
+		for i=1, kernel_size do
+			kernel[i] = kernel[i] / sum
+		end
+		return kernel
 	end,
 	-- Create sharpen kernel
 	create_sharpen_kernel = function(strength)
@@ -62,9 +81,9 @@ g2du = {
 		kernel.height = kernel_wide
 		for i=1, kernel_size do
 			if i == math.ceil(kernel_size/2) then
-				kernel[i] = -1
-			else
 				kernel[i] = kernel_size
+			else
+				kernel[i] = -1
 			end
 		end
 		return kernel
@@ -77,16 +96,6 @@ g2du = {
 			-1, 8, -1,
 			-1, -1, -1
 		}
-	end,
-	-- Create emboss kernel
-	create_emboss_kernel = function(strength, angle)
-		if type(strength) ~= "number" or strength < 1 or math.floor(strength) ~= strength or
-			type(angle) ~= "number" then
-			error("valid numbers expected", 2)
-		end
-		
-		-- TODO
-	
 	end,
 	-- Stock matrices
 	identify = g2d.create_matrix(),
