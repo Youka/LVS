@@ -1,4 +1,7 @@
-/bin
+/bin/LVS.dll
+/bin/LVS.exp
+/bin/LVS.lib
+/bin/LVS.pdb
 
 /src/temp
 /src/LVS.ncb
