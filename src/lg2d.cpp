@@ -5,23 +5,18 @@
 #define M_PI       3.14159265358979323846	// From "math.h"
 
 // Objects names
-#define G2D_IMAGE "G2D_IMAGE"
-#define G2D_MATRIX "G2D_MATRIX"
-#define G2D_SOURCE "G2D_SOURCE"
-#define G2D_CONTEXT "G2D_CONTEXT"
+#define G2D_IMAGE "g2d image"
+#define G2D_MATRIX "g2d matrix"
+#define G2D_SOURCE "g2d source"
+#define G2D_CONTEXT "g2d context"
 
 // Type<->string converters
 inline cairo_format_t cairo_format_from_string(const char *format_string){
-	if(strcmp(format_string, "RGBA") == 0)
-		return CAIRO_FORMAT_ARGB32;
-	else if(strcmp(format_string, "RGB") == 0)
-		return CAIRO_FORMAT_RGB24;
-	else if(strcmp(format_string, "ALPHA") == 0)
-		return CAIRO_FORMAT_A8;
-	else if(strcmp(format_string, "BINARY") == 0)
-		return CAIRO_FORMAT_A1;
-	else
-		return CAIRO_FORMAT_INVALID;
+	if(strcmp(format_string, "RGBA") == 0) return CAIRO_FORMAT_ARGB32;
+	else if(strcmp(format_string, "RGB") == 0) return CAIRO_FORMAT_RGB24;
+	else if(strcmp(format_string, "ALPHA") == 0) return CAIRO_FORMAT_A8;
+	else if(strcmp(format_string, "BINARY") == 0) return CAIRO_FORMAT_A1;
+	else return CAIRO_FORMAT_INVALID;
 }
 
 inline const char* cairo_format_to_string(cairo_format_t format){
@@ -35,16 +30,11 @@ inline const char* cairo_format_to_string(cairo_format_t format){
 }
 
 inline cairo_extend_t cairo_extend_from_string(const char *extend_string){
-	if(strcmp(extend_string, "NONE") == 0)
-		return CAIRO_EXTEND_NONE;
-	else if(strcmp(extend_string, "REPEAT") == 0)
-		return CAIRO_EXTEND_REPEAT;
-	else if(strcmp(extend_string, "MIRROR") == 0)
-		return CAIRO_EXTEND_REFLECT;
-	else if(strcmp(extend_string, "FLOW") == 0)
-		return CAIRO_EXTEND_PAD;
-	else
-		return CAIRO_EXTEND_NONE;
+	if(strcmp(extend_string, "NONE") == 0) return CAIRO_EXTEND_NONE;
+	else if(strcmp(extend_string, "REPEAT") == 0) return CAIRO_EXTEND_REPEAT;
+	else if(strcmp(extend_string, "MIRROR") == 0) return CAIRO_EXTEND_REFLECT;
+	else if(strcmp(extend_string, "FLOW") == 0) return CAIRO_EXTEND_PAD;
+	else return CAIRO_EXTEND_NONE;
 }
 
 inline const char* cairo_extend_to_string(cairo_extend_t extend){
@@ -58,14 +48,10 @@ inline const char* cairo_extend_to_string(cairo_extend_t extend){
 }
 
 inline cairo_filter_t cairo_filter_from_string(const char *filter_string){
-	if(strcmp(filter_string, "FAST") == 0)
-		return CAIRO_FILTER_FAST;
-	else if(strcmp(filter_string, "GOOD") == 0)
-		return CAIRO_FILTER_GOOD;
-	else if(strcmp(filter_string, "BEST") == 0)
-		return CAIRO_FILTER_BEST;
-	else
-		return CAIRO_FILTER_BEST;
+	if(strcmp(filter_string, "FAST") == 0) return CAIRO_FILTER_FAST;
+	else if(strcmp(filter_string, "GOOD") == 0) return CAIRO_FILTER_GOOD;
+	else if(strcmp(filter_string, "BEST") == 0) return CAIRO_FILTER_BEST;
+	else return CAIRO_FILTER_BEST;
 }
 
 inline const char* cairo_filter_to_string(cairo_filter_t filter){
@@ -89,12 +75,9 @@ inline const char* cairo_pattern_type_to_string(cairo_pattern_type_t type){
 }
 
 inline cairo_fill_rule_t cairo_fill_rule_from_string(const char *fill_rule_string){
-	if(strcmp(fill_rule_string, "WINDING") == 0)
-		return CAIRO_FILL_RULE_WINDING;
-	else if(strcmp(fill_rule_string, "ODD") == 0)
-		return CAIRO_FILL_RULE_EVEN_ODD;
-	else
-		return CAIRO_FILL_RULE_WINDING;
+	if(strcmp(fill_rule_string, "WINDING") == 0) return CAIRO_FILL_RULE_WINDING;
+	else if(strcmp(fill_rule_string, "ODD") == 0) return CAIRO_FILL_RULE_EVEN_ODD;
+	else return CAIRO_FILL_RULE_WINDING;
 }
 
 
@@ -107,14 +90,10 @@ inline const char* cairo_fill_rule_to_string(cairo_fill_rule_t fill_rule){
 }
 
 inline cairo_line_cap_t cairo_line_cap_from_string(const char *line_cap_string){
-	if(strcmp(line_cap_string, "FLAT") == 0)
-		return CAIRO_LINE_CAP_BUTT;
-	else if(strcmp(line_cap_string, "ROUND") == 0)
-		return CAIRO_LINE_CAP_ROUND;
-	else if(strcmp(line_cap_string, "SQUARE") == 0)
-		return CAIRO_LINE_CAP_SQUARE;
-	else
-		return CAIRO_LINE_CAP_BUTT;
+	if(strcmp(line_cap_string, "FLAT") == 0) return CAIRO_LINE_CAP_BUTT;
+	else if(strcmp(line_cap_string, "ROUND") == 0) return CAIRO_LINE_CAP_ROUND;
+	else if(strcmp(line_cap_string, "SQUARE") == 0) return CAIRO_LINE_CAP_SQUARE;
+	else return CAIRO_LINE_CAP_BUTT;
 }
 
 inline const char* cairo_line_cap_to_string(cairo_line_cap_t line_cap){
@@ -127,14 +106,10 @@ inline const char* cairo_line_cap_to_string(cairo_line_cap_t line_cap){
 }
 
 inline cairo_line_join_t cairo_line_join_from_string(const char *line_join_string){
-	if(strcmp(line_join_string, "MITER") == 0)
-		return CAIRO_LINE_JOIN_MITER;
-	else if(strcmp(line_join_string, "ROUND") == 0)
-		return CAIRO_LINE_JOIN_ROUND;
-	else if(strcmp(line_join_string, "BEVEL") == 0)
-		return CAIRO_LINE_JOIN_BEVEL;
-	else
-		return CAIRO_LINE_JOIN_MITER;
+	if(strcmp(line_join_string, "MITER") == 0) return CAIRO_LINE_JOIN_MITER;
+	else if(strcmp(line_join_string, "ROUND") == 0) return CAIRO_LINE_JOIN_ROUND;
+	else if(strcmp(line_join_string, "BEVEL") == 0) return CAIRO_LINE_JOIN_BEVEL;
+	else return CAIRO_LINE_JOIN_MITER;
 }
 
 inline const char* cairo_line_join_to_string(cairo_line_join_t line_join){
@@ -147,28 +122,17 @@ inline const char* cairo_line_join_to_string(cairo_line_join_t line_join){
 }
 
 inline cairo_operator_t cairo_operator_from_string(const char *op_string){
-	if(strcmp(op_string, "SOURCE") == 0)
-		return CAIRO_OPERATOR_SOURCE;
-	else if(strcmp(op_string, "OVER") == 0)
-		return CAIRO_OPERATOR_OVER;
-	else if(strcmp(op_string, "INSIDE") == 0)
-		return CAIRO_OPERATOR_IN;
-	else if(strcmp(op_string, "OUTSIDE") == 0)
-		return CAIRO_OPERATOR_OUT;
-	else if(strcmp(op_string, "MIX") == 0)
-		return CAIRO_OPERATOR_ATOP;
-	else if(strcmp(op_string, "XOR") == 0)
-		return CAIRO_OPERATOR_XOR;
-	else if(strcmp(op_string, "ADD") == 0)
-		return CAIRO_OPERATOR_ADD;
-	else if(strcmp(op_string, "SATURATE") == 0)
-		return CAIRO_OPERATOR_SATURATE;
-	else if(strcmp(op_string, "MULTIPLY") == 0)
-		return CAIRO_OPERATOR_MULTIPLY;
-	else if(strcmp(op_string, "DIFFERENCE") == 0)
-		return CAIRO_OPERATOR_DIFFERENCE;
-	else
-		return CAIRO_OPERATOR_OVER;
+	if(strcmp(op_string, "SOURCE") == 0) return CAIRO_OPERATOR_SOURCE;
+	else if(strcmp(op_string, "OVER") == 0) return CAIRO_OPERATOR_OVER;
+	else if(strcmp(op_string, "INSIDE") == 0) return CAIRO_OPERATOR_IN;
+	else if(strcmp(op_string, "OUTSIDE") == 0) return CAIRO_OPERATOR_OUT;
+	else if(strcmp(op_string, "MIX") == 0) return CAIRO_OPERATOR_ATOP;
+	else if(strcmp(op_string, "XOR") == 0) return CAIRO_OPERATOR_XOR;
+	else if(strcmp(op_string, "ADD") == 0) return CAIRO_OPERATOR_ADD;
+	else if(strcmp(op_string, "SATURATE") == 0) return CAIRO_OPERATOR_SATURATE;
+	else if(strcmp(op_string, "MULTIPLY") == 0) return CAIRO_OPERATOR_MULTIPLY;
+	else if(strcmp(op_string, "DIFFERENCE") == 0) return CAIRO_OPERATOR_DIFFERENCE;
+	else return CAIRO_OPERATOR_OVER;
 }
 
 inline const char* cairo_operator_to_string(cairo_operator_t op){
@@ -831,18 +795,22 @@ LUA_FUNC_1ARG(source_get_circles, 1)
 LUA_FUNC_END
 
 LUA_FUNC_2ARG(source_add_mesh, 19, 25)
+	// Get parameters
 	cairo_pattern_t *pattern = *reinterpret_cast<cairo_pattern_t**>(luaL_checkuserdata(L, 1, G2D_SOURCE));
+	double x0 = luaL_checknumber(L, 2), y0 = luaL_checknumber(L, 3), r0 = luaL_checknumber(L, 4), g0 = luaL_checknumber(L, 5), b0 = luaL_checknumber(L, 6), a0 = luaL_checknumber(L, 7),
+	x1 = luaL_checknumber(L, 8), y1 = luaL_checknumber(L, 9), r1 = luaL_checknumber(L, 10), g1 = luaL_checknumber(L, 11), b1 = luaL_checknumber(L, 12), a1 = luaL_checknumber(L, 13),
+	x2 = luaL_checknumber(L, 14), y2 = luaL_checknumber(L, 15), r2 = luaL_checknumber(L, 16), g2 = luaL_checknumber(L, 17), b2 = luaL_checknumber(L, 18), a2 = luaL_checknumber(L, 19),
+	x3 = luaL_optnumber(L, 20, x0), y3 = luaL_optnumber(L, 21, y0), r3 = luaL_optnumber(L, 22, r0), g3 = luaL_optnumber(L, 23, g0), b3 = luaL_optnumber(L, 24, b0), a3 = luaL_optnumber(L, 25, a0);
+	// Add patch to pattern
 	cairo_mesh_pattern_begin_patch(pattern);
-	cairo_mesh_pattern_move_to(pattern, luaL_checknumber(L, 2), luaL_checknumber(L, 3));
-	cairo_mesh_pattern_set_corner_color_rgba(pattern, 0, luaL_checknumber(L, 4), luaL_checknumber(L, 5), luaL_checknumber(L, 6), luaL_checknumber(L, 7));
-	cairo_mesh_pattern_line_to(pattern, luaL_checknumber(L, 8), luaL_checknumber(L, 9));
-	cairo_mesh_pattern_set_corner_color_rgba(pattern, 1, luaL_checknumber(L, 10), luaL_checknumber(L, 11), luaL_checknumber(L, 12), luaL_checknumber(L, 13));
-	cairo_mesh_pattern_line_to(pattern, luaL_checknumber(L, 14), luaL_checknumber(L, 15));
-	cairo_mesh_pattern_set_corner_color_rgba(pattern, 2, luaL_checknumber(L, 16), luaL_checknumber(L, 17), luaL_checknumber(L, 18), luaL_checknumber(L, 19));
-	if(lua_gettop(L) == 25){
-		cairo_mesh_pattern_line_to(pattern, luaL_checknumber(L, 20), luaL_checknumber(L, 21));
-		cairo_mesh_pattern_set_corner_color_rgba(pattern, 3, luaL_checknumber(L, 22), luaL_checknumber(L, 23), luaL_checknumber(L, 24), luaL_checknumber(L, 25));
-	}
+	cairo_mesh_pattern_move_to(pattern, x0, y0);
+	cairo_mesh_pattern_set_corner_color_rgba(pattern, 0, r0, g0, b0, a0);
+	cairo_mesh_pattern_line_to(pattern, x1, y1);
+	cairo_mesh_pattern_set_corner_color_rgba(pattern, 1, r1, g1, b1, a1);
+	cairo_mesh_pattern_line_to(pattern, x2, y2);
+	cairo_mesh_pattern_set_corner_color_rgba(pattern, 2, r2, g2, b2, a2);
+	cairo_mesh_pattern_line_to(pattern, x3, y3);
+	cairo_mesh_pattern_set_corner_color_rgba(pattern, 3, r3, g3, b3, a3);
 	cairo_mesh_pattern_end_patch(pattern);
 	cairo_status_t status = cairo_pattern_status(pattern);
 	if(status != CAIRO_STATUS_SUCCESS)
@@ -1142,9 +1110,10 @@ LUA_FUNC_1ARG(context_clip_get_rectangles, 1)
 	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
 	// Get clip rectangles
 	cairo_rectangle_list_t *rect_list = cairo_copy_clip_rectangle_list(ctx);
-	if(rect_list->status != CAIRO_STATUS_SUCCESS){
+	cairo_status_t status = rect_list->status;
+	if(status != CAIRO_STATUS_SUCCESS){
 		cairo_rectangle_list_destroy(rect_list);
-		luaL_error2(L, cairo_status_to_string(rect_list->status));
+		luaL_error2(L, cairo_status_to_string(status));
 	}
 	// Push rectangles to Lua
 	lua_createtable(L, rect_list->num_rectangles, 0);
@@ -1156,6 +1125,7 @@ LUA_FUNC_1ARG(context_clip_get_rectangles, 1)
 		lua_pushnumber(L, rect_list->rectangles[rect_i].height); lua_setfield(L, -2, "height");
 		lua_rawseti(L, -2, rect_i+1);
 	}
+	cairo_rectangle_list_destroy(rect_list);
 	return 1;
 LUA_FUNC_END
 
@@ -1245,8 +1215,11 @@ LUA_FUNC_2ARG(context_path_transform, 2, 3)
 	bool is_flat = luaL_optboolean(L, 3, false);
 	// Get path
 	cairo_path_t *path = is_flat ? cairo_copy_path_flat(ctx) : cairo_copy_path(ctx);
-	if(path->status != CAIRO_STATUS_SUCCESS)
-		luaL_error2(L, cairo_status_to_string(path->status));
+	cairo_status_t status = path->status;
+	if(status != CAIRO_STATUS_SUCCESS){
+		cairo_path_destroy(path);
+		luaL_error2(L, cairo_status_to_string(status));
+	}
 	// Transform path points
 	cairo_path_data_t *data;
 	for(int data_i = 0; data_i < path->num_data; data_i += path->data[data_i].header.length){
