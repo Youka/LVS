@@ -130,29 +130,68 @@ g2du = {
 	violet = g2d.create_source_color(0.5, 0, 1),
 	brown = g2d.create_source_color(0.5, 0.25, 0.125),
 	sapphire = g2d.create_source_color(0.125, 0.25, 0.5),
-	-- Path transformation (in tiny segments)
+	-- Path transformation (points of tiny outline segments)
 	path_transform = function(ctx, filter)
 		if getmetatable(ctx) ~= "g2d context" or type(filter) ~= "function" then
 			error("g2d context and function expected", 2)
 		end
+		-- Calculate new path
 		local new_path, new_path_n = {}, 0
-		local success = pcall(function()
+		local success, err = pcall(function()
+			local prev_point, prev_move_point
 			ctx:path_transform(function(typ, x, y)
-
-				-- TODO: pass splitted lines
-
-				x, y = filter(typ, x, y)
-				if typ ~= "close" and (type(x) ~= "number" or type(y) ~= "number") then
-					error()
+				if typ == "move" or (typ == "line" and not prev_point) then
+					local x2, y2 = filter(x, y)
+					if type(x2) ~= "number" or type(y2) ~= "number" then
+						error("filter function must return 2 numbers", 0)
+					end
+					new_path_n = new_path_n + 1
+					new_path[new_path_n] = {typ = typ, x = x2, y = y2}
+					prev_point = {x = x, y = y}
+					if typ == "move" then
+						prev_move_point = prev_point
+					end
+				elseif typ == "line" then
+					local vec = {x = x-prev_point.x, y = y-prev_point.y}
+					local len = math.sqrt(vec.x*vec.x + vec.y*vec.y)
+					local offset = len % 2
+					if offset == 0 then offset = 2 end
+					local pct, x2, y2
+					for cur_len = offset, len, 2 do
+						pct = cur_len / len
+						x2, y2 = filter(prev_point.x + pct*vec.x, prev_point.y + pct*vec.y)
+						if type(x2) ~= "number" or type(y2) ~= "number" then
+							error("filter function must return 2 numbers", 0)
+						end
+						new_path_n = new_path_n + 1
+						new_path[new_path_n] = {typ = typ, x = x2, y = y2}
+					end
+					prev_point = {x = x, y = y}
+				elseif prev_move_point then	-- close
+					local vec = {x = prev_move_point.x - prev_point.x, y = prev_move_point.y - prev_point.y}
+					local len = math.sqrt(vec.x*vec.x + vec.y*vec.y)
+					local offset = len % 2
+					if offset == 0 then offset = 2 end
+					local pct, x2, y2
+					for cur_len = offset, len, 2 do
+						pct = cur_len / len
+						x2, y2 = filter(prev_point.x + pct*vec.x, prev_point.y + pct*vec.y)
+						if type(x2) ~= "number" or type(y2) ~= "number" then
+							error("filter function must return 2 numbers")
+						end
+						new_path_n = new_path_n + 1
+						new_path[new_path_n] = {typ = "line", x = x2, y = y2}
+					end
+					new_path_n = new_path_n + 1
+					new_path[new_path_n] = {typ = typ}
 				end
-				new_path_n = new_path_n + 1
-				new_path[new_path_n] = {typ = typ, x = x, y = y}
 				return 0, 0
 			end, true)
 		end)
 		if not success then
-			error("error in filter function call", 2)
+			error(err:gsub(".*:%d+: (.*)", "%1", 1), 2)
 		end
+		-- Replace old with new path
 		ctx:path_clear()
 		local segment
 		for i=1, new_path_n do
@@ -161,7 +200,7 @@ g2du = {
 				ctx:path_move_to(segment.x, segment.y)
 			elseif segment.typ == "line" then
 				ctx:path_line_to(segment.x, segment.y)
-			else
+			else -- segment.typ == "close"
 				ctx:path_close()
 			end
 		end
