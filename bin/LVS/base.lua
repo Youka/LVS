@@ -78,6 +78,13 @@ function math.ellipse(x, y, w, h, a)
 	return x + w/2 * math.cos(ra), y + h/2 * math.sin(ra)
 end
 
+function math.interpolate(a, b, pct)
+	if type(a) ~= "number" or type(b) ~= "number" or type(pct) ~= "number" then
+		error("number, number and number expected", 2)
+	end
+	return a + (b-a) * pct
+end
+
 function math.ortho(vec1, vec2)
 	if type(vec1) ~= "table" or type(vec2) ~= "table" then
 		error("table and table expected", 2)

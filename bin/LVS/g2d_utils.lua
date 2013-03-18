@@ -167,7 +167,7 @@ g2du = {
 						new_path[new_path_n] = {typ = typ, x = x2, y = y2}
 					end
 					prev_point = {x = x, y = y}
-				elseif prev_move_point then	-- close
+				elseif prev_move_point and prev_point then	-- close
 					local vec = {x = prev_move_point.x - prev_point.x, y = prev_move_point.y - prev_point.y}
 					local len = math.sqrt(vec.x*vec.x + vec.y*vec.y)
 					local offset = len % 2
