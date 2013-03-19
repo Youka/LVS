@@ -137,19 +137,22 @@ static DWORD WINAPI cairo_image_surface_convolution_argb(void *userdata){
 		for(register int x = 0; x < thread_data->image_width; x++){
 			// Accumulate pixels by filter rule
 			accum_r = accum_g = accum_b = accum_a = 0;
-			for(int yy = 0; yy < thread_data->filter_height; yy++)
+			for(int yy = 0; yy < thread_data->filter_height; yy++){
+				image_y = y - (thread_data->filter_height >> 1) + yy;
+				if(image_y < 0 || image_y >= thread_data->image_height)
+					continue;
 				for(int xx = 0; xx < thread_data->filter_width; xx++){
 					image_x = x - (thread_data->filter_width >> 1) + xx;
-					image_y = y - (thread_data->filter_height >> 1) + yy;
-					if(image_x >= 0 && image_x < thread_data->image_width && image_y >= 0 && image_y < thread_data->image_height){
-						convolution = thread_data->filter_kernel[yy * thread_data->filter_width + xx];
-						src_pixel = thread_data->image_src + image_y * thread_data->image_stride + (image_x << 2);
-						accum_b += src_pixel[0] * convolution;
-						accum_g += src_pixel[1] * convolution;
-						accum_r += src_pixel[2] * convolution;
-						accum_a += src_pixel[3] * convolution;
-					}
+					if(image_x < 0 || image_x >= thread_data->image_width)
+						continue;
+					convolution = thread_data->filter_kernel[yy * thread_data->filter_width + xx];
+					src_pixel = thread_data->image_src + image_y * thread_data->image_stride + (image_x << 2);
+					accum_b += src_pixel[0] * convolution;
+					accum_g += src_pixel[1] * convolution;
+					accum_r += src_pixel[2] * convolution;
+					accum_a += src_pixel[3] * convolution;
 				}
+			}
 			// Set accumulator to destination image pixel
 			dst_pixel = thread_data->image_dst + y * thread_data->image_stride + (x << 2);
 			dst_pixel[0] = accum_b > 255 ? 255 : (accum_b < 0 ? 0 : accum_b);
@@ -173,18 +176,21 @@ static DWORD WINAPI cairo_image_surface_convolution_rgb(void *userdata){
 		for(register int x = 0; x < thread_data->image_width; x++){
 			// Accumulate pixels by filter rule
 			accum_r = accum_g = accum_b = 0;
-			for(int yy = 0; yy < thread_data->filter_height; yy++)
+			for(int yy = 0; yy < thread_data->filter_height; yy++){
+				image_y = y - (thread_data->filter_height >> 1) + yy;
+				if(image_y < 0 || image_y >= thread_data->image_height)
+					continue;
 				for(int xx = 0; xx < thread_data->filter_width; xx++){
 					image_x = x - (thread_data->filter_width >> 1) + xx;
-					image_y = y - (thread_data->filter_height >> 1) + yy;
-					if(image_x >= 0 && image_x < thread_data->image_width && image_y >= 0 && image_y < thread_data->image_height){
-						convolution = thread_data->filter_kernel[yy * thread_data->filter_width + xx];
-						src_pixel = thread_data->image_src + image_y * thread_data->image_stride + (image_x << 2);
-						accum_b += src_pixel[0] * convolution;
-						accum_g += src_pixel[1] * convolution;
-						accum_r += src_pixel[2] * convolution;
-					}
+					if(image_x < 0 || image_x >= thread_data->image_width)
+						continue;
+					convolution = thread_data->filter_kernel[yy * thread_data->filter_width + xx];
+					src_pixel = thread_data->image_src + image_y * thread_data->image_stride + (image_x << 2);
+					accum_b += src_pixel[0] * convolution;
+					accum_g += src_pixel[1] * convolution;
+					accum_r += src_pixel[2] * convolution;
 				}
+			}
 			// Set accumulator to destination image pixel
 			dst_pixel = thread_data->image_dst + y * thread_data->image_stride + (x << 2);
 			dst_pixel[0] = accum_b > 255 ? 255 : (accum_b < 0 ? 0 : accum_b);
@@ -204,13 +210,17 @@ static DWORD WINAPI cairo_image_surface_convolution_a8(void *userdata){
 		for(register int x = 0; x < thread_data->image_width; x++){
 			// Accumulate pixels by filter rule
 			accum = 0;
-			for(int yy = 0; yy < thread_data->filter_height; yy++)
+			for(int yy = 0; yy < thread_data->filter_height; yy++){
+				image_y = y - (thread_data->filter_height >> 1) + yy;
+				if(image_y < 0 || image_y >= thread_data->image_height)
+					continue;
 				for(int xx = 0; xx < thread_data->filter_width; xx++){
 					image_x = x - (thread_data->filter_width >> 1) + xx;
-					image_y = y - (thread_data->filter_height >> 1) + yy;
-					if(image_x >= 0 && image_x < thread_data->image_width && image_y >= 0 && image_y < thread_data->image_height)
-						accum += thread_data->image_src[image_y * thread_data->image_stride + image_x] * thread_data->filter_kernel[yy * thread_data->filter_width + xx];
+					if(image_x < 0 || image_x >= thread_data->image_width)
+						continue;
+					accum += thread_data->image_src[image_y * thread_data->image_stride + image_x] * thread_data->filter_kernel[yy * thread_data->filter_width + xx];
 				}
+			}
 			// Set accumulator to destination image pixel
 			thread_data->image_dst[y * thread_data->image_stride + x] = accum > 255 ? 255 : (accum < 0 ? 0 : accum);
 		}
