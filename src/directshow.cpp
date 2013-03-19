@@ -87,7 +87,7 @@ class LVSVideoFilterPropertyPage : public CBasePropertyPage{
 						// 'OK' button
 						case IDOK:{
 							// Get stored userdata from window
-							ILVSVideoFilterConfiguration *config = reinterpret_cast<ILVSVideoFilterConfiguration*>(lParam);
+							ILVSVideoFilterConfiguration *config = reinterpret_cast<ILVSVideoFilterConfiguration*>(GetWindowLongPtrA(wnd, DWLP_USER));
 							// Save filename
 							HWND edit = GetDlgItem(wnd, ID_CONFIG_FILENAME);
 							int text_len = static_cast<int>(SendMessageW(edit, WM_GETTEXTLENGTH, 0, 0));

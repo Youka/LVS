@@ -1,6 +1,6 @@
 #include "llibs.hpp"
 #include "cairo.hpp"
-#include "textconv.hpp"
+#include "textconv.hpp"	// For library text functions
 #include <memory>	// For smart pointers
 #define M_PI       3.14159265358979323846	// From "math.h"
 

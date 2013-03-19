@@ -55,7 +55,7 @@ function math.degree(vec1, vec2)
 	return	(vec1[1]*vec2[2] - vec1[2]*vec2[1]) < 0 and -degree or degree
 end
 
-function math.distance( w, h, d )
+function math.distance(w, h, d)
 	if type(w) ~= "number" or type(h) ~= "number" or (type(d) ~= "number" and type(d) ~= "nil") then
 		error("number, number and optional number expected", 2)
 	end
