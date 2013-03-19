@@ -118,7 +118,8 @@ static void cairo_win32_text_path(cairo_t *ctx, const wchar_t *text, const wchar
 // Thread data for functions below
 struct THREAD_DATA{
 	int image_width, image_height, image_stride, image_first_row, image_last_row;
-	unsigned char *image_src, *image_dst;
+	double *image_src;
+	unsigned char *image_dst;
 	int filter_width, filter_height;
 	double *filter_kernel;
 };
@@ -126,7 +127,8 @@ struct THREAD_DATA{
 static DWORD WINAPI cairo_image_surface_convolution_argb(void *userdata){
 	THREAD_DATA *thread_data = reinterpret_cast<THREAD_DATA*>(userdata);
 	// Storages for pixel processing
-	unsigned char *src_pixel, *dst_pixel;
+	double *src_pixel;
+	unsigned char *dst_pixel;
 	double accum_r, accum_g, accum_b, accum_a;
 	int image_x, image_y;
 	double convolution;
@@ -161,7 +163,8 @@ static DWORD WINAPI cairo_image_surface_convolution_argb(void *userdata){
 static DWORD WINAPI cairo_image_surface_convolution_rgb(void *userdata){
 	THREAD_DATA *thread_data = reinterpret_cast<THREAD_DATA*>(userdata);
 	// Storages for pixel processing
-	unsigned char *src_pixel, *dst_pixel;
+	double *src_pixel;
+	unsigned char *dst_pixel;
 	double accum_r, accum_g, accum_b;
 	int image_x, image_y;
 	double convolution;

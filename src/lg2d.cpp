@@ -383,8 +383,9 @@ LUA_FUNC_1ARG(image_convolution, 2)
 	unsigned char *image_data = cairo_image_surface_get_data(surface);
 	// Image data copy (use copy as source, original as destination)
 	unsigned long image_data_size = image_height * image_stride;
-	unsigned char *image_data_copy = new unsigned char[image_data_size];
-	memcpy(image_data_copy, image_data, image_data_size);
+	double *image_data_copy = new double[image_data_size];
+	for(unsigned long int i = 0; i < image_data_size; i++)
+		image_data_copy[i] = image_data[i];
 	// Apply convolution filter to image in multiple threads
 	unsigned long cpu_num;
 	{

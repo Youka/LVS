@@ -1,3 +1,2 @@
-* write base script (utf-8 string; table.tostring; ???)
-* write g2d utility script (convolution filter generation; splitted path iteration)
 * write ass script
+* improve image convolution performance (SSE2/3; source image border)
