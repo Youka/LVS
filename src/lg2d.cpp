@@ -360,8 +360,8 @@ LUA_FUNC_1ARG(image_convolution, 2)
 	// Get parameters
 	cairo_surface_t *surface = *reinterpret_cast<cairo_surface_t**>(luaL_checkuserdata(L, 1, G2D_IMAGE));
 	size_t filter_size;
-	double *convolution_filter = luaL_checktable<double>(L, 2, &filter_size);
-	std::auto_ptr<double> convolution_filter_obj(convolution_filter);
+	float *convolution_filter = luaL_checktable<float>(L, 2, &filter_size);
+	std::auto_ptr<float> convolution_filter_obj(convolution_filter);
 	lua_getfield(L, 2, "width");
 	if(!lua_isnumber(L, -1)) luaL_error2(L, "table needs a valid field 'width'");
 	int filter_width = lua_tonumber(L, -1);
@@ -383,7 +383,7 @@ LUA_FUNC_1ARG(image_convolution, 2)
 	unsigned char *image_data = cairo_image_surface_get_data(surface);
 	// Image data copy (use copy as source, original as destination)
 	unsigned long image_data_size = image_height * image_stride;
-	double *image_data_copy = new double[image_data_size];
+	float *image_data_copy = new float[image_data_size];
 	for(unsigned long int i = 0; i < image_data_size; i++)
 		image_data_copy[i] = image_data[i];
 	// Apply convolution filter to image in multiple threads
@@ -411,10 +411,8 @@ LUA_FUNC_1ARG(image_convolution, 2)
 		// Run thread for color format
 		switch(image_format){
 			case CAIRO_FORMAT_ARGB32:
-				threads[i] = CreateThread(NULL, 0, cairo_image_surface_convolution_argb, reinterpret_cast<void*>(&threads_data[i]), 0x0, NULL);
-				break;
 			case CAIRO_FORMAT_RGB24:
-				threads[i] = CreateThread(NULL, 0, cairo_image_surface_convolution_rgb, reinterpret_cast<void*>(&threads_data[i]), 0x0, NULL);
+				threads[i] = CreateThread(NULL, 0, cairo_image_surface_convolution_argb, reinterpret_cast<void*>(&threads_data[i]), 0x0, NULL);
 				break;
 			case CAIRO_FORMAT_A8:
 				threads[i] = CreateThread(NULL, 0, cairo_image_surface_convolution_a8, reinterpret_cast<void*>(&threads_data[i]), 0x0, NULL);

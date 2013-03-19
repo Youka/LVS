@@ -3,6 +3,7 @@
 #define CAIRO_WIN32_STATIC_BUILD
 #include <cairo/cairo.h>
 #include <windows.h>
+#include <xmmintrin.h>
 
 // Windows text extents structure
 struct cairo_win32_text_extents_t{
@@ -118,25 +119,23 @@ static void cairo_win32_text_path(cairo_t *ctx, const wchar_t *text, const wchar
 // Thread data for functions below
 struct THREAD_DATA{
 	int image_width, image_height, image_stride, image_first_row, image_last_row;
-	double *image_src;
+	float *image_src;
 	unsigned char *image_dst;
 	int filter_width, filter_height;
-	double *filter_kernel;
+	float *filter_kernel;
 };
-// Thread function for cairo image surface (ARGB32) convolution
+// Thread function for cairo image surface (ARGB32+RGB24) convolution
 static DWORD WINAPI cairo_image_surface_convolution_argb(void *userdata){
 	THREAD_DATA *thread_data = reinterpret_cast<THREAD_DATA*>(userdata);
 	// Storages for pixel processing
-	double *src_pixel;
-	unsigned char *dst_pixel;
-	double accum_r, accum_g, accum_b, accum_a;
 	int image_x, image_y;
-	double convolution;
+	float dst_buf[4];
+	unsigned char *dst_pixel;
 	// Iterate through source image pixels
 	for(register int y = thread_data->image_first_row; y <= thread_data->image_last_row; y++)
 		for(register int x = 0; x < thread_data->image_width; x++){
 			// Accumulate pixels by filter rule
-			accum_r = accum_g = accum_b = accum_a = 0;
+			__m128 accum = _mm_setzero_ps();
 			for(int yy = 0; yy < thread_data->filter_height; yy++){
 				image_y = y - (thread_data->filter_height >> 1) + yy;
 				if(image_y < 0 || image_y >= thread_data->image_height)
@@ -145,57 +144,31 @@ static DWORD WINAPI cairo_image_surface_convolution_argb(void *userdata){
 					image_x = x - (thread_data->filter_width >> 1) + xx;
 					if(image_x < 0 || image_x >= thread_data->image_width)
 						continue;
-					convolution = thread_data->filter_kernel[yy * thread_data->filter_width + xx];
-					src_pixel = thread_data->image_src + image_y * thread_data->image_stride + (image_x << 2);
-					accum_b += src_pixel[0] * convolution;
-					accum_g += src_pixel[1] * convolution;
-					accum_r += src_pixel[2] * convolution;
-					accum_a += src_pixel[3] * convolution;
+					accum = _mm_add_ps(
+						accum,
+						_mm_mul_ps(
+							_mm_loadu_ps(thread_data->image_src + image_y * thread_data->image_stride + (image_x << 2)),
+							_mm_set_ps1(thread_data->filter_kernel[yy * thread_data->filter_width + xx])
+						)
+					);
 				}
 			}
-			// Set accumulator to destination image pixel
+			// Trim and set accumulator to destination image pixel
+			_mm_storeu_ps(
+				dst_buf,
+				_mm_max_ps(
+					_mm_setzero_ps(),
+					_mm_min_ps(
+						_mm_set_ps1(255),
+						accum
+					)
+				)
+			);
 			dst_pixel = thread_data->image_dst + y * thread_data->image_stride + (x << 2);
-			dst_pixel[0] = accum_b > 255 ? 255 : (accum_b < 0 ? 0 : accum_b);
-			dst_pixel[1] = accum_g > 255 ? 255 : (accum_g < 0 ? 0 : accum_g);
-			dst_pixel[2] = accum_r > 255 ? 255 : (accum_r < 0 ? 0 : accum_r);
-			dst_pixel[3] = accum_a > 255 ? 255 : (accum_a < 0 ? 0 : accum_a);
-		}
-	return 0;
-}
-// Thread function for cairo image surface (RGB24) convolution
-static DWORD WINAPI cairo_image_surface_convolution_rgb(void *userdata){
-	THREAD_DATA *thread_data = reinterpret_cast<THREAD_DATA*>(userdata);
-	// Storages for pixel processing
-	double *src_pixel;
-	unsigned char *dst_pixel;
-	double accum_r, accum_g, accum_b;
-	int image_x, image_y;
-	double convolution;
-	// Iterate through source image pixels
-	for(register int y = thread_data->image_first_row; y <= thread_data->image_last_row; y++)
-		for(register int x = 0; x < thread_data->image_width; x++){
-			// Accumulate pixels by filter rule
-			accum_r = accum_g = accum_b = 0;
-			for(int yy = 0; yy < thread_data->filter_height; yy++){
-				image_y = y - (thread_data->filter_height >> 1) + yy;
-				if(image_y < 0 || image_y >= thread_data->image_height)
-					continue;
-				for(int xx = 0; xx < thread_data->filter_width; xx++){
-					image_x = x - (thread_data->filter_width >> 1) + xx;
-					if(image_x < 0 || image_x >= thread_data->image_width)
-						continue;
-					convolution = thread_data->filter_kernel[yy * thread_data->filter_width + xx];
-					src_pixel = thread_data->image_src + image_y * thread_data->image_stride + (image_x << 2);
-					accum_b += src_pixel[0] * convolution;
-					accum_g += src_pixel[1] * convolution;
-					accum_r += src_pixel[2] * convolution;
-				}
-			}
-			// Set accumulator to destination image pixel
-			dst_pixel = thread_data->image_dst + y * thread_data->image_stride + (x << 2);
-			dst_pixel[0] = accum_b > 255 ? 255 : (accum_b < 0 ? 0 : accum_b);
-			dst_pixel[1] = accum_g > 255 ? 255 : (accum_g < 0 ? 0 : accum_g);
-			dst_pixel[2] = accum_r > 255 ? 255 : (accum_r < 0 ? 0 : accum_r);
+			dst_pixel[0] = dst_buf[0];
+			dst_pixel[1] = dst_buf[1];
+			dst_pixel[2] = dst_buf[2];
+			dst_pixel[3] = dst_buf[3];
 		}
 	return 0;
 }
@@ -203,7 +176,7 @@ static DWORD WINAPI cairo_image_surface_convolution_rgb(void *userdata){
 static DWORD WINAPI cairo_image_surface_convolution_a8(void *userdata){
 	THREAD_DATA *thread_data = reinterpret_cast<THREAD_DATA*>(userdata);
 	// Storages for pixel processing
-	double accum;
+	float accum;
 	int image_x, image_y;
 	// Iterate through source image pixels
 	for(register int y = thread_data->image_first_row; y <= thread_data->image_last_row; y++)
