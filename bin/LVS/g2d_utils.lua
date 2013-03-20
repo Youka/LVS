@@ -185,7 +185,7 @@ g2du = {
 					new_path_n = new_path_n + 1
 					new_path[new_path_n] = {typ = typ}
 				end
-				return 0, 0
+				return x, y
 			end, true)
 		end)
 		if not success then
