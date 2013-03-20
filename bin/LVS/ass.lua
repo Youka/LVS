@@ -204,11 +204,11 @@ function LoadASS(content)
 			-- Reformat style
 			style.fontsize = tonumber(style.fontsize)
 			for c = 1, 4 do
-				local a, b, g, r = _G["style.color" .. c]:match("&H(%x%x)(%x%x)(%x%x)(%x%x)")
+				local a, b, g, r = style["color" .. c]:match("&H(%x%x)(%x%x)(%x%x)(%x%x)")
 				if r then
-					_G["style.color" .. c] = {r = tonumber(r,16) / 255, g = tonumber(g,16) / 255, b = tonumber(b,16) / 255, a = (255 - tonumber(a,16)) / 255}
+					style["color" .. c] = {r = tonumber(r,16) / 255, g = tonumber(g,16) / 255, b = tonumber(b,16) / 255, a = (255 - tonumber(a,16)) / 255}
 				else
-					_G["style.color" .. c] = nil
+					style["color" .. c] = nil
 				end
 			end
 			style.bold = style.bold == "-1"
