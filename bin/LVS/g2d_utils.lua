@@ -32,7 +32,7 @@ g2du = {
 		end
 		local kernel_value = 1 / kernel_wide
 		local m = math.cos(math.rad(angle)) / math.sin(math.rad(angle))
-		m = m - m % 0.001
+		m = m == 1/0 and math.huge or m - m % 0.001
 		if m > 1 or m < -1 then
 			for y = -strength, strength do
 				kernel[1 + (-y+strength)*kernel_wide + math.floor(y / m)+strength] = kernel_value
