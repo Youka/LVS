@@ -204,5 +204,18 @@ g2du = {
 				ctx:path_close()
 			end
 		end
+	end,
+	rotate_xy = function(mat, x, y)
+		if getmetatable(mat) ~= "g2d matrix" or type(x) ~= "number" or type(y) ~= "number" then
+			error("g2d matrix, number and number expected", 2)
+		end
+		-- Create 3D matrices for x and y rotation
+
+		-- TODO
+
+		-- Convert 3D to 2D matrices and multiply with current matrix
+
+		-- TODO
+
 	end
 }

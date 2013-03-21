@@ -706,7 +706,7 @@ LUA_FUNC_END
 
 LUA_FUNC_1ARG(matrix_shear, 3)
 	cairo_matrix_t *matrix = reinterpret_cast<cairo_matrix_t*>(luaL_checkuserdata(L, 1, G2D_MATRIX));
-	cairo_matrix_t a = {1, luaL_checknumber(L, 2), luaL_checknumber(L, 3), 1, 0, 0};
+	cairo_matrix_t a = {1, luaL_checknumber(L, 3), luaL_checknumber(L, 2), 1, 0, 0};
 	cairo_matrix_t b = *matrix;
 	cairo_matrix_multiply(matrix, &a, &b);
 LUA_FUNC_END
