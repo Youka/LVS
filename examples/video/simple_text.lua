@@ -1,6 +1,6 @@
 -- Create transformation matrix
 local translation = g2d.create_matrix()
-translation:translate(250, 100)
+translation:translate(350, 100)
 
 -- Process frames
 function GetFrame(frame, frame_i)
@@ -8,7 +8,7 @@ function GetFrame(frame, frame_i)
 	local ctx = g2d.create_context(frame)
 	-- Define path
 	ctx:set_matrix(translation)
-	ctx:path_add_text("こんにちわ", "Arial", 60, true, true, true, true)
+	ctx:path_add_text("こんにちわ\nGuten Tag!\nGood day!", "Arial", 60, true, true, true, true)
 	-- Stroke path
 	ctx:set_source(g2du.white)
 	ctx:set_line_join("ROUND")

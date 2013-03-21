@@ -71,7 +71,19 @@ static void cairo_win32_text_path(cairo_t *ctx, const wchar_t *text, const wchar
 	SelectObject(dc, font);
 	// Draw text path to context
 	BeginPath(dc);
-	ExtTextOutW(dc, 0, 0, 0x0, NULL, text, wcslen(text), NULL);
+	TEXTMETRICW metrics = {0};
+	GetTextMetricsW(dc, &metrics);
+	int y = 0;
+	wchar_t *start = const_cast<wchar_t*>(text), *end = NULL;
+	do{
+		end = wcschr(start, L'\n');
+		if(end){
+			ExtTextOutW(dc, 0, y, 0x0, NULL, start, end-start, NULL);
+			y += metrics.tmHeight + metrics.tmExternalLeading;
+			start = end + 1;
+		}else
+			ExtTextOutW(dc, 0, y, 0x0, NULL, start, wcslen(start), NULL);
+	}while(end);
 	EndPath(dc);
 	// Get context path
 	POINT *points;

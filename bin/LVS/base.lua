@@ -75,7 +75,7 @@ function math.ellipse(x, y, w, h, a)
 		error("number, number, number, number and number expected", 2)
 	end
 	local ra = math.rad(a)
-	return x + w/2 * math.cos(ra), y + h/2 * math.sin(ra)
+	return x + w/2 * math.sin(ra), y + h/2 * math.cos(ra)
 end
 
 function math.interpolate(a, b, pct)

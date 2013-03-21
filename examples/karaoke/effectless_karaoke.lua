@@ -20,10 +20,10 @@ Dialogue: 0,0:00:13.82,0:00:20.34,Subtitle,,0,0,0,,Doch bis hierhin bin ich ganz
 
 -- Process frames
 function GetFrame(frame, frame_i)
-	-- Get frame time
-	local ms = frame_i / VIDEO_FPS * 1000
 	-- Create drawing context
 	local ctx = g2d.create_context(frame)
+	-- Get frame time
+	local ms = frame_i / VIDEO_FPS * 1000
 	-- Look for frame-related ASS lines
 	for _, line in ipairs(lines) do
 		if ms >= line.start_time and ms < line.end_time then
