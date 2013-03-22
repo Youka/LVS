@@ -485,11 +485,11 @@ function LoadASS(content)
 					for si, syl in ipairs(line.syls) do
 						local x_fix = (max_width - syl.width) / 2
 						if line.styleref.alignment == 4 then
-							syl.x = line.left + x_fix
+							syl.x = line.x + x_fix
 						elseif line.styleref.alignment == 5 then
 							syl.x = meta.width / 2 - syl.width / 2
 						else
-							syl.x = line.right - syl.width - x_fix
+							syl.x = line.x + line.width - syl.width - x_fix
 						end
 					end
 				end
@@ -522,11 +522,11 @@ function LoadASS(content)
 					for ci, char in ipairs(line.chars) do
 						local x_fix = (max_width - char.width) / 2
 						if line.styleref.alignment == 4 then
-							char.x = line.left + x_fix
+							char.x = line.x + x_fix
 						elseif line.styleref.alignment == 5 then
 							char.x = meta.width / 2 - char.width / 2
 						else
-							char.x = line.right - char.width - x_fix
+							char.x = line.x + line.width - char.width - x_fix
 						end
 					end
 				end
@@ -560,11 +560,11 @@ function LoadASS(content)
 					for wi, word in ipairs(line.words) do
 						local x_fix = (max_width - word.width) / 2
 						if line.styleref.alignment == 4 then
-							word.x = line.left + x_fix
+							word.x = line.x + x_fix
 						elseif line.styleref.alignment == 5 then
 							word.x = meta.width / 2 - word.width / 2
 						else
-							word.x = line.right - word.width - x_fix
+							word.x = line.x + line.width - word.width - x_fix
 						end
 					end
 				end
