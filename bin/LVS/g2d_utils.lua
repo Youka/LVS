@@ -209,13 +209,22 @@ g2du = {
 		if getmetatable(mat) ~= "g2d matrix" or type(x) ~= "number" or type(y) ~= "number" then
 			error("g2d matrix, number and number expected", 2)
 		end
-		-- Create 3D matrices for x and y rotation
-
-		-- TODO
-
-		-- Convert 3D to 2D matrices and multiply with current matrix
-
-		-- TODO
-
+		-- Convert angles to radians
+		x, y = math.rad(x), math.rad(y)
+		-- Create xy-rotation matrix
+		local xx, yx, xy, yy, x0, y0 = math.cos(y), 0, math.sin(x)*math.sin(y), math.cos(x), 0, 0
+		-- Apply xy-rotation to matrix
+		mat:multiply(xx, yx, xy, yy, x0, y0)
+	end,
+	rotate_yx = function(mat, x, y)
+		if getmetatable(mat) ~= "g2d matrix" or type(x) ~= "number" or type(y) ~= "number" then
+			error("g2d matrix, number and number expected", 2)
+		end
+		-- Convert angles to radians
+		x, y = math.rad(x), math.rad(y)
+		-- Create yx-rotation matrix
+		local xx, yx, xy, yy, x0, y0 = math.cos(y), -math.sin(x) * -math.sin(y), 0, math.cos(x), 0, 0
+		-- Apply yx-rotation to matrix
+		mat:multiply(xx, yx, xy, yy, x0, y0)
 	end
 }
