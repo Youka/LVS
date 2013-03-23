@@ -97,7 +97,7 @@ g2du = {
 		}
 	end,
 	-- Stock matrices
-	identify = g2d.create_matrix(),
+	identity = g2d.create_matrix(),
 	-- Stock color sources
 	white = g2d.create_source_color(1, 1, 1),
 	black = g2d.create_source_color(0, 0, 0),
