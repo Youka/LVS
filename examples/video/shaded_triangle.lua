@@ -5,8 +5,7 @@ local points = {
 	{x = 450, y = 130}
 }
 -- Create triangle gradient (note: aliased)
-local gradient = g2d.create_source_mesh_gradient()
-gradient:add_mesh(
+local gradient = g2d.create_source_mesh_gradient():add_mesh(
 	points[1].x, points[1].y, 1, 0, 0, 1,
 	points[2].x, points[2].y, 0, 1, 0, 1,
 	points[3].x, points[3].y, 0, 0, 1, 1

@@ -21,7 +21,7 @@ Dialogue: 0,0:00:10.75,0:00:15.44,Subtitle,,0,0,0,,Ich blickte auf, um die Wüns
 -- Roumaji & kanji
 local function roumaji_kanji(ctx, ms, line)
 	for si, syl in ipairs(line.syls) do
-		ctx:set_matrix(g2d.create_matrix(1, 0, 0, 1, syl.x, syl.y))
+		ctx:set_matrix(g2d.create_matrix():translate(syl.x, syl.y))
 		ctx:path_add_text(syl.text, line.styleref.fontname, line.styleref.fontsize, line.styleref.bold, line.styleref.italic, line.styleref.underline, line.styleref.strikeout)
 		if ms >= line.start_time + syl.start_time and ms < line.start_time + syl.end_time then
 			ctx:set_source(g2du.red)
@@ -35,7 +35,7 @@ end
 
 -- Subtitle
 local function subtitle(ctx, ms, line)
-	ctx:set_matrix(g2d.create_matrix(1, 0, 0, 1, line.x, line.y))
+	ctx:set_matrix(g2d.create_matrix():translate(line.x, line.y))
 	ctx:path_add_text(line.text, line.styleref.fontname, line.styleref.fontsize, line.styleref.bold, line.styleref.italic, line.styleref.underline, line.styleref.strikeout)
 	ctx:set_source(g2du.white)
 	ctx:path_fill()

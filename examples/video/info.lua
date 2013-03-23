@@ -2,8 +2,7 @@
 local info = string.format("Dimension: %dx%d\nColorspace: %s\nFrames per second: %f\nFrame: %%d/%d"
 							, VIDEO_WIDTH, VIDEO_HEIGHT, VIDEO_HAS_ALPHA and "RGBA" or "RGB", VIDEO_FPS, VIDEO_FRAMES)
 -- Create position matrix
-local translation = g2d.create_matrix()
-translation:translate(10,10)
+local translation = g2d.create_matrix():translate(10,10)
 
 -- Process frames
 function GetFrame(frame, frame_i)

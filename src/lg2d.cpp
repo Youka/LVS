@@ -673,6 +673,7 @@ LUA_FUNC_END
 LUA_FUNC_1ARG(matrix_identity, 1)
 	cairo_matrix_t *matrix = reinterpret_cast<cairo_matrix_t*>(luaL_checkuserdata(L, 1, G2D_MATRIX));
 	cairo_matrix_init_identity(matrix);
+	return 1;
 LUA_FUNC_END
 
 LUA_FUNC_1ARG(matrix_invert, 1)
@@ -680,6 +681,7 @@ LUA_FUNC_1ARG(matrix_invert, 1)
 	cairo_status_t status = cairo_matrix_invert(matrix);
 	if(status != CAIRO_STATUS_SUCCESS)
 				luaL_error2(L, cairo_status_to_string(status));
+	return 1;
 LUA_FUNC_END
 
 LUA_FUNC_1ARG(matrix_multiply, 7)
@@ -687,21 +689,29 @@ LUA_FUNC_1ARG(matrix_multiply, 7)
 	cairo_matrix_t a = {luaL_checknumber(L, 2), luaL_checknumber(L, 3), luaL_checknumber(L, 4), luaL_checknumber(L, 5), luaL_checknumber(L, 6), luaL_checknumber(L, 7)};
 	cairo_matrix_t b = *matrix;
 	cairo_matrix_multiply(matrix, &a, &b);
+	lua_pushvalue(L, 1);
+	return 1;
 LUA_FUNC_END
 
 LUA_FUNC_1ARG(matrix_translate, 3)
 	cairo_matrix_t *matrix = reinterpret_cast<cairo_matrix_t*>(luaL_checkuserdata(L, 1, G2D_MATRIX));
 	cairo_matrix_translate(matrix, luaL_checknumber(L, 2), luaL_checknumber(L, 3));
+	lua_pushvalue(L, 1);
+	return 1;
 LUA_FUNC_END
 
 LUA_FUNC_1ARG(matrix_scale, 3)
 	cairo_matrix_t *matrix = reinterpret_cast<cairo_matrix_t*>(luaL_checkuserdata(L, 1, G2D_MATRIX));
 	cairo_matrix_scale(matrix, luaL_checknumber(L, 2), luaL_checknumber(L, 3));
+	lua_pushvalue(L, 1);
+	return 1;
 LUA_FUNC_END
 
 LUA_FUNC_1ARG(matrix_rotate, 2)
 	cairo_matrix_t *matrix = reinterpret_cast<cairo_matrix_t*>(luaL_checkuserdata(L, 1, G2D_MATRIX));
 	cairo_matrix_rotate(matrix, luaL_checknumber(L, 2) / 180.0L * M_PI);
+	lua_pushvalue(L, 1);
+	return 1;
 LUA_FUNC_END
 
 LUA_FUNC_1ARG(matrix_shear, 3)
@@ -709,6 +719,8 @@ LUA_FUNC_1ARG(matrix_shear, 3)
 	cairo_matrix_t a = {1, luaL_checknumber(L, 3), luaL_checknumber(L, 2), 1, 0, 0};
 	cairo_matrix_t b = *matrix;
 	cairo_matrix_multiply(matrix, &a, &b);
+	lua_pushvalue(L, 1);
+	return 1;
 LUA_FUNC_END
 
 LUA_FUNC_1ARG(matrix_transform, 3)
@@ -733,6 +745,8 @@ LUA_FUNC_2ARG(source_add_color, 5, 6)
 	cairo_status_t status = cairo_pattern_status(pattern);
 	if(status != CAIRO_STATUS_SUCCESS)
 		luaL_error2(L, cairo_status_to_string(status));
+	lua_pushvalue(L, 1);
+	return 1;
 LUA_FUNC_END
 
 LUA_FUNC_2ARG(source_get_color, 1, 2)
@@ -814,6 +828,8 @@ LUA_FUNC_2ARG(source_add_mesh, 19, 25)
 	cairo_status_t status = cairo_pattern_status(pattern);
 	if(status != CAIRO_STATUS_SUCCESS)
 		luaL_error2(L, cairo_status_to_string(status));
+	lua_pushvalue(L, 1);
+	return 1;
 LUA_FUNC_END
 
 LUA_FUNC_1ARG(source_get_mesh, 2)
@@ -1097,7 +1113,7 @@ LUA_FUNC_END
 
 LUA_FUNC_1ARG(context_clip_from_path, 1)
 	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
-	cairo_clip(ctx);
+	cairo_clip_preserve(ctx);
 LUA_FUNC_END
 
 LUA_FUNC_1ARG(context_clip_clear, 1)
