@@ -5,7 +5,7 @@
 with the capability of scripting language *Lua* + 2D image processing functionality.
 
 Implented plugin interfaces are currently *Avisynth*, *VirtualDub* and *DirectShow*.  
-Avisynth permits also a way to edit audio data and pass userdata.  
+(Avisynth permits also a way to edit audio data and pass userdata.)  
 The provided plugin already includes a Lua 5.2 interpreter with a graphic library, 
 so there's no additionaly dependency to install.
 
@@ -15,7 +15,7 @@ but (maybe) requires more time to see something.
 
 
 ## Requirements
-* MSVC 9 runtime library
+* [MSVC 9 runtime library](http://www.microsoft.com/de-de/download/details.aspx?id=29)
 * SSE2 supporting processor
 
 

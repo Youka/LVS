@@ -78,8 +78,9 @@ g2du = {
 		local kernel = table.create(kernel_size, 2)
 		kernel.width = kernel_wide
 		kernel.height = kernel_wide
+		local mid_i = math.ceil(kernel_size/2)
 		for i=1, kernel_size do
-			if i == math.ceil(kernel_size/2) then
+			if i == mid_i then
 				kernel[i] = kernel_size
 			else
 				kernel[i] = -1
