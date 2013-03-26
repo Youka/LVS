@@ -8,18 +8,19 @@
 <meta name="application-name" content="LVS">
 <meta name="author" content="Youka">
 <meta name="description" content="LVS documentation">
-<meta name="keywords" content="LVS,Lua,Avisynth,VirtualDub,DirectShow,Video,Plugin">
+<meta name="keywords" content="LVS,Lua,Avisynth,VirtualDub,DirectShow,Video,Plugin,Editing,Effects,Karaoke">
 <link rel="icon" type="image/png" href="LVS/LVS.png">
 <style type="text/css" media="screen">
 	body{
 		background-color: black;
-		color: #E0E0E0;
+		color: #E8E8E8;
 		width: 250px;
 		text-align: center;
+		font-size: 18px;
 		margin: auto;
 	}
 	div.index{
-		background-image: url("LVS/dark_texture.jpg");
+		background-image: url("LVS/dark_texture.png");
 		background-repeat: repeat;
 		border: 8px double black;
 		height: 48px;
@@ -28,24 +29,35 @@
 	div.index:hover{
 		height: 100%;
 	}
+	h1, h2{
+		font-weight: bold;
+		color: white;
+		text-shadow: 4px 4px 2px black;
+	}
 	h1{
 		font-family: Comic Sans MS;
 		font-size: 30px;
-		font-weight: bold;
-		text-shadow: 4px 4px 2px black;
-		color: white;
-		margin: 0px;
-		padding-bottom: 10px;
+		margin: 0px 0px 10px 0px;
+	}
+	h2{
+		font-size: 18px;
+		text-decoration: underline;
+		margin: 10px 0px 0px -5px;
+	}
+	span{
+		text-align: left;
+		padding-left: 15px;
+		display: block;
 	}
 	ol{
 		margin: 0px 0px 0px 20px;
-		font-family: Arial;
-		font-size: 18px;
 		text-align: left;
 	}
 	a{
+		font-family: Arial;
+		font-size: 18px;
 		cursor: pointer;
-		color: #E0E0E0;
+		color: #E8E8E8;
 		text-decoration: none;
 	}
 	a:hover{
@@ -55,10 +67,11 @@
 </style>
 <script type="text/javascript">
 	function generateLinkList(){
-		var content = "",
+		var content = "<ol>",
 			entries = Math.floor(arguments.length / 2);
 		for(var i = 0; i < entries; i++)
-			content += "\n<li><a href='" + arguments[i*2+1] + "' target='_blank'>" + arguments[i*2] + "</a></li>";
+			content += "<li><a href='" + arguments[i*2+1] + "' target='_blank'>" + arguments[i*2] + "</a></li>";
+		content += "</ol>";
 		document.write(content);
 	}
 </script>
@@ -68,30 +81,42 @@
 <img src="LVS/LVS.png">
 <div class="index">
 <h1>Definition</h1>
-
+<span>
+<h2>"LVS"</h2>
+test
 <!-- TODO -->
-
+<h2>Purpose</h2>
+<!-- TODO -->
+<h2>Plugin interfaces</h2>
+<!-- TODO -->
+<h2>Workflow</h2>
+<!-- TODO -->
+</span>
 </div>
 <div class="index">
 <h1>Usage</h1>
-<ol><script type="text/javascript">
-generateLinkList("General", "",
-			"Avisynth", "",
-			"VirtualDub", "",
-			"DirectShow", "",
-			"Getting started", "",
-			"Karaoke", "");
-</script></ol>
+<span>
+<h2>Avisynth</h2>
+<!-- TODO -->
+<h2>VirtualDub</h2>
+<!-- TODO -->
+<h2>DirectShow</h2>
+<!-- TODO -->
+<h2>Getting started</h2>
+<!-- TODO -->
+<h2>Karaoke</h2>
+<!-- TODO -->
+</span>
 </div>
 <div class="index">
 <h1>References</h1>
-<ol><script type="text/javascript">
+<script type="text/javascript">
 generateLinkList("Lua 5.2", "Lua_5.2/Lua 5.2 Reference Manual.htm",
-			"Lua extensions", "",
-			"G2D", "",
-			"G2D Utilities", "",
-			"ASS", "");
-</script></ol>
+			"Lua extensions", "LVS/Lua_LVS.html",
+			"G2D", "G2D/g2d.html",
+			"G2D Utilities", "G2D/g2du.html",
+			"ASS", "ASS/ass.html");
+</script>
 </div>
 </body>
 
