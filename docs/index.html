@@ -9,42 +9,90 @@
 <meta name="author" content="Youka">
 <meta name="description" content="LVS documentation">
 <meta name="keywords" content="LVS,Lua,Avisynth,VirtualDub,DirectShow,Video,Plugin">
-<link rel="icon" type="image/png" href="LVS.png">
+<link rel="icon" type="image/png" href="LVS/LVS.png">
 <style type="text/css" media="screen">
 	body{
-		background-color:black;
-		color:white;
+		background-color: black;
+		color: #E0E0E0;
+		width: 250px;
 		text-align: center;
+		margin: auto;
+	}
+	div.index{
+		background-image: url("LVS/dark_texture.jpg");
+		background-repeat: repeat;
+		border: 8px double black;
+		height: 48px;
+		overflow: hidden;
+	}
+	div.index:hover{
+		height: 100%;
+	}
+	h1{
+		font-family: Comic Sans MS;
+		font-size: 30px;
+		font-weight: bold;
+		text-shadow: 4px 4px 2px black;
+		color: white;
+		margin: 0px;
+		padding-bottom: 10px;
+	}
+	ol{
+		margin: 0px 0px 0px 20px;
+		font-family: Arial;
+		font-size: 18px;
+		text-align: left;
 	}
 	a{
-		text-decoration:none;
-	}
-	a:link{
-
-	}
-	a:visited{
-
-	}
-	a:active{
-
+		cursor: pointer;
+		color: #E0E0E0;
+		text-decoration: none;
 	}
 	a:hover{
-		color:#FF0000;
-	}
-	ul{
-		margin: 0px;
+		color: white;
+		text-shadow: 0px 0px 2px white;
 	}
 </style>
 <script type="text/javascript">
-	function echo(text){
-		document.write(text)
+	function generateLinkList(){
+		var content = "",
+			entries = Math.floor(arguments.length / 2);
+		for(var i = 0; i < entries; i++)
+			content += "\n<li><a href='" + arguments[i*2+1] + "' target='_blank'>" + arguments[i*2] + "</a></li>";
+		document.write(content);
 	}
 </script>
 </head>
 
 <body>
-<img src="LVS.png" style="display: block; margin: 0px auto; width:150px;">
-<script>echo("Hello world!")</script>
+<img src="LVS/LVS.png">
+<div class="index">
+<h1>Definition</h1>
+
+<!-- TODO -->
+
+</div>
+<div class="index">
+<h1>Usage</h1>
+<ol><script type="text/javascript">
+generateLinkList("General", "",
+			"Avisynth", "",
+			"VirtualDub", "",
+			"DirectShow", "",
+			"Getting started", "",
+			"Karaoke", "");
+</script></ol>
+</div>
+<div class="index">
+<h1>References</h1>
+<ol><script type="text/javascript">
+generateLinkList("Lua 5.2", "Lua_5.2/Lua 5.2 Reference Manual.htm",
+			"Lua extensions", "",
+			"G2D", "",
+			"G2D Utilities", "",
+			"ASS", "");
+</script></ol>
+</div>
 </body>
 
 </html>

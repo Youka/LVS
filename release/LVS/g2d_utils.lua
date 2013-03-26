@@ -89,13 +89,24 @@ g2du = {
 		return kernel
 	end,
 	-- Create edge detection kernel
-	create_edge_detect_kernel = function()
-		return {
-			width = 3, height = 3,
-			-1, -1, -1,
-			-1, 8, -1,
-			-1, -1, -1
-		}
+	create_edge_detect_kernel = function(strength)
+		if type(strength) ~= "number" or strength < 1 or math.floor(strength) ~= strength then
+			error("valid number expected", 2)
+		end
+		local kernel_wide = 1 + 2*strength
+		local kernel_size = kernel_wide * kernel_wide
+		local kernel = table.create(kernel_size, 2)
+		kernel.width = kernel_wide
+		kernel.height = kernel_wide
+		local mid_i = math.ceil(kernel_size/2)
+		for i=1, kernel_size do
+			if i == mid_i then
+				kernel[i] = kernel_size-1
+			else
+				kernel[i] = -1
+			end
+		end
+		return kernel
 	end,
 	-- Stock matrices
 	identity = g2d.create_matrix(),
@@ -131,6 +142,7 @@ g2du = {
 	violet = g2d.create_source_color(0.5, 0, 1),
 	brown = g2d.create_source_color(0.5, 0.25, 0.125),
 	sapphire = g2d.create_source_color(0.125, 0.25, 0.5),
+	transparent = g2d.create_source_color(0, 0, 0, 0),
 	-- Path transformation (points of tiny outline segments)
 	path_transform = function(ctx, filter)
 		if getmetatable(ctx) ~= "g2d context" or type(filter) ~= "function" then

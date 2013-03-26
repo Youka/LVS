@@ -27,7 +27,7 @@ LVS documentation in HTML format.
 Example scripts for LVS.
 
 ***release***  
-Plugin + scripts (external libraries).
+LVS plugin + scripts (external libraries).
 
 ***src***  
 LVS source code.
