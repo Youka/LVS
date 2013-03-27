@@ -9,7 +9,7 @@ Implented plugin interfaces are currently *Avisynth*, *VirtualDub* and *DirectSh
 The provided plugin already includes a Lua 5.2 interpreter with a graphic library, 
 so there's no additionaly dependency to install.
 
-LVS aims at user groups like programmers, video editors or karaoke effects makers. 
+LVS aims at user groups like programmers, video editors and karaoke effects makers. 
 Because of the work flow by writing code it gives more control to users than a GUI-based video editor, 
 but (maybe) requires more time to see something.
 

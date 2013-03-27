@@ -7,14 +7,14 @@
 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
 <meta name="application-name" content="LVS">
 <meta name="author" content="Youka">
-<meta name="description" content="LVS documentation">
+<meta name="description" content="LVS plugin documentation.">
 <meta name="keywords" content="LVS,Lua,Avisynth,VirtualDub,DirectShow,Video,Plugin,Editing,Effects,Karaoke">
 <link rel="icon" type="image/png" href="LVS/LVS.png">
 <style type="text/css" media="screen">
 	body{
 		background-color: black;
 		color: #E8E8E8;
-		width: 250px;
+		width: 600px;
 		text-align: center;
 		font-size: 18px;
 		margin: auto;
@@ -39,26 +39,30 @@
 		font-size: 30px;
 		margin: 0px 0px 10px 0px;
 	}
+	span{
+		text-align: left;
+		padding-left: 20px;
+		display: block;
+	}
 	h2{
 		font-size: 18px;
 		text-decoration: underline;
-		margin: 10px 0px 0px -5px;
-	}
-	span{
-		text-align: left;
-		padding-left: 15px;
-		display: block;
+		margin: 10px 0px 0px -10px;
 	}
 	ol{
-		margin: 0px 0px 0px 20px;
+		margin: 0px 0px 0px 0px;
 		text-align: left;
 	}
 	a{
-		font-family: Arial;
-		font-size: 18px;
 		cursor: pointer;
 		color: #E8E8E8;
 		text-decoration: none;
+		font-style: italic;
+	}
+	a.intern{
+		font-family: Arial;
+		font-size: 18px;
+		font-style: normal;
 	}
 	a:hover{
 		color: white;
@@ -67,10 +71,10 @@
 </style>
 <script type="text/javascript">
 	function generateLinkList(){
-		var content = "<ol>",
+		var content = "<ol style='margin-left: 200px;'>",
 			entries = Math.floor(arguments.length / 2);
 		for(var i = 0; i < entries; i++)
-			content += "<li><a href='" + arguments[i*2+1] + "' target='_blank'>" + arguments[i*2] + "</a></li>";
+			content += "<li><a class='intern' href='" + arguments[i*2+1] + "' target='_blank'>" + arguments[i*2] + "</a></li>";
 		content += "</ol>";
 		document.write(content);
 	}
@@ -83,14 +87,20 @@
 <h1>Definition</h1>
 <span>
 <h2>"LVS"</h2>
-test
-<!-- TODO -->
+<b>LVS</b> (Lua Video Sync) is a <a href="http://en.wikipedia.org/wiki/Frameserver" target="_blank">video frameserver</a> plugin to edit video frames with the capability of 
+<a href="http://en.wikipedia.org/wiki/Lua_%28programming_language%29" target="_blank">scripting language Lua</a> + <a href="http://en.wikipedia.org/wiki/2D_computer_graphics" target="_blank">2D image processing</a> functionality.
 <h2>Purpose</h2>
-<!-- TODO -->
+LVS allows linear video frame editing by writing scripts. This gives users more control than a function-limited GUI and encourages creativity.
 <h2>Plugin interfaces</h2>
-<!-- TODO -->
+Plugin interfaces for frameserver application <a href="http://en.wikipedia.org/wiki/Avisynth" target="_blank">Avisynth</a> and <a href="http://en.wikipedia.org/wiki/DirectShow" target="_blank">DirectShow</a> 
+and video editor <a href="http://en.wikipedia.org/wiki/VirtualDub" target="_blank">VirtualDub</a> are available.
 <h2>Workflow</h2>
-<!-- TODO -->
+<ol>
+<li>Load <b>LVS.dll</b> into your application.</li>
+<li>Configure LVS to load a <b>.lua</b> script for frame editing.</li>
+<li>Write the script (see 2.).</li>
+<li>Play or encode the resulting video.</li>
+</ol>
 </span>
 </div>
 <div class="index">

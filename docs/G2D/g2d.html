@@ -1,0 +1,115 @@
+<head>
+<title>LVS</title>
+<base href="." target="_blank">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta name="application-name" content="G2D">
+<meta name="author" content="Youka">
+<meta name="description" content="G2D library reference.">
+<meta name="keywords" content="LVS,Lua,Image,2D,Editing">
+<link rel="icon" type="image/png" href="../LVS/LVS.png">
+<style type="text/css" media="screen">
+	body{
+		background-color: black;
+		color: white;
+		margin: 10px;
+	}
+	h1{
+		font-size: 36px;
+		font-weight: bold;
+		background-color: #505050;
+		border: 2px solid white;
+		display: table;
+		margin: 0px;
+	}
+	h2{
+		font-size: 20px;
+		text-decoration: underline;
+		margin: 10px 0px 10px 0px;
+	}
+	span.ret{
+		color: green;
+	}
+	span.arg{
+		color: red;
+	}
+	p.func{
+		color: black;
+		background-color: #F0F0F0;
+		display: table;
+		border: 2px groove black;
+	}
+	p{
+		margin: 0px 0px 0px 10px;
+	}
+	div{
+		margin: 0px 0px 10px 30px;
+	}
+	hr{
+		height: 0px;
+		border: 3px ridge grey;
+	}
+</style>
+<script type="text/javascript">
+function generateEntry(ret, func, arguments){
+	var buffer = "<p class='func'><b>";
+	if(ret.length > 0)
+		buffer += "<span class='ret'>"+ret+"</span> = ";
+	buffer += func+"(";
+	if(arguments.length > 0)
+		buffer += "<span class='arg'>"+arguments+"</span>";
+	buffer += ")</b></p>";
+	document.write(buffer);
+}
+</script>
+</head>
+
+<body>
+<h1>G2D library</h1>
+<h2>Image creation</h2>
+<script>generateEntry("image", "g2d.create_image", "format, width, height");</script>
+<p>Creates a memory image with given size and colorspace.</p>
+<div>
+<span class="arg">format</span>: "RGBA", "RGB", "ALPHA" or "BINARY"<br/>
+<span class="arg">width height</span>: number bigger than 0<br/>
+<span class="ret">image</span>: image object
+</div>
+<script>generateEntry("image", "g2d.create_sub_image", "image, x0, y0, x1, y1");</script>
+<p>Creates a sub image from the area of given image.</p>
+<div>
+<span class="arg">image</span>: image object<br/>
+<span class="arg">x0 y0 x1 y1</span>: numbers<br/>
+<span class="ret">image</span>: image object
+</div>
+<h2>Context creation</h2>
+<h2>Matrix creation</h2>
+<h2>Source creation</h2>
+<h2>Utilities</h2>
+<hr>
+<h1>Image object</h1>
+<h2>Header data</h2>
+<h2>Pixel data</h2>
+<hr>
+<h1>Matrix object</h1>
+<h2>Data</h2>
+<h2>Manipulation</h2>
+<h2>Transformation</h2>
+<hr>
+<h1>Source object</h1>
+<h2>Add data</h2>
+<h2>Get data</h2>
+<h2>Properties</h2>
+<hr>
+<h1>Context object</h1>
+<h2>State</h2>
+<h2>Transformation</h2>
+<h2>Raster source</h2>
+<h2>Render properties</h2>
+<h2>Stroke properties</h2>
+<h2>Clipping</h2>
+<h2>Path definition</h2>
+<h2>Drawing</h2>
+<h2>Bounding</h2>
+<h2>Point test</h2>
+</body>
+
+</html>
