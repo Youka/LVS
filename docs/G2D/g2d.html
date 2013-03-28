@@ -71,14 +71,12 @@ function EndArgs(){
 }
 </script>
 <!--
-<script>
 Entry("", "", "");
 Desc("");
 BeginArgs();
 Arg("", "");
 Ret("", "");
 EndArgs();
-</script>
 -->
 </head>
 
@@ -90,7 +88,7 @@ Entry("image", "g2d.create_image", "format, width, height");
 Desc("Creates an image with given size and colorspace.");
 BeginArgs();
 Arg("format", '"RGBA", "RGB", "ALPHA" or "BINARY"');
-Arg("width, height", "size");
+Arg("width, height", "size (number)");
 Ret("image", "image object");
 EndArgs();
 Entry("image", "g2d.create_sub_image", "image, x0, y0, x1, y1");
@@ -107,7 +105,7 @@ Arg("filename", "name of a PNG file (string)");
 Ret("image", "image object");
 EndArgs();
 Entry("", "g2d.create_png_from_image", "image, filename");
-Desc("Create a PNG file from an image.");
+Desc("Creates a PNG file from an image.");
 BeginArgs();
 Arg("image", "image object");
 Ret("filename", "name of a new PNG file (string)");
@@ -125,7 +123,7 @@ EndArgs();
 <h2>Matrix creation</h2>
 <script>
 Entry("matrix", "g2d.create_matrix", "");
-Desc("Create a matrix.");
+Desc("Creates a matrix.");
 BeginArgs();
 Ret("matrix", "matrix object");
 EndArgs();
@@ -133,7 +131,7 @@ EndArgs();
 <h2>Source creation</h2>
 <script>
 Entry("source", "g2d.create_source_color", "r, g, b[, a]");
-Desc("Create a source of given color.");
+Desc("Creates a source of given color.");
 BeginArgs();
 Arg("r, g, b, a", "color strength in range 0-1 (number)");
 Ret("source", "source object");
@@ -151,12 +149,12 @@ Arg("cx0, cy0, r0, cx1, cy1, r1", "circles (number)");
 Ret("source", "source object");
 EndArgs();
 Entry("source", "g2d.create_source_mesh_gradient", "");
-Desc("Create a source as color gradients inside meshes.");
+Desc("Creates a source as color gradient meshes.");
 BeginArgs();
 Ret("source", "source object");
 EndArgs();
 Entry("source", "g2d.create_source_image", "image");
-Desc("Create a source as given image.");
+Desc("Creates a source as given image.");
 BeginArgs();
 Arg("image", "image object");
 Ret("source", "source object");
@@ -287,20 +285,350 @@ EndArgs();
 <hr>
 <h1>Source object</h1>
 <h2>Add data</h2>
+<script>
+Entry("source", "source:add_color", "pct, r, g, b[, a]");
+Desc("Adds a color to color gradient source.");
+BeginArgs();
+Arg("pct", "gradient offset in range 0-1 (number)");
+Arg("r, g, b", "color strength in range 0-1 (number)");
+Arg("a", "alpha strength in range 0-1 (number, optional)");
+Ret("source", "source object from input");
+EndArgs();
+Entry("source", "source:add_mesh", "x0, y0, r0, g0, b0, a0, x1, y1, r1, g1, b1, a1, x2, y2, r2, g2, b2, a2[, x3, y3, r3, g3, b3, a3]");
+Desc("Adds a color gradient mesh to meshes source");
+BeginArgs();
+Arg("x0, y0, r0, g0, b0, a0, x1, y1, r1, g1, b1, a1, x2, y2, r2, g2, b2, a", "mesh points and colors in range 0-1 (number)");
+Arg("x3, y3, r3, g3, b3, a3", "fourth mesh point and color (number, optional)");
+Ret("source", "source object from input");
+EndArgs();
+</script>
 <h2>Get data</h2>
+<script>
+Entry("[pct, ]r, g, b, a", "source:get_color", "[index]");
+Desc("Returns (gradient offset and) color of color (gradient) source.");
+BeginArgs();
+Arg("index", "color index in color gradient source (number, optional)");
+Ret("pct", "gradient offset in range 0-1 (number, case-dependent)");
+Ret("r, g, b, a", "color and alpha in range 0-1 (number)");
+EndArgs();
+Entry("x0, y0, x1, y1", "source:get_points", "");
+Desc("Returns vector of linear color gradient.");
+BeginArgs();
+Ret("x0, y0, x1, y1", "vector (number)");
+EndArgs();
+Entry("cx0, cy0, r0, cx1, cy1, r1", "source:get_circles", "");
+Desc("Returns circles of radial color gradient.");
+BeginArgs();
+Ret("cx0, cy0, r0, cx1, cy1, r1", "circles (number)");
+EndArgs();
+Entry("x0, y0, r0, g0, b0, a0, x1, y1, r1, g1, b1, a1, x2, y2, r2, g2, b2, a2, x3, y3, r3, g3, b3, a3", "source:get_mesh", "index");
+Desc("Returns a mesh from color gradient mesh source.");
+BeginArgs();
+Arg("index", "mesh index in color gradient mesh source (number)");
+Ret("x0, y0, r0, g0, b0, a0, x1, y1, r1, g1, b1, a1, x2, y2, r2, g2, b2, a2, x3, y3, r3, g3, b3, a3", "mesh (number)");
+EndArgs();
+Entry("image", "source:get_image", "");
+Desc("Returns image of image source.");
+BeginArgs();
+Ret("image", "image object");
+EndArgs();
+</script>
 <h2>Properties</h2>
+<script>
+Entry("type", "source:get_type", "");
+Desc("Returns source type.");
+BeginArgs();
+Ret("type", '"COLOR", "LINEAR_GRADIENT", "RADIAL_GRADIENT", "MESH_GRADIENT" or "IMAGE"');
+EndArgs();
+Entry("extender", "source:get_extender", "");
+Desc("Returns source edge extension mode.");
+BeginArgs();
+Ret("extender", '"NONE", "REPEAT", "MIRROR" or "FLOW"');
+EndArgs();
+Entry("", "source:set_extender", "extender");
+Desc("Sets source edge extension mode.");
+BeginArgs();
+Arg("extender", '"NONE", "REPEAT", "MIRROR" or "FLOW"');
+EndArgs();
+Entry("filter", "source:get_filter", "");
+Desc("Returns source transformation filter.");
+BeginArgs();
+Ret("filter", '"FAST", "GOOD" or "BEST"');
+EndArgs();
+Entry("", "source:set_filter", "filter");
+Desc("Sets source transformation filter.");
+BeginArgs();
+Arg("filter", '"FAST", "GOOD" or "BEST"');
+EndArgs();
+Entry("matrix", "source:get_matrix", "");
+Desc("Returns source transformation matrix.");
+BeginArgs();
+Ret("matrix", "matrix object");
+EndArgs();
+Entry("", "source:set_matrix", "matrix");
+Desc("Sets source transformation matrix.");
+BeginArgs();
+Arg("matrix", "matrix object");
+EndArgs();
+</script>
 <hr>
 <h1>Context object</h1>
 <h2>State</h2>
+<script>
+Entry("", "context:push_state", "");
+Desc("Pushes current context state onto the internal state stack.");
+Entry("", "context:pop_state", "");
+Desc("Pops a context state from the internal state stack and sets it as current.");
+</script>
 <h2>Transformation</h2>
+<script>
+Entry("matrix", "context:get_matrix", "");
+Desc("Returns context transformation matrix.");
+BeginArgs();
+Ret("matrix", "matrix object");
+EndArgs();
+Entry("", "context:set_matrix", "matrix");
+Desc("Sets context transformation matrix.");
+BeginArgs();
+Arg("matrix", "matrix object");
+EndArgs();
+</script>
 <h2>Raster source</h2>
+<script>
+Entry("source", "context:get_source", "");
+Desc("Returns context source.");
+BeginArgs();
+Ret("source", "source object");
+EndArgs();
+Entry("", "context:set_source", "source");
+Desc("Sets context source.");
+BeginArgs();
+Arg("source", "source object");
+EndArgs();
+</script>
 <h2>Render properties</h2>
+<script>
+Entry("antialiasing", "context:get_antialiasing", "");
+Desc("Returns antialiasing mode.");
+BeginArgs();
+Ret("antialiasing", "antialiasing mode (boolean)");
+EndArgs();
+Entry("", "context:set_antialiasing", "antialiasing");
+Desc("Sets antialiasing mode.");
+BeginArgs();
+Arg("antialiasing", "antialiasing mode (boolean)");
+EndArgs();
+Entry("fill_rule", "context:get_fill_rule", "");
+Desc("Returns filling rule.");
+BeginArgs();
+Ret("fill_rule", '"WINDING" or "ODD"');
+EndArgs();
+Entry("", "context:set_fill_rule", "fill_rule");
+Desc("Sets filling rule.");
+BeginArgs();
+Arg("fill_rule", '"WINDING" or "ODD"');
+EndArgs();
+Entry("composition", "context:get_composition", "");
+Desc("Returns composition.");
+BeginArgs();
+Ret("composition", '"SOURCE", "OVER", "INSIDE", "OUTSIDE", "MIX", "XOR", "ADD", "SATURATE", "MULTIPLY" or "DIFFERENCE"');
+EndArgs();
+Entry("", "context:set_composition", "composition");
+Desc("Sets composition.");
+BeginArgs();
+Arg("composition", '"SOURCE", "OVER", "INSIDE", "OUTSIDE", "MIX", "XOR", "ADD", "SATURATE", "MULTIPLY" or "DIFFERENCE"');
+EndArgs();
+</script>
 <h2>Stroke properties</h2>
+<script>
+Entry("", "", "");
+Desc("");
+BeginArgs();
+Arg("", "");
+Ret("", "");
+EndArgs();
+Entry("", "", "");
+Desc("");
+BeginArgs();
+Arg("", "");
+Ret("", "");
+EndArgs();
+Entry("", "", "");
+Desc("");
+BeginArgs();
+Arg("", "");
+Ret("", "");
+EndArgs();
+Entry("", "", "");
+Desc("");
+BeginArgs();
+Arg("", "");
+Ret("", "");
+EndArgs();
+Entry("", "", "");
+Desc("");
+BeginArgs();
+Arg("", "");
+Ret("", "");
+EndArgs();
+Entry("", "", "");
+Desc("");
+BeginArgs();
+Arg("", "");
+Ret("", "");
+EndArgs();
+Entry("", "", "");
+Desc("");
+BeginArgs();
+Arg("", "");
+Ret("", "");
+EndArgs();
+Entry("", "", "");
+Desc("");
+BeginArgs();
+Arg("", "");
+Ret("", "");
+EndArgs();
+Entry("", "", "");
+Desc("");
+BeginArgs();
+Arg("", "");
+Ret("", "");
+EndArgs();
+Entry("", "", "");
+Desc("");
+BeginArgs();
+Arg("", "");
+Ret("", "");
+EndArgs();
+</script>
 <h2>Clipping</h2>
+<script>
+Entry("", "context:clip_from_path", "");
+Desc("Defines clipping region from current path.");
+Entry("", "context:clip_clear()", "");
+Desc("Clears clipping region.");
+Entry("rectangles", "context:clip_get_rectangles", "");
+Desc("Returns clipping region describing rectangles.");
+BeginArgs();
+Ret("rectangles", "rectangles with fields <i>x</i>, <i>y</i>, <i>width</i> and <i>height</i> (tables in table)");
+EndArgs();
+</script>
 <h2>Path definition</h2>
+<script>
+Entry("", "", "");
+Desc("");
+BeginArgs();
+Arg("", "");
+Ret("", "");
+EndArgs();
+Entry("", "", "");
+Desc("");
+BeginArgs();
+Arg("", "");
+Ret("", "");
+EndArgs();
+Entry("", "", "");
+Desc("");
+BeginArgs();
+Arg("", "");
+Ret("", "");
+EndArgs();
+Entry("", "", "");
+Desc("");
+BeginArgs();
+Arg("", "");
+Ret("", "");
+EndArgs();
+Entry("", "", "");
+Desc("");
+BeginArgs();
+Arg("", "");
+Ret("", "");
+EndArgs();
+Entry("", "", "");
+Desc("");
+BeginArgs();
+Arg("", "");
+Ret("", "");
+EndArgs();
+Entry("", "", "");
+Desc("");
+BeginArgs();
+Arg("", "");
+Ret("", "");
+EndArgs();
+Entry("", "", "");
+Desc("");
+BeginArgs();
+Arg("", "");
+Ret("", "");
+EndArgs();
+Entry("", "", "");
+Desc("");
+BeginArgs();
+Arg("", "");
+Ret("", "");
+EndArgs();
+</script>
 <h2>Drawing</h2>
+<script>
+Entry("", "context:path_fill", "");
+Desc("Fills path with source.");
+Entry("", "context:path_stroke", "");
+Desc("Strokes path with source.");
+Entry("", "context:paint", "");
+Desc("Paints source completely.");
+Entry("", "context:masked_paint", "mask");
+Desc("Paints source with alpha mask.");
+BeginArgs();
+Arg("mask", "source object");
+EndArgs();
+</script>
 <h2>Bounding</h2>
+<script>
+Entry("x0, y0, x1, y1", "context:clip_bounding", "");
+Desc("Calculates the bounding box/area of the clipping region.");
+BeginArgs();
+Ret("x0, y0, x1, y1", "area (number)");
+EndArgs();
+Entry("x0, y0, x1, y1", "context:path_bounding", "");
+Desc("Calculates the bounding box/area of all path points.");
+BeginArgs();
+Ret("x0, y0, x1, y1", "area (number)");
+EndArgs();
+Entry("x0, y0, x1, y1", "context:path_fill_bounding", "");
+Desc("Calculates the bounding box/area of the filling path.");
+BeginArgs();
+Ret("x0, y0, x1, y1", "area (number)");
+EndArgs();
+Entry("x0, y0, x1, y1", "context:path_stroke_bounding", "");
+Desc("Calculates the bounding box/area of the stroking path.");
+BeginArgs();
+Ret("x0, y0, x1, y1", "area (number)");
+EndArgs();
+</script>
 <h2>Point test</h2>
+<script>
+Entry("hit", "context:clip_contains", "x, y");
+Desc("Checks if point is inside of the clipping region.");
+BeginArgs();
+Arg("x, y", "point (number)");
+Ret("hit", "is inside (boolean)");
+EndArgs();
+Entry("hit", "context:path_fill_contains", "x, y");
+Desc("Checks if point is inside of the filling path.");
+BeginArgs();
+Arg("x, y", "point (number)");
+Ret("hit", "is inside (boolean)");
+EndArgs();
+Entry("hit", "context:path_stroke_contains", "x, y");
+Desc("Checks if point is inside of the stroking path.");
+BeginArgs();
+Arg("x, y", "point (number)");
+Ret("hit", "is inside (boolean)");
+EndArgs();
+</script>
 </body>
 
 </html>
