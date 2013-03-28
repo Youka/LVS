@@ -433,6 +433,9 @@ LUA_FUNC_1ARG(image_convolution, 2)
 	delete[] image_data_copy;
 	// Set image data as dirty
 	cairo_surface_mark_dirty(surface);
+	// Return image
+	lua_pushvalue(L, 1);
+	return 1;
 LUA_FUNC_END
 
 LUA_FUNC_2ARG(text_extents, 3, 7)

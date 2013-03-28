@@ -23,76 +23,267 @@
 	}
 	h2{
 		font-size: 20px;
-		text-decoration: underline;
+		text-decoration: underline overline;
 		margin: 10px 0px 10px 0px;
 	}
-	span.ret{
-		color: green;
+	hr{
+		height: 0px;
+		border: 3px ridge grey;
 	}
-	span.arg{
-		color: red;
+	p{
+		margin: 0px 0px 0px 10px;
 	}
 	p.func{
 		color: black;
 		background-color: #F0F0F0;
 		display: table;
 		border: 2px groove black;
-	}
-	p{
-		margin: 0px 0px 0px 10px;
-	}
-	div{
-		margin: 0px 0px 10px 30px;
-	}
-	hr{
-		height: 0px;
-		border: 3px ridge grey;
+		font-weight: bold;
 	}
 </style>
 <script type="text/javascript">
-function generateEntry(ret, func, arguments){
-	var buffer = "<p class='func'><b>";
+var funcs = new Array();
+function Entry(ret, func, arguments){
+	funcs.push(func);
+	var buffer = "<p class='func'><a name='"+func+"'>";
 	if(ret.length > 0)
-		buffer += "<span class='ret'>"+ret+"</span> = ";
+		buffer += "<span style='color: green;'>"+ret+"</span> = ";
 	buffer += func+"(";
 	if(arguments.length > 0)
-		buffer += "<span class='arg'>"+arguments+"</span>";
-	buffer += ")</b></p>";
+		buffer += "<span style='color: red;'>"+arguments+"</span>";
+	buffer += ")</a></p>";
 	document.write(buffer);
 }
+function Desc(text){
+	document.write("<p>"+text+"</p>");
+}
+function BeginArgs(){
+	document.write("<div style='margin: 0px 0px 10px 30px;'>");
+}
+function Arg(arg, desc){
+	document.write("<div><span style='color: red;'>"+arg+"</span>: "+desc+"</div>");
+}
+function Ret(arg, desc){
+	document.write("<div><span style='color: green;'>"+arg+"</span>: "+desc+"</div>");
+}
+function EndArgs(){
+	document.write("</div>");
+}
 </script>
+<!--
+<script>
+Entry("", "", "");
+Desc("");
+BeginArgs();
+Arg("", "");
+Ret("", "");
+EndArgs();
+</script>
+-->
 </head>
 
 <body>
 <h1>G2D library</h1>
 <h2>Image creation</h2>
-<script>generateEntry("image", "g2d.create_image", "format, width, height");</script>
-<p>Creates a memory image with given size and colorspace.</p>
-<div>
-<span class="arg">format</span>: "RGBA", "RGB", "ALPHA" or "BINARY"<br/>
-<span class="arg">width height</span>: number bigger than 0<br/>
-<span class="ret">image</span>: image object
-</div>
-<script>generateEntry("image", "g2d.create_sub_image", "image, x0, y0, x1, y1");</script>
-<p>Creates a sub image from the area of given image.</p>
-<div>
-<span class="arg">image</span>: image object<br/>
-<span class="arg">x0 y0 x1 y1</span>: numbers<br/>
-<span class="ret">image</span>: image object
-</div>
+<script>
+Entry("image", "g2d.create_image", "format, width, height");
+Desc("Creates an image with given size and colorspace.");
+BeginArgs();
+Arg("format", '"RGBA", "RGB", "ALPHA" or "BINARY"');
+Arg("width, height", "size");
+Ret("image", "image object");
+EndArgs();
+Entry("image", "g2d.create_sub_image", "image, x0, y0, x1, y1");
+Desc("Creates a sub image from the area of given image.");
+BeginArgs();
+Arg("image", "image object");
+Arg("x0, y0, x1, y1", "image area (numbers)");
+Ret("image", "image object");
+EndArgs();
+Entry("image", "g2d.create_image_from_png", "filename");
+Desc("Creates an image from a PNG file.");
+BeginArgs();
+Arg("filename", "name of a PNG file (string)");
+Ret("image", "image object");
+EndArgs();
+Entry("", "g2d.create_png_from_image", "image, filename");
+Desc("Create a PNG file from an image.");
+BeginArgs();
+Arg("image", "image object");
+Ret("filename", "name of a new PNG file (string)");
+EndArgs();
+</script>
 <h2>Context creation</h2>
+<script>
+Entry("context", "g2d.create_context", "image");
+Desc("Creates a drawing context for given image.");
+BeginArgs();
+Arg("image", "image object");
+Ret("context", "context object");
+EndArgs();
+</script>
 <h2>Matrix creation</h2>
+<script>
+Entry("matrix", "g2d.create_matrix", "");
+Desc("Create a matrix.");
+BeginArgs();
+Ret("matrix", "matrix object");
+EndArgs();
+</script>
 <h2>Source creation</h2>
+<script>
+Entry("source", "g2d.create_source_color", "r, g, b[, a]");
+Desc("Create a source of given color.");
+BeginArgs();
+Arg("r, g, b, a", "color strength in range 0-1 (number)");
+Ret("source", "source object");
+EndArgs();
+Entry("source", "g2d.create_source_linear_gradient", "x0, y0, x1, y1");
+Desc("Creates a source as color gradient along given vector.");
+BeginArgs();
+Arg("x0, y0, x1, y1", "vector (number)");
+Ret("source", "source object");
+EndArgs();
+Entry("source", "g2d.create_source_radial_gradient", "cx0, cy0, r0, cx1, cy1, r1");
+Desc("Creates a source as color gradient along two circles.");
+BeginArgs();
+Arg("cx0, cy0, r0, cx1, cy1, r1", "circles (number)");
+Ret("source", "source object");
+EndArgs();
+Entry("source", "g2d.create_source_mesh_gradient", "");
+Desc("Create a source as color gradients inside meshes.");
+BeginArgs();
+Ret("source", "source object");
+EndArgs();
+Entry("source", "g2d.create_source_image", "image");
+Desc("Create a source as given image.");
+BeginArgs();
+Arg("image", "image object");
+Ret("source", "source object");
+EndArgs();
+</script>
 <h2>Utilities</h2>
+<script>
+Entry("image", "g2d.image_convolution", "image, kernel");
+Desc("Applies given convolution filter kernel to image.");
+BeginArgs();
+Arg("image", "image object");
+Arg("kernel", "convolution kernel with fields <i>width</i>, <i>height</i> and kernel elements (table)");
+Ret("image", "image object from input");
+EndArgs();
+Entry("width, height, ascent, descent, internal_leading, external_leading", "g2d.text_extents", "text, face, size[, bold, italic, underline, strikeout]");
+Desc("Calculates text extents and font metrics.");
+BeginArgs();
+Arg("text", "any text (string)");
+Arg("face", "font face (string)");
+Arg("size", "font size (number)");
+Arg("bold, italic, underline, strikeout", "font style (boolean, optional)");
+Ret("width, height", "text extents (number)");
+Ret("ascent, descent, internal_leading, external_leading", "font metrics (number)");
+EndArgs();
+</script>
 <hr>
 <h1>Image object</h1>
 <h2>Header data</h2>
-<h2>Pixel data</h2>
+<script>
+Entry("width", "image:get_width", "");
+Desc("Returns image width.");
+BeginArgs();
+Ret("width", "image width (number)");
+EndArgs();
+Entry("height", "image:get_height", "");
+Desc("Returns image height.");
+BeginArgs();
+Ret("height", "image height (number)");
+EndArgs();
+Entry("format", "image:get_format", "");
+Desc("Returns image format/colorspace.");
+BeginArgs();
+Ret("format", '"RGBA", "RGB", "ALPHA" or "BINARY"');
+EndArgs();
+</script>
+<h2>Pixels data</h2>
+<script>
+Entry("pixels", "image:get_data", "x0, y0, x1, y1");
+Desc("Returns image data of given area.");
+BeginArgs();
+Arg("x0, y0, x1, y1", "image area (number)");
+Ret("pixels", "pixels palette (table)");
+EndArgs();
+Entry("", "image:set_data", "x0, y0, x1, y1, pixels");
+Desc("Sets image data to given area.");
+BeginArgs();
+Arg("x0, y0, x1, y1", "image area (number)");
+Arg("pixels", "pixels palette (table)");
+EndArgs();
+</script>
 <hr>
 <h1>Matrix object</h1>
 <h2>Data</h2>
+<script>
+Entry("xx, yx, xy, yy, x0, y0", "matrix:get_data", "");
+Desc("Returns matrix values.");
+BeginArgs();
+Ret("xx, yx, xy, yy, x0, y0", "matrix fields (number)");
+EndArgs();
+Entry("", "matrix:set_data", "xx, yx, xy, yy, x0, y0");
+Desc("Sets matrix values.");
+BeginArgs();
+Arg("xx, yx, xy, yy, x0, y0", "matrix fields (number)");
+EndArgs();
+</script>
 <h2>Manipulation</h2>
+<script>
+Entry("matrix", "matrix:identity", "");
+Desc("Sets matrix to identity.");
+BeginArgs();
+Ret("matrix", "matrix object from input");
+EndArgs();
+Entry("matrix", "matrix:invert", "");
+Desc("Inverts matrix.");
+BeginArgs();
+Ret("matrix", "matrix object from input");
+EndArgs();
+Entry("matrix", "matrix:multiply", "xx, yx, xy, yy, x0, y0");
+Desc("Multiplies matrix with given matrix.");
+BeginArgs();
+Arg("xx, yx, xy, yy, x0, y0", "matrix fields (number)");
+Ret("matrix", "matrix object from input");
+EndArgs();
+Entry("matrix", "matrix:translate", "x, y");
+Desc("Prepends translation to matrix.");
+BeginArgs();
+Arg("x, y", "translation (number)");
+Ret("matrix", "matrix object from input");
+EndArgs();
+Entry("matrix", "matrix:scale", "x, y");
+Desc("Prepends scaling to matrix.");
+BeginArgs();
+Arg("x, y", "scale (number)");
+Ret("matrix", "matrix object from input");
+EndArgs();
+Entry("matrix", "matrix:rotate", "angle");
+Desc("Prepends z-axis rotation to matrix.");
+BeginArgs();
+Arg("angle", "rotation angle (number)");
+Ret("matrix", "matrix object from input");
+EndArgs();
+Entry("matrix", "matrix:shear", "x, y");
+Desc("Prepends shearing to matrix.");
+BeginArgs();
+Arg("x, y", "shear (number)");
+Ret("matrix", "matrix object from input");
+EndArgs();
+</script>
 <h2>Transformation</h2>
+<script>
+Entry("x, y", "matrix:transform", "x, y");
+Desc("Multiplies matrix with point.");
+BeginArgs();
+Arg("x, y", "point (number)");
+Ret("x, y", "transformed point (number)");
+EndArgs();
+</script>
 <hr>
 <h1>Source object</h1>
 <h2>Add data</h2>
