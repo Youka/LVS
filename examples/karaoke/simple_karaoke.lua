@@ -1,5 +1,5 @@
 -- Parse ASS content and fill global tables
-LoadASS([[
+ass.load([[
 PlayResX: 720
 PlayResY: 480
 
@@ -22,7 +22,7 @@ Dialogue: 0,0:00:10.75,0:00:15.44,Subtitle,,0,0,0,,Ich blickte auf, um die Wüns
 local function roumaji_kanji(ctx, ms, line)
 	for si, syl in ipairs(line.syls) do
 		ctx:set_matrix(g2d.create_matrix():translate(syl.x, syl.y))
-		ctx:path_add_text(syl.text, line.styleref.fontname, line.styleref.fontsize, line.styleref.bold, line.styleref.italic, line.styleref.underline, line.styleref.strikeout)
+		ctx:path_add_text(syl.text, ass.unpack_style(line.styleref))
 		if ms >= line.start_time + syl.start_time and ms < line.start_time + syl.end_time then
 			ctx:set_source(g2du.red)
 		else
@@ -36,7 +36,7 @@ end
 -- Subtitle
 local function subtitle(ctx, ms, line)
 	ctx:set_matrix(g2d.create_matrix():translate(line.x, line.y))
-	ctx:path_add_text(line.text, line.styleref.fontname, line.styleref.fontsize, line.styleref.bold, line.styleref.italic, line.styleref.underline, line.styleref.strikeout)
+	ctx:path_add_text(line.text, ass.unpack_style(line.styleref))
 	ctx:set_source(g2du.white)
 	ctx:path_fill()
 	ctx:path_clear()
