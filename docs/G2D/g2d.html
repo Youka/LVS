@@ -1,6 +1,5 @@
 <head>
 <title>LVS</title>
-<base href="." target="_blank">
 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
 <meta name="application-name" content="G2D">
 <meta name="author" content="Youka">
@@ -39,6 +38,11 @@
 		display: table;
 		border: 2px groove black;
 		font-weight: bold;
+	}
+	a.index{
+		font-weight: bold;
+		text-decoration: none;
+		color: white;
 	}
 </style>
 <script type="text/javascript">
@@ -441,72 +445,64 @@ EndArgs();
 </script>
 <h2>Stroke properties</h2>
 <script>
-Entry("", "", "");
-Desc("");
+Entry("offset, dashes", "context:get_dash", "");
+Desc("Sets the dash pattern for path stroking.");
 BeginArgs();
-Arg("", "");
-Ret("", "");
+Ret("offset", "dash pattern offset for stroke start (number)");
+Ret("dashes", "length of 'on' and 'off' portions in stroke (table of numbers)");
 EndArgs();
-Entry("", "", "");
-Desc("");
+Entry("", "context:set_dash", "offset, dashes");
+Desc("Returns the dash pattern for path stroking.");
 BeginArgs();
-Arg("", "");
-Ret("", "");
+Arg("offset", "dash pattern offset for stroke start (number)");
+Arg("dashes", "length of 'on' and 'off' portions in stroke (table of numbers)");
 EndArgs();
-Entry("", "", "");
-Desc("");
+Entry("line_cap", "context:get_line_cap", "");
+Desc("Gets line cap.");
 BeginArgs();
-Arg("", "");
-Ret("", "");
+Ret("line_cap", '"FLAT", "ROUND" or "SQUARE"');
 EndArgs();
-Entry("", "", "");
-Desc("");
+Entry("", "context:set_line_cap", "line_cap");
+Desc("Sets line cap.");
 BeginArgs();
-Arg("", "");
-Ret("", "");
+Arg("line_cap", '"FLAT", "ROUND" or "SQUARE"');
 EndArgs();
-Entry("", "", "");
-Desc("");
+Entry("line_join", "context:get_line_join", "");
+Desc("Returns line join.");
 BeginArgs();
-Arg("", "");
-Ret("", "");
+Ret("line_join", '"MITER", "ROUND" or "BEVEL"');
 EndArgs();
-Entry("", "", "");
-Desc("");
+Entry("", "context:set_line_join", "line_join");
+Desc("Sets line join.");
 BeginArgs();
-Arg("", "");
-Ret("", "");
+Arg("line_join", '"MITER", "ROUND" or "BEVEL"');
 EndArgs();
-Entry("", "", "");
-Desc("");
+Entry("miter_limit", "context:get_miter_limit", "");
+Desc("Returns miter join width limit.");
 BeginArgs();
-Arg("", "");
-Ret("", "");
+Ret("miter_limit", "miter limit (number)");
 EndArgs();
-Entry("", "", "");
-Desc("");
+Entry("", "context:set_miter_limit", "miter_limit");
+Desc("Sets miter join width limit.");
 BeginArgs();
-Arg("", "");
-Ret("", "");
+Arg("miter_limit", "miter limit (number)");
 EndArgs();
-Entry("", "", "");
-Desc("");
+Entry("width", "context:get_line_width", "");
+Desc("Returns line width.");
 BeginArgs();
-Arg("", "");
-Ret("", "");
+Ret("width", "line width (number)");
 EndArgs();
-Entry("", "", "");
-Desc("");
+Entry("", "context:set_line_width", "width");
+Desc("Sets line width.");
 BeginArgs();
-Arg("", "");
-Ret("", "");
+Arg("width", "line width (number)");
 EndArgs();
 </script>
 <h2>Clipping</h2>
 <script>
 Entry("", "context:clip_from_path", "");
 Desc("Defines clipping region from current path.");
-Entry("", "context:clip_clear()", "");
+Entry("", "context:clip_clear", "");
 Desc("Clears clipping region.");
 Entry("rectangles", "context:clip_get_rectangles", "");
 Desc("Returns clipping region describing rectangles.");
@@ -516,59 +512,50 @@ EndArgs();
 </script>
 <h2>Path definition</h2>
 <script>
-Entry("", "", "");
-Desc("");
+Entry("", "context:path_move_to", "x, y");
+Desc("Adds a movement to current path.");
 BeginArgs();
-Arg("", "");
-Ret("", "");
+Arg("x, y", "point (number)");
 EndArgs();
-Entry("", "", "");
-Desc("");
+Entry("", "context:path_line_to", "x, y");
+Desc("Adds a line to current path.");
 BeginArgs();
-Arg("", "");
-Ret("", "");
+Arg("x, y", "point (number)");
 EndArgs();
-Entry("", "", "");
-Desc("");
+Entry("", "context:path_curve_to", "x0, y0, x1, y1, x2, y2");
+Desc("Adds a bezier curve to current path.");
 BeginArgs();
-Arg("", "");
-Ret("", "");
+Arg("x0, y0, x1, y1, x2, y2", "points (number)");
 EndArgs();
-Entry("", "", "");
-Desc("");
+Entry("", "context:path_add_rectangle", "x, y, width, height");
+Desc("Adds a closed rectangle to current path.");
 BeginArgs();
-Arg("", "");
-Ret("", "");
+Arg("x, y", "upper-left point of rectangle (number)");
+Arg("width, height", "dimension of rectangle (number)");
 EndArgs();
-Entry("", "", "");
-Desc("");
+Entry("", "context:path_add_arc", "cx, cy, r, angle0, angle1");
+Desc("Adds an arc to current path.");
 BeginArgs();
-Arg("", "");
-Ret("", "");
+Arg("cx, cy, r", "arc (number)");
+Arg("angle0, angle1", "start and end angle of arc (number)");
 EndArgs();
-Entry("", "", "");
-Desc("");
+Entry("", "context:path_add_text", "text, face, size[, bold, italic, underline, strikeout]");
+Desc("Adds a closed text path to current path.");
 BeginArgs();
-Arg("", "");
-Ret("", "");
+Arg("text", "any text (string)");
+Arg("face", "font face (string)");
+Arg("size", "font size (number)");
+Arg("bold, italic, underline, strikeout", "font style (boolean, optional)");
 EndArgs();
-Entry("", "", "");
+Entry("", "context:path_close", "");
+Desc("Closes current path.");
+Entry("", "context:path_clear", "");
+Desc("Clears path.");
+Entry("", "context:path_transform", "filter[, flatten]");
 Desc("");
 BeginArgs();
-Arg("", "");
-Ret("", "");
-EndArgs();
-Entry("", "", "");
-Desc("");
-BeginArgs();
-Arg("", "");
-Ret("", "");
-EndArgs();
-Entry("", "", "");
-Desc("");
-BeginArgs();
-Arg("", "");
-Ret("", "");
+Arg("filter", "path points filter (function)");
+Arg("flatten", "curves flattened before? (boolean)");
 EndArgs();
 </script>
 <h2>Drawing</h2>
@@ -629,6 +616,20 @@ Arg("x, y", "point (number)");
 Ret("hit", "is inside (boolean)");
 EndArgs();
 </script>
+<hr>
+<h1>Index</h1>
+<a name="func_index"><div id="func_index" style='display: table; background-color: #402020; border: 3px ridge red; padding: 10px;'>
+<script>
+for(var i = 0; i < funcs.length; i++){
+	document.write('<a class="index" href="#'+funcs[i]+'">'+funcs[i]+'</a>');
+	if(i != funcs.length-1)
+		document.write("<br/>");
+}
+</script>
+</div></a>
+<a class="index" href="#func_index"><div style='position: fixed; right: 0px; top: 0px; background-color: #402020; border: 3px ridge red;'>
+Index
+</div></a>
 </body>
 
 </html>
