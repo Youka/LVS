@@ -23,7 +23,7 @@ local function roumaji_kanji(ctx, ms, line)
 	for si, syl in ipairs(line.syls) do
 		ctx:set_matrix(g2d.create_matrix():translate(syl.x, syl.y))
 		ctx:path_add_text(syl.text, ass.unpack_style(line.styleref))
-		if ms >= line.start_time + syl.start_time and ms < line.start_time + syl.end_time then
+		if ms >= syl.start_time and ms < syl.end_time then
 			ctx:set_source(g2du.red)
 		else
 			ctx:set_source(g2du.white)

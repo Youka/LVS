@@ -228,6 +228,8 @@ g2du = {
 		local xx, yx, xy, yy, x0, y0 = math.cos(y), 0, math.sin(x)*math.sin(y), math.cos(x), 0, 0
 		-- Apply xy-rotation to matrix
 		mat:multiply(xx, yx, xy, yy, x0, y0)
+		-- Return input matrix
+		return mat
 	end,
 	rotate_yx = function(mat, x, y)
 		if getmetatable(mat) ~= "g2d matrix" or type(x) ~= "number" or type(y) ~= "number" then
@@ -239,5 +241,7 @@ g2du = {
 		local xx, yx, xy, yy, x0, y0 = math.cos(y), -math.sin(x) * -math.sin(y), 0, math.cos(x), 0, 0
 		-- Apply yx-rotation to matrix
 		mat:multiply(xx, yx, xy, yy, x0, y0)
+		-- Return input matrix
+		return mat
 	end
 }

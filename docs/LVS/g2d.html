@@ -1,12 +1,15 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
 <head>
-<title>LVS</title>
+<title>G2D</title>
 <base href="" target="_self" />
 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-<meta name="application-name" content="G2D">
+<meta name="application-name" content="LVS">
 <meta name="author" content="Youka">
 <meta name="description" content="G2D library reference.">
 <meta name="keywords" content="LVS,Lua,Image,2D,Editing">
-<link rel="icon" type="image/png" href="../LVS/LVS.png">
+<link rel="icon" type="image/png" href="LVS.png">
 <style type="text/css" media="screen">
 	body{
 		background-color: black;
@@ -33,7 +36,7 @@
 	p{
 		margin: 0px 0px 0px 10px;
 	}
-	p.func{
+	p.def{
 		color: black;
 		background-color: #F0F0F0;
 		display: table;
@@ -47,10 +50,14 @@
 	}
 </style>
 <script type="text/javascript">
-var funcs = new Array();
-function Entry(ret, func, arguments){
-	funcs.push(func);
-	var buffer = "<p class='func'><a name='"+func+"'>";
+var index_entries = new Array();
+function VarEntry(v){
+	index_entries.push(v);
+	document.write("<p class='def'><a name='"+v+"'>"+v+"</a></p>");
+}
+function FuncEntry(ret, func, arguments){
+	index_entries.push(func);
+	var buffer = "<p class='def'><a name='"+func+"'>";
 	if(ret.length > 0)
 		buffer += "<span style='color: green;'>"+ret+"</span> = ";
 	buffer += func+"(";
@@ -75,41 +82,33 @@ function EndArgs(){
 	document.write("</div>");
 }
 </script>
-<!--
-Entry("", "", "");
-Desc("");
-BeginArgs();
-Arg("", "");
-Ret("", "");
-EndArgs();
--->
 </head>
 
 <body>
 <h1>G2D library</h1>
 <h2>Image creation</h2>
 <script>
-Entry("image", "g2d.create_image", "format, width, height");
+FuncEntry("image", "g2d.create_image", "format, width, height");
 Desc("Creates an image with given size and colorspace.");
 BeginArgs();
 Arg("format", '"RGBA", "RGB", "ALPHA" or "BINARY"');
 Arg("width, height", "size (number)");
 Ret("image", "image object");
 EndArgs();
-Entry("image", "g2d.create_sub_image", "image, x0, y0, x1, y1");
+FuncEntry("image", "g2d.create_sub_image", "image, x0, y0, x1, y1");
 Desc("Creates a sub image from the area of given image.");
 BeginArgs();
 Arg("image", "image object");
 Arg("x0, y0, x1, y1", "image area (numbers)");
 Ret("image", "image object");
 EndArgs();
-Entry("image", "g2d.create_image_from_png", "filename");
+FuncEntry("image", "g2d.create_image_from_png", "filename");
 Desc("Creates an image from a PNG file.");
 BeginArgs();
 Arg("filename", "name of a PNG file (string)");
 Ret("image", "image object");
 EndArgs();
-Entry("", "g2d.create_png_from_image", "image, filename");
+FuncEntry("", "g2d.create_png_from_image", "image, filename");
 Desc("Creates a PNG file from an image.");
 BeginArgs();
 Arg("image", "image object");
@@ -118,7 +117,7 @@ EndArgs();
 </script>
 <h2>Context creation</h2>
 <script>
-Entry("context", "g2d.create_context", "image");
+FuncEntry("context", "g2d.create_context", "image");
 Desc("Creates a drawing context for given image.");
 BeginArgs();
 Arg("image", "image object");
@@ -127,7 +126,7 @@ EndArgs();
 </script>
 <h2>Matrix creation</h2>
 <script>
-Entry("matrix", "g2d.create_matrix", "");
+FuncEntry("matrix", "g2d.create_matrix", "");
 Desc("Creates a matrix.");
 BeginArgs();
 Ret("matrix", "matrix object");
@@ -135,30 +134,30 @@ EndArgs();
 </script>
 <h2>Source creation</h2>
 <script>
-Entry("source", "g2d.create_source_color", "r, g, b[, a]");
+FuncEntry("source", "g2d.create_source_color", "r, g, b[, a]");
 Desc("Creates a source of given color.");
 BeginArgs();
 Arg("r, g, b, a", "color strength in range 0-1 (number)");
 Ret("source", "source object");
 EndArgs();
-Entry("source", "g2d.create_source_linear_gradient", "x0, y0, x1, y1");
+FuncEntry("source", "g2d.create_source_linear_gradient", "x0, y0, x1, y1");
 Desc("Creates a source as color gradient along given vector.");
 BeginArgs();
 Arg("x0, y0, x1, y1", "vector (number)");
 Ret("source", "source object");
 EndArgs();
-Entry("source", "g2d.create_source_radial_gradient", "cx0, cy0, r0, cx1, cy1, r1");
+FuncEntry("source", "g2d.create_source_radial_gradient", "cx0, cy0, r0, cx1, cy1, r1");
 Desc("Creates a source as color gradient along two circles.");
 BeginArgs();
 Arg("cx0, cy0, r0, cx1, cy1, r1", "circles (number)");
 Ret("source", "source object");
 EndArgs();
-Entry("source", "g2d.create_source_mesh_gradient", "");
+FuncEntry("source", "g2d.create_source_mesh_gradient", "");
 Desc("Creates a source as color gradient meshes.");
 BeginArgs();
 Ret("source", "source object");
 EndArgs();
-Entry("source", "g2d.create_source_image", "image");
+FuncEntry("source", "g2d.create_source_image", "image");
 Desc("Creates a source as given image.");
 BeginArgs();
 Arg("image", "image object");
@@ -167,14 +166,14 @@ EndArgs();
 </script>
 <h2>Utilities</h2>
 <script>
-Entry("image", "g2d.image_convolution", "image, kernel");
+FuncEntry("image", "g2d.image_convolution", "image, kernel");
 Desc("Applies given convolution filter kernel to image.");
 BeginArgs();
 Arg("image", "image object");
 Arg("kernel", "convolution kernel with fields <i>width</i>, <i>height</i> and kernel elements (table)");
 Ret("image", "image object from input");
 EndArgs();
-Entry("width, height, ascent, descent, internal_leading, external_leading", "g2d.text_extents", "text, face, size[, bold, italic, underline, strikeout]");
+FuncEntry("width, height, ascent, descent, internal_leading, external_leading", "g2d.text_extents", "text, face, size[, bold, italic, underline, strikeout]");
 Desc("Calculates text extents and font metrics.");
 BeginArgs();
 Arg("text", "any text (string)");
@@ -189,17 +188,17 @@ EndArgs();
 <h1>Image object</h1>
 <h2>Header data</h2>
 <script>
-Entry("width", "image:get_width", "");
+FuncEntry("width", "image:get_width", "");
 Desc("Returns image width.");
 BeginArgs();
 Ret("width", "image width (number)");
 EndArgs();
-Entry("height", "image:get_height", "");
+FuncEntry("height", "image:get_height", "");
 Desc("Returns image height.");
 BeginArgs();
 Ret("height", "image height (number)");
 EndArgs();
-Entry("format", "image:get_format", "");
+FuncEntry("format", "image:get_format", "");
 Desc("Returns image format/colorspace.");
 BeginArgs();
 Ret("format", '"RGBA", "RGB", "ALPHA" or "BINARY"');
@@ -207,13 +206,13 @@ EndArgs();
 </script>
 <h2>Pixels data</h2>
 <script>
-Entry("pixels", "image:get_data", "x0, y0, x1, y1");
+FuncEntry("pixels", "image:get_data", "x0, y0, x1, y1");
 Desc("Returns image data of given area.");
 BeginArgs();
 Arg("x0, y0, x1, y1", "image area (number)");
 Ret("pixels", "pixels palette (table)");
 EndArgs();
-Entry("", "image:set_data", "x0, y0, x1, y1, pixels");
+FuncEntry("", "image:set_data", "x0, y0, x1, y1, pixels");
 Desc("Sets image data to given area.");
 BeginArgs();
 Arg("x0, y0, x1, y1", "image area (number)");
@@ -224,12 +223,12 @@ EndArgs();
 <h1>Matrix object</h1>
 <h2>Data</h2>
 <script>
-Entry("xx, yx, xy, yy, x0, y0", "matrix:get_data", "");
+FuncEntry("xx, yx, xy, yy, x0, y0", "matrix:get_data", "");
 Desc("Returns matrix values.");
 BeginArgs();
 Ret("xx, yx, xy, yy, x0, y0", "matrix fields (number)");
 EndArgs();
-Entry("", "matrix:set_data", "xx, yx, xy, yy, x0, y0");
+FuncEntry("", "matrix:set_data", "xx, yx, xy, yy, x0, y0");
 Desc("Sets matrix values.");
 BeginArgs();
 Arg("xx, yx, xy, yy, x0, y0", "matrix fields (number)");
@@ -237,41 +236,41 @@ EndArgs();
 </script>
 <h2>Manipulation</h2>
 <script>
-Entry("matrix", "matrix:identity", "");
+FuncEntry("matrix", "matrix:identity", "");
 Desc("Sets matrix to identity.");
 BeginArgs();
 Ret("matrix", "matrix object from input");
 EndArgs();
-Entry("matrix", "matrix:invert", "");
+FuncEntry("matrix", "matrix:invert", "");
 Desc("Inverts matrix.");
 BeginArgs();
 Ret("matrix", "matrix object from input");
 EndArgs();
-Entry("matrix", "matrix:multiply", "xx, yx, xy, yy, x0, y0");
+FuncEntry("matrix", "matrix:multiply", "xx, yx, xy, yy, x0, y0");
 Desc("Multiplies matrix with given matrix.");
 BeginArgs();
 Arg("xx, yx, xy, yy, x0, y0", "matrix fields (number)");
 Ret("matrix", "matrix object from input");
 EndArgs();
-Entry("matrix", "matrix:translate", "x, y");
+FuncEntry("matrix", "matrix:translate", "x, y");
 Desc("Prepends translation to matrix.");
 BeginArgs();
 Arg("x, y", "translation (number)");
 Ret("matrix", "matrix object from input");
 EndArgs();
-Entry("matrix", "matrix:scale", "x, y");
+FuncEntry("matrix", "matrix:scale", "x, y");
 Desc("Prepends scaling to matrix.");
 BeginArgs();
 Arg("x, y", "scale (number)");
 Ret("matrix", "matrix object from input");
 EndArgs();
-Entry("matrix", "matrix:rotate", "angle");
+FuncEntry("matrix", "matrix:rotate", "angle");
 Desc("Prepends z-axis rotation to matrix.");
 BeginArgs();
 Arg("angle", "rotation angle (number)");
 Ret("matrix", "matrix object from input");
 EndArgs();
-Entry("matrix", "matrix:shear", "x, y");
+FuncEntry("matrix", "matrix:shear", "x, y");
 Desc("Prepends shearing to matrix.");
 BeginArgs();
 Arg("x, y", "shear (number)");
@@ -280,7 +279,7 @@ EndArgs();
 </script>
 <h2>Transformation</h2>
 <script>
-Entry("x, y", "matrix:transform", "x, y");
+FuncEntry("x, y", "matrix:transform", "x, y");
 Desc("Multiplies matrix with point.");
 BeginArgs();
 Arg("x, y", "point (number)");
@@ -291,7 +290,7 @@ EndArgs();
 <h1>Source object</h1>
 <h2>Add data</h2>
 <script>
-Entry("source", "source:add_color", "pct, r, g, b[, a]");
+FuncEntry("source", "source:add_color", "pct, r, g, b[, a]");
 Desc("Adds a color to color gradient source.");
 BeginArgs();
 Arg("pct", "gradient offset in range 0-1 (number)");
@@ -299,7 +298,7 @@ Arg("r, g, b", "color strength in range 0-1 (number)");
 Arg("a", "alpha strength in range 0-1 (number, optional)");
 Ret("source", "source object from input");
 EndArgs();
-Entry("source", "source:add_mesh", "x0, y0, r0, g0, b0, a0, x1, y1, r1, g1, b1, a1, x2, y2, r2, g2, b2, a2[, x3, y3, r3, g3, b3, a3]");
+FuncEntry("source", "source:add_mesh", "x0, y0, r0, g0, b0, a0, x1, y1, r1, g1, b1, a1, x2, y2, r2, g2, b2, a2[, x3, y3, r3, g3, b3, a3]");
 Desc("Adds a color gradient mesh to meshes source");
 BeginArgs();
 Arg("x0, y0, r0, g0, b0, a0, x1, y1, r1, g1, b1, a1, x2, y2, r2, g2, b2, a", "mesh points and colors in range 0-1 (number)");
@@ -309,30 +308,30 @@ EndArgs();
 </script>
 <h2>Get data</h2>
 <script>
-Entry("[pct, ]r, g, b, a", "source:get_color", "[index]");
+FuncEntry("[pct, ]r, g, b, a", "source:get_color", "[index]");
 Desc("Returns (gradient offset and) color of color (gradient) source.");
 BeginArgs();
 Arg("index", "color index in color gradient source (number, optional)");
 Ret("pct", "gradient offset in range 0-1 (number, case-dependent)");
 Ret("r, g, b, a", "color and alpha in range 0-1 (number)");
 EndArgs();
-Entry("x0, y0, x1, y1", "source:get_points", "");
+FuncEntry("x0, y0, x1, y1", "source:get_points", "");
 Desc("Returns vector of linear color gradient.");
 BeginArgs();
 Ret("x0, y0, x1, y1", "vector (number)");
 EndArgs();
-Entry("cx0, cy0, r0, cx1, cy1, r1", "source:get_circles", "");
+FuncEntry("cx0, cy0, r0, cx1, cy1, r1", "source:get_circles", "");
 Desc("Returns circles of radial color gradient.");
 BeginArgs();
 Ret("cx0, cy0, r0, cx1, cy1, r1", "circles (number)");
 EndArgs();
-Entry("x0, y0, r0, g0, b0, a0, x1, y1, r1, g1, b1, a1, x2, y2, r2, g2, b2, a2, x3, y3, r3, g3, b3, a3", "source:get_mesh", "index");
+FuncEntry("x0, y0, r0, g0, b0, a0, x1, y1, r1, g1, b1, a1, x2, y2, r2, g2, b2, a2, x3, y3, r3, g3, b3, a3", "source:get_mesh", "index");
 Desc("Returns a mesh from color gradient mesh source.");
 BeginArgs();
 Arg("index", "mesh index in color gradient mesh source (number)");
 Ret("x0, y0, r0, g0, b0, a0, x1, y1, r1, g1, b1, a1, x2, y2, r2, g2, b2, a2, x3, y3, r3, g3, b3, a3", "mesh (number)");
 EndArgs();
-Entry("image", "source:get_image", "");
+FuncEntry("image", "source:get_image", "");
 Desc("Returns image of image source.");
 BeginArgs();
 Ret("image", "image object");
@@ -340,37 +339,37 @@ EndArgs();
 </script>
 <h2>Properties</h2>
 <script>
-Entry("type", "source:get_type", "");
+FuncEntry("type", "source:get_type", "");
 Desc("Returns source type.");
 BeginArgs();
 Ret("type", '"COLOR", "LINEAR_GRADIENT", "RADIAL_GRADIENT", "MESH_GRADIENT" or "IMAGE"');
 EndArgs();
-Entry("extender", "source:get_extender", "");
+FuncEntry("extender", "source:get_extender", "");
 Desc("Returns source edge extension mode.");
 BeginArgs();
 Ret("extender", '"NONE", "REPEAT", "MIRROR" or "FLOW"');
 EndArgs();
-Entry("", "source:set_extender", "extender");
+FuncEntry("", "source:set_extender", "extender");
 Desc("Sets source edge extension mode.");
 BeginArgs();
 Arg("extender", '"NONE", "REPEAT", "MIRROR" or "FLOW"');
 EndArgs();
-Entry("filter", "source:get_filter", "");
+FuncEntry("filter", "source:get_filter", "");
 Desc("Returns source transformation filter.");
 BeginArgs();
 Ret("filter", '"FAST", "GOOD" or "BEST"');
 EndArgs();
-Entry("", "source:set_filter", "filter");
+FuncEntry("", "source:set_filter", "filter");
 Desc("Sets source transformation filter.");
 BeginArgs();
 Arg("filter", '"FAST", "GOOD" or "BEST"');
 EndArgs();
-Entry("matrix", "source:get_matrix", "");
+FuncEntry("matrix", "source:get_matrix", "");
 Desc("Returns source transformation matrix.");
 BeginArgs();
 Ret("matrix", "matrix object");
 EndArgs();
-Entry("", "source:set_matrix", "matrix");
+FuncEntry("", "source:set_matrix", "matrix");
 Desc("Sets source transformation matrix.");
 BeginArgs();
 Arg("matrix", "matrix object");
@@ -380,19 +379,19 @@ EndArgs();
 <h1>Context object</h1>
 <h2>State</h2>
 <script>
-Entry("", "context:push_state", "");
+FuncEntry("", "context:push_state", "");
 Desc("Pushes current context state onto the internal state stack.");
-Entry("", "context:pop_state", "");
+FuncEntry("", "context:pop_state", "");
 Desc("Pops a context state from the internal state stack and sets it as current.");
 </script>
 <h2>Transformation</h2>
 <script>
-Entry("matrix", "context:get_matrix", "");
+FuncEntry("matrix", "context:get_matrix", "");
 Desc("Returns context transformation matrix.");
 BeginArgs();
 Ret("matrix", "matrix object");
 EndArgs();
-Entry("", "context:set_matrix", "matrix");
+FuncEntry("", "context:set_matrix", "matrix");
 Desc("Sets context transformation matrix.");
 BeginArgs();
 Arg("matrix", "matrix object");
@@ -400,12 +399,12 @@ EndArgs();
 </script>
 <h2>Raster source</h2>
 <script>
-Entry("source", "context:get_source", "");
+FuncEntry("source", "context:get_source", "");
 Desc("Returns context source.");
 BeginArgs();
 Ret("source", "source object");
 EndArgs();
-Entry("", "context:set_source", "source");
+FuncEntry("", "context:set_source", "source");
 Desc("Sets context source.");
 BeginArgs();
 Arg("source", "source object");
@@ -413,32 +412,32 @@ EndArgs();
 </script>
 <h2>Render properties</h2>
 <script>
-Entry("antialiasing", "context:get_antialiasing", "");
+FuncEntry("antialiasing", "context:get_antialiasing", "");
 Desc("Returns antialiasing mode.");
 BeginArgs();
 Ret("antialiasing", "antialiasing mode (boolean)");
 EndArgs();
-Entry("", "context:set_antialiasing", "antialiasing");
+FuncEntry("", "context:set_antialiasing", "antialiasing");
 Desc("Sets antialiasing mode.");
 BeginArgs();
 Arg("antialiasing", "antialiasing mode (boolean)");
 EndArgs();
-Entry("fill_rule", "context:get_fill_rule", "");
+FuncEntry("fill_rule", "context:get_fill_rule", "");
 Desc("Returns filling rule.");
 BeginArgs();
 Ret("fill_rule", '"WINDING" or "ODD"');
 EndArgs();
-Entry("", "context:set_fill_rule", "fill_rule");
+FuncEntry("", "context:set_fill_rule", "fill_rule");
 Desc("Sets filling rule.");
 BeginArgs();
 Arg("fill_rule", '"WINDING" or "ODD"');
 EndArgs();
-Entry("composition", "context:get_composition", "");
+FuncEntry("composition", "context:get_composition", "");
 Desc("Returns composition.");
 BeginArgs();
 Ret("composition", '"SOURCE", "OVER", "INSIDE", "OUTSIDE", "MIX", "XOR", "ADD", "SATURATE", "MULTIPLY" or "DIFFERENCE"');
 EndArgs();
-Entry("", "context:set_composition", "composition");
+FuncEntry("", "context:set_composition", "composition");
 Desc("Sets composition.");
 BeginArgs();
 Arg("composition", '"SOURCE", "OVER", "INSIDE", "OUTSIDE", "MIX", "XOR", "ADD", "SATURATE", "MULTIPLY" or "DIFFERENCE"');
@@ -446,54 +445,54 @@ EndArgs();
 </script>
 <h2>Stroke properties</h2>
 <script>
-Entry("offset, dashes", "context:get_dash", "");
+FuncEntry("offset, dashes", "context:get_dash", "");
 Desc("Sets the dash pattern for path stroking.");
 BeginArgs();
 Ret("offset", "dash pattern offset for stroke start (number)");
 Ret("dashes", "length of 'on' and 'off' portions in stroke (table of numbers)");
 EndArgs();
-Entry("", "context:set_dash", "offset, dashes");
+FuncEntry("", "context:set_dash", "offset, dashes");
 Desc("Returns the dash pattern for path stroking.");
 BeginArgs();
 Arg("offset", "dash pattern offset for stroke start (number)");
 Arg("dashes", "length of 'on' and 'off' portions in stroke (table of numbers)");
 EndArgs();
-Entry("line_cap", "context:get_line_cap", "");
+FuncEntry("line_cap", "context:get_line_cap", "");
 Desc("Gets line cap.");
 BeginArgs();
 Ret("line_cap", '"FLAT", "ROUND" or "SQUARE"');
 EndArgs();
-Entry("", "context:set_line_cap", "line_cap");
+FuncEntry("", "context:set_line_cap", "line_cap");
 Desc("Sets line cap.");
 BeginArgs();
 Arg("line_cap", '"FLAT", "ROUND" or "SQUARE"');
 EndArgs();
-Entry("line_join", "context:get_line_join", "");
+FuncEntry("line_join", "context:get_line_join", "");
 Desc("Returns line join.");
 BeginArgs();
 Ret("line_join", '"MITER", "ROUND" or "BEVEL"');
 EndArgs();
-Entry("", "context:set_line_join", "line_join");
+FuncEntry("", "context:set_line_join", "line_join");
 Desc("Sets line join.");
 BeginArgs();
 Arg("line_join", '"MITER", "ROUND" or "BEVEL"');
 EndArgs();
-Entry("miter_limit", "context:get_miter_limit", "");
+FuncEntry("miter_limit", "context:get_miter_limit", "");
 Desc("Returns miter join width limit.");
 BeginArgs();
 Ret("miter_limit", "miter limit (number)");
 EndArgs();
-Entry("", "context:set_miter_limit", "miter_limit");
+FuncEntry("", "context:set_miter_limit", "miter_limit");
 Desc("Sets miter join width limit.");
 BeginArgs();
 Arg("miter_limit", "miter limit (number)");
 EndArgs();
-Entry("width", "context:get_line_width", "");
+FuncEntry("width", "context:get_line_width", "");
 Desc("Returns line width.");
 BeginArgs();
 Ret("width", "line width (number)");
 EndArgs();
-Entry("", "context:set_line_width", "width");
+FuncEntry("", "context:set_line_width", "width");
 Desc("Sets line width.");
 BeginArgs();
 Arg("width", "line width (number)");
@@ -501,11 +500,11 @@ EndArgs();
 </script>
 <h2>Clipping</h2>
 <script>
-Entry("", "context:clip_from_path", "");
+FuncEntry("", "context:clip_from_path", "");
 Desc("Defines clipping region from current path.");
-Entry("", "context:clip_clear", "");
+FuncEntry("", "context:clip_clear", "");
 Desc("Clears clipping region.");
-Entry("rectangles", "context:clip_get_rectangles", "");
+FuncEntry("rectangles", "context:clip_get_rectangles", "");
 Desc("Returns clipping region describing rectangles.");
 BeginArgs();
 Ret("rectangles", "rectangles with fields <i>x</i>, <i>y</i>, <i>width</i> and <i>height</i> (tables in table)");
@@ -513,34 +512,34 @@ EndArgs();
 </script>
 <h2>Path definition</h2>
 <script>
-Entry("", "context:path_move_to", "x, y");
+FuncEntry("", "context:path_move_to", "x, y");
 Desc("Adds a movement to current path.");
 BeginArgs();
 Arg("x, y", "point (number)");
 EndArgs();
-Entry("", "context:path_line_to", "x, y");
+FuncEntry("", "context:path_line_to", "x, y");
 Desc("Adds a line to current path.");
 BeginArgs();
 Arg("x, y", "point (number)");
 EndArgs();
-Entry("", "context:path_curve_to", "x0, y0, x1, y1, x2, y2");
+FuncEntry("", "context:path_curve_to", "x0, y0, x1, y1, x2, y2");
 Desc("Adds a bezier curve to current path.");
 BeginArgs();
 Arg("x0, y0, x1, y1, x2, y2", "points (number)");
 EndArgs();
-Entry("", "context:path_add_rectangle", "x, y, width, height");
+FuncEntry("", "context:path_add_rectangle", "x, y, width, height");
 Desc("Adds a closed rectangle to current path.");
 BeginArgs();
 Arg("x, y", "upper-left point of rectangle (number)");
 Arg("width, height", "dimension of rectangle (number)");
 EndArgs();
-Entry("", "context:path_add_arc", "cx, cy, r, angle0, angle1");
+FuncEntry("", "context:path_add_arc", "cx, cy, r, angle0, angle1");
 Desc("Adds an arc to current path.");
 BeginArgs();
 Arg("cx, cy, r", "arc (number)");
 Arg("angle0, angle1", "start and end angle of arc (number)");
 EndArgs();
-Entry("", "context:path_add_text", "text, face, size[, bold, italic, underline, strikeout]");
+FuncEntry("", "context:path_add_text", "text, face, size[, bold, italic, underline, strikeout]");
 Desc("Adds a closed text path to current path.");
 BeginArgs();
 Arg("text", "any text (string)");
@@ -548,12 +547,12 @@ Arg("face", "font face (string)");
 Arg("size", "font size (number)");
 Arg("bold, italic, underline, strikeout", "font style (boolean, optional)");
 EndArgs();
-Entry("", "context:path_close", "");
+FuncEntry("", "context:path_close", "");
 Desc("Closes current path.");
-Entry("", "context:path_clear", "");
+FuncEntry("", "context:path_clear", "");
 Desc("Clears path.");
-Entry("", "context:path_transform", "filter[, flatten]");
-Desc("");
+FuncEntry("", "context:path_transform", "filter[, flatten]");
+Desc("Passes current path points through a filter function for manipulation.");
 BeginArgs();
 Arg("filter", "path points filter (function)");
 Arg("flatten", "curves flattened before? (boolean)");
@@ -561,13 +560,13 @@ EndArgs();
 </script>
 <h2>Drawing</h2>
 <script>
-Entry("", "context:path_fill", "");
+FuncEntry("", "context:path_fill", "");
 Desc("Fills path with source.");
-Entry("", "context:path_stroke", "");
+FuncEntry("", "context:path_stroke", "");
 Desc("Strokes path with source.");
-Entry("", "context:paint", "");
+FuncEntry("", "context:paint", "");
 Desc("Paints source completely.");
-Entry("", "context:masked_paint", "mask");
+FuncEntry("", "context:masked_paint", "mask");
 Desc("Paints source with alpha mask.");
 BeginArgs();
 Arg("mask", "source object");
@@ -575,22 +574,22 @@ EndArgs();
 </script>
 <h2>Bounding</h2>
 <script>
-Entry("x0, y0, x1, y1", "context:clip_bounding", "");
+FuncEntry("x0, y0, x1, y1", "context:clip_bounding", "");
 Desc("Calculates the bounding box/area of the clipping region.");
 BeginArgs();
 Ret("x0, y0, x1, y1", "area (number)");
 EndArgs();
-Entry("x0, y0, x1, y1", "context:path_bounding", "");
+FuncEntry("x0, y0, x1, y1", "context:path_bounding", "");
 Desc("Calculates the bounding box/area of all path points.");
 BeginArgs();
 Ret("x0, y0, x1, y1", "area (number)");
 EndArgs();
-Entry("x0, y0, x1, y1", "context:path_fill_bounding", "");
+FuncEntry("x0, y0, x1, y1", "context:path_fill_bounding", "");
 Desc("Calculates the bounding box/area of the filling path.");
 BeginArgs();
 Ret("x0, y0, x1, y1", "area (number)");
 EndArgs();
-Entry("x0, y0, x1, y1", "context:path_stroke_bounding", "");
+FuncEntry("x0, y0, x1, y1", "context:path_stroke_bounding", "");
 Desc("Calculates the bounding box/area of the stroking path.");
 BeginArgs();
 Ret("x0, y0, x1, y1", "area (number)");
@@ -598,19 +597,19 @@ EndArgs();
 </script>
 <h2>Point test</h2>
 <script>
-Entry("hit", "context:clip_contains", "x, y");
+FuncEntry("hit", "context:clip_contains", "x, y");
 Desc("Checks if point is inside of the clipping region.");
 BeginArgs();
 Arg("x, y", "point (number)");
 Ret("hit", "is inside (boolean)");
 EndArgs();
-Entry("hit", "context:path_fill_contains", "x, y");
+FuncEntry("hit", "context:path_fill_contains", "x, y");
 Desc("Checks if point is inside of the filling path.");
 BeginArgs();
 Arg("x, y", "point (number)");
 Ret("hit", "is inside (boolean)");
 EndArgs();
-Entry("hit", "context:path_stroke_contains", "x, y");
+FuncEntry("hit", "context:path_stroke_contains", "x, y");
 Desc("Checks if point is inside of the stroking path.");
 BeginArgs();
 Arg("x, y", "point (number)");
@@ -618,12 +617,151 @@ Ret("hit", "is inside (boolean)");
 EndArgs();
 </script>
 <hr>
+<h1>G2DU library</h1>
+<h2>Kernel generation</h2>
+<script>
+FuncEntry("kernel", "g2du.create_box_blur_kernel", "r")
+Desc("Generates a box blur filter kernel.");
+BeginArgs();
+Arg("r", "kernel radius (number, integer)");
+Ret("kernel", "filter kernel (table)");
+EndArgs();
+FuncEntry("kernel", "g2du.create_gaussian_blur_kernel", "r")
+Desc("Generates a gaussian blur filter kernel.");
+BeginArgs();
+Arg("r", "kernel radius (number, integer)");
+Ret("kernel", "filter kernel (table)");
+EndArgs();
+FuncEntry("kernel", "g2du.create_motion_blur_kernel", "r, angle")
+Desc("Generates a motion blur filter kernel.");
+BeginArgs();
+Arg("r", "kernel radius (number, integer)");
+Arg("angle", "blur direction as angle (number)");
+Ret("kernel", "filter kernel (table)");
+EndArgs();
+FuncEntry("kernel", "g2du.create_sharpen_kernel", "r")
+Desc("Generates a sharpen filter kernel.");
+BeginArgs();
+Arg("r", "kernel radius (number, integer)");
+Ret("kernel", "filter kernel (table)");
+EndArgs();
+FuncEntry("kernel", "g2du.create_edge_detect_kernel", "r")
+Desc("Generates an edge detection filter kernel.");
+BeginArgs();
+Arg("r", "kernel radius (number, integer)");
+Ret("kernel", "filter kernel (table)");
+EndArgs();
+</script>
+<h2>Stock objects</h2>
+<script>
+VarEntry("g2du.identity");
+Desc("Identity matrix.");
+VarEntry("g2du.white");
+Desc("White color source.");
+VarEntry("g2du.black");
+Desc("Black color source.");
+VarEntry("g2du.grey");
+Desc("Grey color source.");
+VarEntry("g2du.dark_grey");
+Desc("Dark grey color source.");
+VarEntry("g2du.bright_grey");
+Desc("Bright grey color source.");
+VarEntry("g2du.red");
+Desc("Red color source.");
+VarEntry("g2du.dark_red");
+Desc("Dark red color source.");
+VarEntry("g2du.bright_red");
+Desc("Bright red color source.");
+VarEntry("g2du.green");
+Desc("Green color source.");
+VarEntry("g2du.dark_green");
+Desc("Dark green color source.");
+VarEntry("g2du.bright_green");
+Desc("Bright green color source.");
+VarEntry("g2du.blue");
+Desc("Blue color source.");
+VarEntry("g2du.dark_blue");
+Desc("Dark blue color source.");
+VarEntry("g2du.bright_blue");
+Desc("Bright blue color source.");
+VarEntry("g2du.yellow");
+Desc("Yellow color source.");
+VarEntry("g2du.dark_yellow");
+Desc("Dark yellow color source.");
+VarEntry("g2du.bright_yellow");
+Desc("Bright yellow color source.");
+VarEntry("g2du.aqua");
+Desc("Aqua color source.");
+VarEntry("g2du.dark_aqua");
+Desc("Dark aqua color source.");
+VarEntry("g2du.bright_aqua");
+Desc("Bright aqua color source.");
+VarEntry("g2du.purple");
+Desc("Purple color source.");
+VarEntry("g2du.dark_purple");
+Desc("Dark purple color source.");
+VarEntry("g2du.bright_purple");
+Desc("Bright purple color source.");
+VarEntry("g2du.orange");
+Desc("Orange color source.");
+VarEntry("g2du.lime");
+Desc("Lime color source.");
+VarEntry("g2du.spring");
+Desc("Spring color source.");
+VarEntry("g2du.azure");
+Desc("Azure color source.");
+VarEntry("g2du.pink");
+Desc("Pink color source.");
+VarEntry("g2du.violet");
+Desc("Violet color source.");
+VarEntry("g2du.brown");
+Desc("Brown color source.");
+VarEntry("g2du.sapphire");
+Desc("Sapphire color source.");
+VarEntry("g2du.transparent");
+Desc("Transparent color source.");
+</script>
+<h2>Path manipulation</h2>
+<script>
+FuncEntry("", "g2du.path_transform", "ctx, filter")
+Desc("Splits context path into tiny line segments and passes their points through a filter function for manipulation.");
+BeginArgs();
+Arg("ctx", "context object");
+Ret("filter", "path points filter (function)");
+EndArgs();
+</script>
+<h2>Matrix manipulation</h2>
+<script>
+FuncEntry("mat", "g2du.rotate_xy", "mat, x, y")
+Desc("Prepends x-axis + y-axis rotation to matrix.");
+BeginArgs();
+Arg("mat", "matrix object");
+Arg("x, y", "angles (number)");
+Ret("mat", "matrix object from input");
+EndArgs();
+FuncEntry("mat", "g2du.rotate_yx", "mat, x, y")
+Desc("Prepends y-axis + x-axis rotation to matrix.");
+BeginArgs();
+Arg("mat", "matrix object");
+Arg("x, y", "angles (number)");
+Ret("mat", "matrix object from input");
+EndArgs();
+</script>
+<hr>
+<!--
+FuncEntry("", "", "")
+Desc("");
+BeginArgs();
+Arg("", "");
+Ret("", "");
+EndArgs();
+-->
 <h1>Index</h1>
 <a name="func_index"><div id="func_index" style='display: table; background-color: #402020; border: 3px ridge red; padding: 10px;'>
 <script>
-for(var i = 0; i < funcs.length; i++){
-	document.write('<a class="index" href="#'+funcs[i]+'">'+funcs[i]+'</a>');
-	if(i != funcs.length-1)
+for(var i = 0; i < index_entries.length; i++){
+	document.write('<a class="index" href="#'+index_entries[i]+'">'+index_entries[i]+'</a>');
+	if(i != index_entries.length-1)
 		document.write("<br/>");
 }
 </script>

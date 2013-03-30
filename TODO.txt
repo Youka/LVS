@@ -1,0 +1,13 @@
+DOCS
+---
+* G2D functions usage (path_transform)
+* ASS functions entry
+
+SRC
+---
+* Multithreading with main thread
+* Multithreaded pixel conversion
+
+EXAMPLES
+---
+* Advanced karaoke sample

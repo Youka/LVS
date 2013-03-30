@@ -268,10 +268,10 @@ ass = {
 					local syl = table.create(0,24)
 					-- Times
 					syl.duration = tag_time * 10
-					syl.start_time = last_time
+					syl.start_time = line.start_time + last_time
 					syl.mid_time = syl.start_time + syl.duration / 2
 					syl.end_time = syl.start_time + syl.duration
-					last_time = syl.end_time
+					last_time = last_time + syl.duration
 					-- Text
 					syl.text, syl.prespace, syl.postspace = trim(text)
 					-- Inline fx

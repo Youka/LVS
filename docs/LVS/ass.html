@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+<title>ASS</title>
+<base href="" target="_self" />
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta name="application-name" content="LVS">
+<meta name="author" content="Youka">
+<meta name="description" content="Advanced Substation Alpha library reference.">
+<meta name="keywords" content="LVS,Lua,ASS,Advanced Substation Alpha,Subtitle">
+<link rel="icon" type="image/png" href="LVS.png">
+<style type="text/css" media="screen">
+	body{
+		background-color: black;
+		color: white;
+	}
+	td{
+		background-color: #F0F0F0;
+		color: black;
+		outline: 4px ridge red;
+		white-space: pre;
+		vertical-align:text-top;
+		padding: 10px;
+	}
+	td.header{
+		font-style: italic;
+		font-weight: bold;
+		font-size: 24px;
+	}
+	span{
+		font-style: italic;
+		color: blue;
+	}
+	div{
+		display: inline-block;
+		vertical-align:top;
+	}
+</style>
+</head>
+
+<body>
+<table style='display: inline;'><tr>
+<td class="header">Values</td>
+<td class="header">Description</td>
+</tr><tr>
+<td style='font-weight: bold;'>meta
+	.wrap_style
+	.width
+	.height
+	.audio
+	.video
+styles
+	[i]
+		.name
+		.fontname
+		.fontsize
+		.color1
+			.r
+			.g
+			.b
+			.a
+		.color2
+			.r
+			.g
+			.b
+			.a
+		.color3
+			.r
+			.g
+			.b
+			.a
+		.color4
+			.r
+			.g
+			.b
+			.a
+		.bold
+		.italic
+		.underline
+		.strikeout
+		.scale_x
+		.scale_y
+		.spacing
+		.angle
+		.borderstyle
+		.outline
+		.shadow
+		.alignment
+		.margin_l
+		.margin_r
+		.margin_v
+		.encoding
+lines
+	[i]
+		.comment
+		.layer
+		.start_time
+		.mid_time
+		.end_time
+		.duration
+		.infade
+		.outfade
+		.style
+		.styleref
+		.actor
+		.margin_l
+		.margin_r
+		.margin_v
+		.effect
+		.k_text
+		.text
+		.i
+		.width
+		.height
+		.ascent
+		.descent
+		.intlead
+		.extlead
+		.x
+		.y
+		.syls
+			[i]
+				.i
+				.word_i
+				.start_time
+				.mid_time
+				.end_time
+				.duration
+				.text
+				.inline_fx
+				.prespace
+				.postspace
+				.width
+				.height
+				.ascent
+				.descent
+				.intlead
+				.extlead
+				.x
+				.y
+		.chars
+			[i]
+				.i
+				.syl_i
+				.word_i
+				.start_time
+				.mid_time
+				.end_time
+				.duration
+				.text
+				.width
+				.height
+				.ascent
+				.descent
+				.intlead
+				.extlead
+				.x
+				.y
+		.words
+			[i]
+				.i
+				.start_time
+				.mid_time
+				.end_time
+				.duration
+				.text
+				.prespace
+				.postspace
+				.width
+				.height
+				.ascent
+				.descent
+				.intlead
+				.extlead
+				.x
+				.y</td>
+<td>Script meta data <span>table</span>
+Line wrap style <span>number</span>
+Video width <span>number</span>
+Video height <span>number</span>
+Audio file <span>string</span>
+Video file <span>string</span>
+Styles <span>table</span>
+Single style <span>table</span>
+Style name <span>string</span>
+Font face <span>string</span>
+Font size <span>number</span>
+Fill color <span>table</span>
+Fill color red strength <span>number</span>
+Fill color green strength <span>number</span>
+Fill color blue strength <span>number</span>
+Fill color alpha strength <span>number</span>
+Karaoke color <span>table</span>
+Karaoke color red strength <span>number</span>
+Karaoke color green strength <span>number</span>
+Karaoke color blue strength <span>number</span>
+Karaoke color alpha strength <span>number</span>
+Outline color <span>table</span>
+Outline color red strength <span>number</span>
+Outline color green strength <span>number</span>
+Outline color blue strength <span>number</span>
+Outline color alpha strength <span>number</span>
+Shadow color <span>table</span>
+Shadow color red strength <span>number</span>
+Shadow color green strength <span>number</span>
+Shadow color blue strength <span>number</span>
+Shadow color alpha strength <span>number</span>
+Font bold? <span>boolean</span>
+Font italic? <span>boolean</span>
+Font underlined? <span>boolean</span>
+Font strikeouted? <span>boolean</span>
+Horizontal scale <span>number</span>
+Vertical scale <span>number</span>
+After-character space <span>number</span>
+Z-axis rotation <span>number</span>
+Border box? <span>boolean</span>
+Outline width <span>number</span>
+Shadow range <span>number</span>
+Alignment <span>number</span>
+Margin left <span>number</span>
+Margin right <span>number</span>
+Margin vertical <span>number</span>
+Character encoding <span>number</span>
+Dialog lines <span>table</span>
+Single dialog line <span>table</span>
+Is a comment? <span>boolean</span>
+Layer <span>number</span>
+Start time in milliseconds <span>number</span>
+Mid time in milliseconds <span>number</span>
+End time in milliseconds <span>number</span>
+Duration in milliseconds <span>number</span>
+Infade duration in milliseconds <span>number</span>
+Outfade duration in milliseconds <span>number</span>
+Style name <span>string</span>
+Related style <span>table</span>
+Actor <span>string</span>
+Margin left <span>number</span>
+Margin right <span>number</span>
+Margin vertical <span>number</span>
+Effect description <span>string</span>
+Raw text <span>string</span>
+Tagless text <span>string</span>
+Line index <span>number</span>
+Width <span>number</span>
+Height <span>number</span>
+Ascent <span>number</span>
+Descent <span>number</span>
+Internal leading <span>number</span>
+External leading <span>number</span>
+Position on x-axis <span>number</span>
+Position on y-axis <span>number</span>
+Line sylables <span>table</span>
+Single line sylable <span>table</span>
+Sylable index <span>number</span>
+Sylable word index <span>number</span>
+Start time in milliseconds <span>number</span>
+Mid time in milliseconds <span>number</span>
+End time in milliseconds <span>number</span>
+Duration in milliseconds <span>number</span>
+Text <span>string</span>
+Inline effect description (marked as <font color=grey>\\-EFFECT</font> tag) <span>string</span>
+Number of spaces before text <span>number</span>
+Number of spaces after text <span>number</span>
+Width <span>number</span>
+Height <span>number</span>
+Ascent <span>number</span>
+Descent <span>number</span>
+Internal leading <span>number</span>
+External leading <span>number</span>
+Position on x-axis <span>number</span>
+Position on y-axis <span>number</span>
+Line characters <span>table</span>
+Single line character <span>table</span>
+Character index <span>number</span>
+Character sylable index <span>number</span>
+Character word index <span>number</span>
+Start time in milliseconds <span>number</span>
+Mid time in milliseconds <span>number</span>
+End time in milliseconds <span>number</span>
+Duration in milliseconds <span>number</span>
+Text <span>string</span>
+Width <span>number</span>
+Height <span>number</span>
+Ascent <span>number</span>
+Descent <span>number</span>
+Internal leading <span>number</span>
+External leading <span>number</span>
+Position on x-axis <span>number</span>
+Position on y-axis <span>number</span>
+Line words <span>table</span>
+Single line word <span>table</span>
+Word index <span>number</span>
+Start time in milliseconds <span>number</span>
+Mid time in milliseconds <span>number</span>
+End time in milliseconds <span>number</span>
+Duration in milliseconds <span>number</span>
+Text <span>string</span>
+Number of spaces before text <span>number</span>
+Number of spaces after text <span>number</span>
+Width <span>number</span>
+Height <span>number</span>
+Ascent <span>number</span>
+Descent <span>number</span>
+Internal leading <span>number</span>
+External leading <span>number</span>
+Position on x-axis <span>number</span>
+Position on y-axis <span>number</span>
+</td>
+</tr></table>
+<div>
+
+<!-- TODO -->
+
+</div>
+</body>
+
+</html>
