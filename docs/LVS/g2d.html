@@ -552,7 +552,7 @@ Desc("Closes current path.");
 FuncEntry("", "context:path_clear", "");
 Desc("Clears path.");
 FuncEntry("", "context:path_transform", "filter[, flatten]");
-Desc("Passes current path points through a filter function for manipulation.");
+Desc("Passes current path points (type + coordinate) through a filter function for manipulation.");
 BeginArgs();
 Arg("filter", "path points filter (function)");
 Arg("flatten", "curves flattened before? (boolean)");
@@ -724,7 +724,7 @@ Desc("Transparent color source.");
 <h2>Path manipulation</h2>
 <script>
 FuncEntry("", "g2du.path_transform", "ctx, filter")
-Desc("Splits context path into tiny line segments and passes their points through a filter function for manipulation.");
+Desc("Splits context path into tiny line segments and passes their points (just coordinate) through a filter function for manipulation.");
 BeginArgs();
 Arg("ctx", "context object");
 Ret("filter", "path points filter (function)");

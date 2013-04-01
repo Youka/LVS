@@ -386,7 +386,7 @@ LUA_FUNC_1ARG(image_convolution, 2)
 	float *image_data_copy = new float[image_data_size];
 	for(unsigned long int i = 0; i < image_data_size; i++)
 		image_data_copy[i] = image_data[i];
-	// Apply convolution filter to image in multiple threads
+	// Threading data
 	unsigned long cpu_num;
 	{
 		SYSTEM_INFO system_info = {0};
@@ -394,7 +394,8 @@ LUA_FUNC_1ARG(image_convolution, 2)
 		cpu_num = system_info.dwNumberOfProcessors;
 	}
 	THREAD_DATA *threads_data = new THREAD_DATA[cpu_num];
-	HANDLE *threads = new HANDLE[cpu_num];
+	HANDLE *threads = new HANDLE[cpu_num-1];
+	// Apply convolution filter to image in multiple threads
 	int image_row_step = image_height / cpu_num;
 	for(unsigned long i = 0; i < cpu_num; i++){
 		// Set current thread data
@@ -402,26 +403,36 @@ LUA_FUNC_1ARG(image_convolution, 2)
 		threads_data[i].image_height = image_height;
 		threads_data[i].image_stride = image_stride;
 		threads_data[i].image_first_row = i * image_row_step;
-		threads_data[i].image_last_row = i == cpu_num-1 ? image_height-1 : threads_data[i].image_first_row + image_row_step-1;
+		threads_data[i].image_last_row = i == cpu_num - 1 ? image_height-1 : threads_data[i].image_first_row + image_row_step-1;
 		threads_data[i].image_src = image_data_copy;
 		threads_data[i].image_dst = image_data;
 		threads_data[i].filter_width = filter_width;
 		threads_data[i].filter_height = filter_height;
 		threads_data[i].filter_kernel = convolution_filter;
 		// Run thread for color format
-		switch(image_format){
-			case CAIRO_FORMAT_ARGB32:
-			case CAIRO_FORMAT_RGB24:
-				threads[i] = CreateThread(NULL, 0, cairo_image_surface_convolution_argb, reinterpret_cast<void*>(&threads_data[i]), 0x0, NULL);
-				break;
-			case CAIRO_FORMAT_A8:
-				threads[i] = CreateThread(NULL, 0, cairo_image_surface_convolution_a8, reinterpret_cast<void*>(&threads_data[i]), 0x0, NULL);
-				break;
-			default:
-				threads[i] = NULL;
-		}
+		if(i == cpu_num - 1)
+			switch(image_format){
+				case CAIRO_FORMAT_ARGB32:
+				case CAIRO_FORMAT_RGB24:
+					cairo_image_surface_convolution_argb(&threads_data[i]);
+					break;
+				case CAIRO_FORMAT_A8:
+					cairo_image_surface_convolution_a8(&threads_data[i]);
+			}
+		else
+			switch(image_format){
+				case CAIRO_FORMAT_ARGB32:
+				case CAIRO_FORMAT_RGB24:
+					threads[i] = CreateThread(NULL, 0, cairo_image_surface_convolution_argb, reinterpret_cast<void*>(&threads_data[i]), 0x0, NULL);
+					break;
+				case CAIRO_FORMAT_A8:
+					threads[i] = CreateThread(NULL, 0, cairo_image_surface_convolution_a8, reinterpret_cast<void*>(&threads_data[i]), 0x0, NULL);
+					break;
+				default:
+					threads[i] = NULL;
+			}
 	}
-	for(unsigned long i = 0; i < cpu_num; i++)
+	for(unsigned long i = 0; i < cpu_num-1; i++)
 		// Wait for thread to finish and close him afterwards
 		if(threads[i] != NULL){
 			WaitForSingleObject(threads[i], INFINITE);

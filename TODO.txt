@@ -1,11 +1,10 @@
 DOCS
 ---
-* G2D functions usage (path_transform)
-* ASS functions entry
+* Lua extensions
+* Usage
 
 SRC
 ---
-* Multithreading with main thread
 * Multithreaded pixel conversion
 
 EXAMPLES
