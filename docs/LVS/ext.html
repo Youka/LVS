@@ -87,9 +87,59 @@ function EndArgs(){
 <body>
 <h1>Math</h1>
 <script>
-
-<!-- TODO -->
-
+FuncEntry("point", "math.bezier", "pct, points");
+Desc("Calculates point on bezier curve.");
+BeginArgs();
+Arg("pct", "number in range 0-1");
+Arg("points", "curve points (table)");
+Ret("point", "point on curve (table)");
+EndArgs();
+FuncEntry("deg", "math.degree", "vec1, vec2");
+Desc("Calculates degree between two vectors.");
+BeginArgs();
+Arg("vec1", "first vector (table)");
+Arg("vec2", "second vector (table)");
+Ret("deg", "degree between vectors (number)");
+EndArgs();
+FuncEntry("len", "math.distance", "w, h[, d]");
+Desc("Calculates vector length.");
+BeginArgs();
+Arg("w", "width (number)");
+Arg("h", "height (number)");
+Arg("d", "depth (number, optional)");
+Ret("len", "length (number)");
+EndArgs();
+FuncEntry("x, y", "math.ellipse", "cx, cy, w, h, a");
+Desc("Calculates ellipse point.");
+BeginArgs();
+Arg("cx, cy", "ellipse center (number)");
+Arg("w, h", "ellipse dimension (number)");
+Arg("a", "ellipse angle (number)");
+Ret("x, y", "point on ellipse (number)");
+EndArgs();
+FuncEntry("res", "math.interpolate", "min, max, pct");
+Desc("Calculates number between two by <i>pct</i>.");
+BeginArgs();
+Arg("min", "minimal number");
+Arg("max", "maximal number");
+Arg("pct", "number in range 0-1");
+Ret("res", "interpolation result (number)");
+EndArgs();
+FuncEntry("vec", "math.ortho", "vec1, vec2");
+Desc("Calculates orthogonal vector of two given vectors.");
+BeginArgs();
+Arg("vec1", "first vector (table)");
+Arg("vec2", "second vector (table)");
+Ret("vec", "orthogonal vector (table)");
+EndArgs();
+FuncEntry("n", "math.randomsteps", "min, max, step");
+Desc("Generates a random number in range <i>min</i> until <i>max</i> and with gaps of <i>step</i>.");
+BeginArgs();
+Arg("min", "minimal number");
+Arg("max", "maximal number");
+Arg("step", "gap size (number)");
+Ret("n", "random number");
+EndArgs();
 FuncEntry("n", "math.round", "num");
 Desc("Rounds number.");
 BeginArgs();
@@ -144,6 +194,26 @@ BeginArgs();
 Arg("t", "any table");
 Ret("info", "table information (string)")
 EndArgs();
+</script>
+<hr>
+<h1>Media</h1>
+<script>
+VarEntry("VIDEO_WIDTH");
+Desc("Video width.");
+VarEntry("VIDEO_HEIGHT");
+Desc("Video height.");
+VarEntry("VIDEO_HAS_ALPHA");
+Desc("Video has an alpha channel.");
+VarEntry("VIDEO_FPS");
+Desc("Video frames per second.");
+VarEntry("VIDEO_FRAMES");
+Desc("Video frames number.");
+VarEntry("AUDIO_CHANNELS");
+Desc("Audio channels.");
+VarEntry("AUDIO_SAMPLE_RATE");
+Desc("Audio samples per second (per channel).");
+VarEntry("AUDIO_SAMPLES");
+Desc("Audio samples number (for all channels).");
 </script>
 <hr>
 <h1>G2D library</h1>
