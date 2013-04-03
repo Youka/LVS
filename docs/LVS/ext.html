@@ -85,6 +85,67 @@ function EndArgs(){
 </head>
 
 <body>
+<h1>Math</h1>
+<script>
+
+<!-- TODO -->
+
+FuncEntry("n", "math.round", "num");
+Desc("Rounds number.");
+BeginArgs();
+Arg("num", "any number");
+Ret("n", "integer");
+EndArgs();
+FuncEntry("result", "math.trim", "num, min, max");
+Desc("Returns result of number trimming to range <i>min</i> until <i>max</i>.");
+BeginArgs();
+Arg("num", "any number");
+Arg("min", "minimal number");
+Arg("max", "maximal number");
+Ret("result", "trimmed number");
+EndArgs();
+</script>
+<hr>
+<h1>String</h1>
+<script>
+FuncEntry("len", "string.ucharrange", "s, pos");
+Desc("Returns length of unicode character at given position in text.");
+BeginArgs();
+Arg("s", "unicode text (string)");
+Arg("pos", "text position (number)");
+Ret("len", "byte length (number)");
+EndArgs();
+FuncEntry("ci, char", "string.uchars", "s");
+Desc("Iterator function for unicode text characters.");
+BeginArgs();
+Arg("s", "unicode text (string)");
+Ret("ci", "index of unicode character (number)");
+Ret("char", "unicode character (string)");
+EndArgs();
+FuncEntry("len", "string.ulen", "s");
+Desc("Returns length of unicode text.");
+BeginArgs();
+Arg("s", "unicode text (string)");
+Ret("len", "text length (number)");
+EndArgs();
+</script>
+<hr>
+<h1>Table</h1>
+<script>
+FuncEntry("t2", "table.copy", "t1")
+Desc("Creates a deep table copy.");
+BeginArgs();
+Arg("t1", "any table");
+Ret("t2", "table copy");
+EndArgs();
+FuncEntry("info", "table.tostring", "t")
+Desc("Returns table as string.")
+BeginArgs();
+Arg("t", "any table");
+Ret("info", "table information (string)")
+EndArgs();
+</script>
+<hr>
 <h1>G2D library</h1>
 <h2>Image creation</h2>
 <script>
