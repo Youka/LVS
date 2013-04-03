@@ -211,6 +211,10 @@
 				RelativePath=".\textconv.hpp"
 				>
 			</File>
+			<File
+				RelativePath=".\threads.h"
+				>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>
