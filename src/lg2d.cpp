@@ -389,8 +389,8 @@ LUA_FUNC_1ARG(image_convolution, 2)
 		image_data_copy[i] = image_data[i];
 	// Threading data
 	static Threads<THREAD_DATA> threads(cairo_image_surface_convolution);
-	int image_row_step = image_height /  threads.size();
 	THREAD_DATA *data;
+	int image_row_step = image_height /  threads.size();
 	for(DWORD i = 0; i < threads.size(); i++){
 		// Set current thread data
 		data = threads.get(i);
@@ -399,14 +399,7 @@ LUA_FUNC_1ARG(image_convolution, 2)
 		data->image_stride = image_stride;
 		data->image_first_row = i * image_row_step;
 		data->image_last_row = i == threads.size() - 1 ? image_height-1 : data->image_first_row + image_row_step-1;
-		switch(image_format){
-			case CAIRO_FORMAT_ARGB32:
-			case CAIRO_FORMAT_RGB24:
-				data->image_rgb = true;
-				break;
-			case CAIRO_FORMAT_A8:
-				data->image_rgb = false;
-		}
+		data->image_format = image_format;
 		data->image_src = image_data_copy;
 		data->image_dst = image_data;
 		data->filter_width = filter_width;

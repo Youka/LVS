@@ -27,7 +27,7 @@ class Threads{
 		}
 		// Dtor (free threading data)
 		~Threads(){
-			// Free threads
+			// Free thread handles
 			delete[] this->threads;
 			// Free threads data
 			delete[] this->data;

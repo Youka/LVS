@@ -16,7 +16,7 @@ struct CairoImage{
 		delete[] this->data;
 	}
 	// Frame types
-	enum API{AVS = 0, VDUB, DSHOW};
+	enum API : unsigned char{AVS = 0, VDUB, DSHOW};
 	// Load from frame
 	void Load(register unsigned char *frame, int pitch, API api){
 		// Image pointer

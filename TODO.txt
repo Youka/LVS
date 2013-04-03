@@ -6,7 +6,6 @@ DOCS
 SRC
 ---
 * Multithreaded pixel conversion
-* Multiline text extents
 
 EXAMPLES
 ---

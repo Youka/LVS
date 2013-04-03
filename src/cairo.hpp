@@ -30,18 +30,30 @@ static cairo_win32_text_extents_t cairo_win32_text_extents(const wchar_t *text, 
 	wcsncpy(lf.lfFaceName, face, 31);	// Copy until 31 characters of wished font face name to logfont
 	HFONT font = CreateFontIndirect(&lf);
 	SelectObject(dc, font);
-	// Get text extents
-	SIZE sz = {0};
-	GetTextExtentPoint32W(dc, text, wcslen(text), &sz);
 	// Get font metrics
 	TEXTMETRICW metrics = {0};
 	GetTextMetricsW(dc, &metrics);
+	// Get text extents
+	SIZE sz = {0};
+	LONG max_width = 0, height = 0;
+	wchar_t *start = const_cast<wchar_t*>(text), *end = NULL;
+	do{
+		end = wcschr(start, L'\n');
+		if(end){
+			GetTextExtentPoint32W(dc, start, end-start, &sz);
+			height += metrics.tmExternalLeading;
+			start = end + 1;
+		}else
+			GetTextExtentPoint32W(dc, start, wcslen(start), &sz);
+		height += sz.cy;
+		max_width = max(max_width, sz.cx);
+	}while(end);
 	// Free windows objects
 	DeleteObject(font);
 	DeleteDC(dc);
-	// Return text extents (8-fold downscaled)
+	// Return text extents (64-fold downscaled)
 	cairo_win32_text_extents_t text_extents = {
-		static_cast<double>(sz.cx) / 64, static_cast<double>(sz.cy) / 64,
+		static_cast<double>(max_width) / 64, static_cast<double>(height) / 64,
 		static_cast<double>(metrics.tmAscent) / 64, static_cast<double>(metrics.tmDescent) / 64,
 		static_cast<double>(metrics.tmInternalLeading) / 64, static_cast<double>(metrics.tmExternalLeading) / 64};
 	return text_extents;
@@ -131,7 +143,7 @@ static void cairo_win32_text_path(cairo_t *ctx, const wchar_t *text, const wchar
 // Thread data for functions below
 struct THREAD_DATA{
 	int image_width, image_height, image_stride, image_first_row, image_last_row;
-	bool image_rgb;
+	cairo_format_t image_format;
 	float *image_src;
 	unsigned char *image_dst;
 	int filter_width, filter_height;
@@ -141,7 +153,7 @@ struct THREAD_DATA{
 static DWORD WINAPI cairo_image_surface_convolution(void *userdata){
 	THREAD_DATA *thread_data = reinterpret_cast<THREAD_DATA*>(userdata);
 	// RGB(A) or A8?
-	if(thread_data->image_rgb){
+	if(thread_data->image_format == CAIRO_FORMAT_ARGB32 || thread_data->image_format == CAIRO_FORMAT_RGB24){
 		// Storages for pixel processing
 		int image_x, image_y;
 		float dst_buf[4];
@@ -185,7 +197,7 @@ static DWORD WINAPI cairo_image_surface_convolution(void *userdata){
 				dst_pixel[2] = dst_buf[2];
 				dst_pixel[3] = dst_buf[3];
 			}
-	}else{
+	}else if(thread_data->image_format == CAIRO_FORMAT_A8){
 		// Storages for pixel processing
 		float accum;
 		int image_x, image_y;
