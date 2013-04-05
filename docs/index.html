@@ -26,15 +26,13 @@
 		height: 48px;
 		overflow: hidden;
 	}
-	div.index:hover{
-		height: 100%;
-	}
 	h1, h2{
 		font-weight: bold;
 		color: white;
 		text-shadow: 4px 4px 2px black;
 	}
 	h1{
+		cursor: pointer;
 		font-family: Comic Sans MS;
 		font-size: 30px;
 		margin: 0px 0px 10px 0px;
@@ -53,6 +51,16 @@
 		margin: 0px 0px 0px 0px;
 		text-align: left;
 	}
+	code{
+		font-family: Arial;
+		font-size: 14px;
+		display: inline-block;
+		white-space: pre;
+		padding: 3px;
+		border: 3px solid black;
+		background-color: #F0F0F0;
+		color: black;
+	}
 	a{
 		cursor: pointer;
 		color: #E8E8E8;
@@ -70,6 +78,13 @@
 	}
 </style>
 <script type="text/javascript">
+	var default_height;
+	function fold(elem){
+		var height = elem.parentNode.style.height;
+		if(default_height == null)
+			default_height = height;
+		elem.parentNode.style.height = height == "100%" ? default_height : "100%";
+	}
 	function generateLinkList(){
 		var content = "<ol style='margin-left: 200px;'>",
 			entries = Math.floor(arguments.length / 2);
@@ -84,7 +99,7 @@
 <body>
 <img src="LVS/LVS.png">
 <div class="index">
-<h1>Definition</h1>
+<h1 onclick="fold(this);">Definition</h1>
 <span>
 <h2>"LVS"</h2>
 <b>LVS</b> (Lua Video Sync) is a <a href="http://en.wikipedia.org/wiki/Frameserver" target="_blank">video frameserver</a> plugin to edit video frames with the capability of 
@@ -104,14 +119,17 @@ and video editor <a href="http://en.wikipedia.org/wiki/VirtualDub" target="_blan
 </span>
 </div>
 <div class="index">
-<h1>Usage</h1>
+<h1 onclick="fold(this);">Usage</h1>
 <span>
 <h2>Avisynth</h2>
-<!-- TODO -->
+<code>LoadPlugin("LVS.dll")
+
+BlankClip()
+LVS("my_script.lua")</code>
 <h2>VirtualDub</h2>
-<!-- TODO -->
+<img src="LVS/vdub.png" alt="VirtualDub - LVS filter" />
 <h2>DirectShow</h2>
-<!-- TODO -->
+<img src="LVS/dshow.png" alt="DirectShow - LVS filter" />
 <h2>Getting started</h2>
 <!-- TODO -->
 <h2>Karaoke</h2>
@@ -119,7 +137,7 @@ and video editor <a href="http://en.wikipedia.org/wiki/VirtualDub" target="_blan
 </span>
 </div>
 <div class="index">
-<h1>References</h1>
+<h1 onclick="fold(this);">References</h1>
 <script type="text/javascript">
 generateLinkList("Lua 5.2", "Lua_5.2/Lua 5.2 Reference Manual.htm",
 			"Lua extensions", "LVS/ext.html",

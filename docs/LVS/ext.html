@@ -12,15 +12,15 @@
 <link rel="icon" type="image/png" href="LVS.png">
 <style type="text/css" media="screen">
 	body{
-		background-color: black;
-		color: white;
+		background-color: white;
+		color: black;
 		margin: 10px;
 	}
 	h1{
 		font-size: 36px;
 		font-weight: bold;
-		background-color: #505050;
-		border: 2px solid white;
+		background-color: #D0D0D0;
+		border: 2px solid black;
 		display: table;
 		margin: 0px;
 	}
@@ -43,10 +43,16 @@
 		border: 2px groove black;
 		font-weight: bold;
 	}
+	div.index{
+		display: table;
+		background-color: #FFF0F0;
+		border: 5px groove red;
+		padding: 10px;
+	}
 	a.index{
 		font-weight: bold;
 		text-decoration: none;
-		color: white;
+		color: black;
 	}
 </style>
 <script type="text/javascript">
@@ -887,8 +893,7 @@ Arg("", "");
 Ret("", "");
 EndArgs();
 -->
-<h1>Index</h1>
-<a name="func_index"><div id="func_index" style='display: table; background-color: #402020; border: 3px ridge red; padding: 10px;'>
+<a name="func_index"><div id="func_index" class="index">
 <script>
 for(var i = 0; i < index_entries.length; i++){
 	document.write('<a class="index" href="#'+index_entries[i]+'">'+index_entries[i]+'</a>');
@@ -897,7 +902,10 @@ for(var i = 0; i < index_entries.length; i++){
 }
 </script>
 </div></a>
-<a class="index" href="#func_index"><div style='position: fixed; right: 0px; top: 0px; background-color: #402020; border: 3px ridge red;'>
+<a class="index" href="#"><div class="index" style='position: fixed; right: 0px; top: 0px; padding: 0px;'>
+Top
+</div></a>
+<a class="index" href="#func_index"><div class="index" style='position: fixed; right: 0px; top: 26px; padding: 0px;'>
 Index
 </div></a>
 </body>
