@@ -16,7 +16,7 @@
 		color: #E8E8E8;
 		width: 600px;
 		text-align: center;
-		font-size: 18px;
+		font-size: 16px;
 		margin: auto;
 	}
 	div.index{
@@ -122,18 +122,31 @@ and video editor <a href="http://en.wikipedia.org/wiki/VirtualDub" target="_blan
 <h1 onclick="fold(this);">Usage</h1>
 <span>
 <h2>Avisynth</h2>
-<code>LoadPlugin("LVS.dll")
+<code>LoadPlugin("E:\PROJEKTE\LVS\release\LVS.dll")
 
 BlankClip()
-LVS("my_script.lua")</code>
+LVS(video = "test_video.lua", audio = "test_audio.lua")</code>
 <h2>VirtualDub</h2>
 <img src="LVS/vdub.png" alt="VirtualDub - LVS filter" />
 <h2>DirectShow</h2>
 <img src="LVS/dshow.png" alt="DirectShow - LVS filter" />
 <h2>Getting started</h2>
-<!-- TODO -->
+A script creation begins with defining the required callback function for streaming data.<br/>
+<br/>
+For frame editing, the callback function is <b>GetFrame(frame, frame_i)</b>.<br/>
+<b>frame</b> is an image object (see <a href="LVS/ext.html#g2d.create_image" target=_blank>g2d image</a>), containing a reference to the current frame data.<br/>
+<b>frame_i</b> is the current frame number.<br/>
+<br/>
+For audio editing, the callback function is <b>GetSamples(samples, samples_n, start_sample_i)</b>.<br/>
+<b>samples</b> is a numbers table, containing a reference to samples of all channels of current time.<br/>
+<b>samples_n</b> is the table size of last argument.<br/>
+<b>start_sample_i</b> is the global sample index (for all channels) of the first gotten sample.<br/>
+<br/>
+See into the <b>examples</b> folder for commented scripts. This, in combination with reading the references, is the best way to learn.
 <h2>Karaoke</h2>
+
 <!-- TODO -->
+
 </span>
 </div>
 <div class="index">

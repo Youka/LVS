@@ -1,7 +1,3 @@
-DOCS
----
-* Usage
-
-EXAMPLES
----
-* Advanced karaoke sample
+* Docs: Usage
+* Src: accelerated pixel transfer
+* Examples: advanced karaoke
