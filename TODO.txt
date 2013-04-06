@@ -1,3 +1,0 @@
-* Docs: Usage
-* Src: accelerated pixel transfer
-* Examples: advanced karaoke

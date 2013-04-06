@@ -1,5 +1,5 @@
 -- Create PNG source
-local source = g2d.create_source_image(g2d.create_image_from_png("check.png"))
+local source = g2d.create_source_image(g2d.create_image_from_png("video\\check.png"))
 source:set_matrix(g2d.create_matrix():translate(300,200))
 
 -- Process frames
