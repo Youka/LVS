@@ -23,7 +23,7 @@ local function roumaji_kanji(ctx, ms, line)
 		if ms >= syl.start_time and ms < syl.end_time then
 			ctx:set_source(g2du.red)
 		else
-			ctx:set_source(g2du.black)
+			ctx:set_source(g2du.yellow)
 		end
 		-- Draw sylable text
 		ctx:set_matrix(g2d.create_matrix():translate(syl.x, syl.y))
@@ -38,7 +38,7 @@ local function subtitle(ctx, ms, line)
 	-- Draw line text
 	ctx:set_matrix(g2d.create_matrix():translate(line.x, line.y))
 	ctx:path_add_text(line.text, ass.unpack_style(line.styleref))
-	ctx:set_source(g2du.black)
+	ctx:set_source(g2du.yellow)
 	ctx:path_fill()
 	ctx:path_clear()
 end

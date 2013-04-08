@@ -3,7 +3,7 @@ LoadPlugin("E:\PROJEKTE\LVS\plugin\LVS.dll")	#fix location if needed
 
 #Create video
 fps = 24000.0/1001
-ColorBars(width = 720, height = 480).ConvertToRGB24().AssumeFPS(fps).Trim(0,Ceil(fps*30))
+ColorBars(width = 720, height = 480, pixel_type = "YV12").AssumeFPS(fps).Trim(0,Ceil(fps*90))
 
 #AUDIO EXAMPLES
 #LVS(audio="audio\audio_to_text.lua")

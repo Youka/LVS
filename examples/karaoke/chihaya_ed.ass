@@ -1,0 +1,37 @@
+﻿[Script Info]
+Title: Default Aegisub file
+ScriptType: v4.00+
+WrapStyle: 0
+PlayResX: 720
+PlayResY: 480
+ScaledBorderAndShadow: yes
+Video Aspect Ratio: 0
+Video Zoom: 6
+Video Position: 0
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Roumaji,Comic Sans MS,24,&H0000FFFF,&H000000FF,&H00FFFFFF,&H00000000,-1,0,0,0,100,100,0,0,1,0,0,8,8,8,10,1
+Style: Kanji,Comic Sans MS,18,&H0000FFFF,&H000000FF,&H00FFFFFF,&H00000000,-1,0,0,0,100,100,0,0,1,0,0,6,8,8,10,1
+Style: Subtitle,Comic Sans MS,22,&H0000FFFF,&H000000FF,&H00FFFFFF,&H00000000,-1,0,0,0,100,100,0,0,1,0,0,2,8,8,8,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:02.00,0:00:10.56,Roumaji,,0000,0000,0000,,{\k29}Yu{\k65}ku {\k35}a{\k30}te {\k31}na{\k26}i {\k61}ma{\k50}chi{\k21} {\k33}hi{\k32}to{\k21}ri {\k72}sa{\k36}ki {\k64}o {\k56}a{\k128}ru{\k66}ku
+Dialogue: 0,0:00:11.51,0:00:20.88,Roumaji,,0000,0000,0000,,{\k63}yo{\k30}u{\k66}hi {\k38}ni {\k29}te{\k23}ra{\k75}sa {\k31}re{\k63}ta{\k63} {\k20}u{\k43}shi{\k33}na{\k21}i {\k46}so{\k43}u{\k46}{\k35}na {\k64}ko{\k30}ko{\k75}ro
+Dialogue: 0,0:00:21.69,0:00:30.62,Roumaji,,0000,0000,0000,,{\k69}Ka{\k126}wa{\k36}tte {\k30}yu{\k32}ku {\k35}na{\k27}n{\k63}te{\k66} {\k14}o{\k18}mo{\k60}i {\k19}mo {\k79}shi{\k64}na{\k96}ka{\k59}tta
+Dialogue: 0,0:00:31.86,0:00:44.84,Roumaji,,0000,0000,0000,,{\k63}ki{\k71}mi {\k67}to {\k23}ka{\k40}sa{\k32}ne{\k31}ta {\k32}yu{\k59}me{\k38} {\k29}i{\k36}tsu{\k57}no{\k40}ma{\k46}ni{\k63} {\k19}chi{\k17}ga{\k13}u {\k85}ho{\k10}u {\k16}e {\k48}to {\k31}a{\k29}ru{\k33}i{\k66}te {\k41}ta{\k24}n{\k62}da {\k77}ne
+Dialogue: 0,0:00:45.19,0:00:55.18,Roumaji,,0000,0000,0000,,{\k38}so{\k34}shi{\k102}te {\k32}i{\k64}ma {\k31}fu{\k34}ta{\k28}ri {\k131}wa{\k31} {\k33}do{\k23}u {\k104}su{\k16}gi{\k10}ru {\k68}se{\k33}ka{\k64}i {\k48}mi{\k17}tsu{\k20}me{\k38}te
+Dialogue: 0,0:00:55.43,0:01:07.81,Roumaji,,0000,0000,0000,,{\k40}so{\k37}shi{\k94}te {\k34}i{\k62}ma {\k31}ho{\k66}ra {\k31}hi{\k33}bi{\k17}ku {\k75}yo{\k32} {\k34}ki{\k32}mi {\k32}ga {\k24}o{\k25}shi{\k47}e{\k30}te {\k27}ku{\k40}re{\k38}ta{\k25} {\k32}u{\k33}ta {\k59}ko{\k32}no {\k26}so{\k45}ra {\k105}ni
+Dialogue: 0,0:00:02.00,0:00:10.56,Kanji,,0000,0000,0000,,{\k29}行{\k65}く{\k35}当{\k30}て{\k31}な{\k26}い{\k111}街{\k21}{\k33}一{\k53}人{\k108}先{\k64}を{\k184}歩{\k66}く
+Dialogue: 0,0:00:11.51,0:00:20.88,Kanji,,0000,0000,0000,,{\k93}夕{\k66}日{\k38}に{\k29}照{\k23}ら{\k75}さ{\k31}れ{\k63}た{\k63}{\k96}失{\k21}い{\k46}そ{\k43}う{\k46}{\k35}な{\k169}心
+Dialogue: 0,0:00:21.69,0:00:30.62,Kanji,,0000,0000,0000,,{\k69}変{\k126}わ{\k36}って{\k30}ゆ{\k32}く{\k35}な{\k27}ん{\k63}て{\k66}{\k32}思{\k60}い{\k19}も{\k79}し{\k64}な{\k96}か{\k59}った
+Dialogue: 0,0:00:31.86,0:00:44.84,Kanji,,0000,0000,0000,,{\k134}君{\k67}と{\k63}重{\k32}ね{\k31}た{\k91}夢{\k38}{\k29}い{\k36}つ{\k57}の{\k40}間{\k46}に{\k63}{\k36}違{\k13}う{\k85}ほ{\k10}う{\k16}へ{\k48}と{\k60}歩{\k33}い{\k66}て{\k41}た{\k24}ん{\k62}だ{\k77}ね
+Dialogue: 0,0:00:45.19,0:00:55.18,Kanji,,0000,0000,0000,,{\k38}そ{\k34}し{\k102}て{\k96}今{\k31}二{\k62}人{\k162}は{\k56}遠{\k104}す{\k16}ぎ{\k10}る{\k68}世{\k97}界{\k48}見{\k17}つ{\k20}め{\k38}て
+Dialogue: 0,0:00:55.43,0:01:07.81,Kanji,,0000,0000,0000,,{\k40}そ{\k37}し{\k94}て{\k96}今{\k31}ほ{\k66}ら{\k64}響{\k17}く{\k75}よ{\k32}{\k66}君{\k32}が{\k49}教{\k47}え{\k30}て{\k27}く{\k40}れ{\k38}た{\k25}{\k65}歌{\k59}こ{\k32}の{\k71}空{\k105}に
+Dialogue: 0,0:00:02.00,0:00:10.56,Subtitle,,0000,0000,0000,,Ich setze in dieser Straße einen Fuß vor den anderen, ganz ohne Ziel.
+Dialogue: 0,0:00:11.51,0:00:20.88,Subtitle,,0000,0000,0000,,Die Abendsonne schien auf das Herz, welches ich verloren glaubte.
+Dialogue: 0,0:00:21.69,0:00:30.62,Subtitle,,0000,0000,0000,,Ich hatte nicht das Gefühl, dass sich irgendetwas ändern würde.
+Dialogue: 0,0:00:31.86,0:00:44.84,Subtitle,,0000,0000,0000,,All die Dinge, von denen wir beide geträumt haben, liesen uns an einer Kreuzung zurück.
+Dialogue: 0,0:00:45.19,0:00:55.18,Subtitle,,0000,0000,0000,,Nun blicken wir von weiter Ferne auf diese Welt.
+Dialogue: 0,0:00:55.43,0:01:07.81,Subtitle,,0000,0000,0000,,Jetzt hör mir zu, wenn ich dem Himmel das Lied vorsinge, welches du mir beibrachtest.
