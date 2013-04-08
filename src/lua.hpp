@@ -1,5 +1,9 @@
 #pragma once
 
+/*
+Lua 5.2 extension header
+*/
+
 #include <lua.hpp>
 
 // Lua instance

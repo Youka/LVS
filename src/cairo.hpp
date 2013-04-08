@@ -1,8 +1,11 @@
 #pragma once
 
+// Cairo graphics
 #define CAIRO_WIN32_STATIC_BUILD
 #include <cairo/cairo.h>
+// Windows API
 #include <windows.h>
+// SSE2
 #include <xmmintrin.h>
 
 // Windows text extents structure
@@ -140,7 +143,7 @@ static void cairo_win32_text_path(cairo_t *ctx, const wchar_t *text, const wchar
 	}
 }
 
-// Thread data for functions below
+// Thread data for function below
 struct THREAD_DATA{
 	int image_width, image_height, image_stride, image_first_row, image_last_row;
 	cairo_format_t image_format;

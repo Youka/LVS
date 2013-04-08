@@ -43,9 +43,9 @@ void LVSMediaBase::LoadExternalLibs(){
 				do{
 					// Valid file?
 					size_t len = wcslen(file_data.cFileName);
-					if((file_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0 &&
-						len > 4 && wcscmp(file_data.cFileName+len-4, L".lua") == 0 &&
-						dir_sep - buf + 6 + len <= buf_len){
+					if((file_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0 &&	// File?
+						len > 4 && wcscmp(file_data.cFileName+len-4, L".lua") == 0 &&	// Valid extension?
+						dir_sep - buf + 6 + len <= buf_len){	// Can prepend path?
 						// Convert filename to UTF-8
 						wcscpy(dir_sep+5, file_data.cFileName);
 						char *filename = utf16_to_utf8(buf);
