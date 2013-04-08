@@ -1,7 +1,7 @@
-/release/LVS.dll
-/release/LVS.exp
-/release/LVS.lib
-/release/LVS.pdb
+/plugin/LVS.dll
+/plugin/LVS.exp
+/plugin/LVS.lib
+/plugin/LVS.pdb
 
 /src/temp
 /src/LVS.ncb

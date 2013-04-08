@@ -17,26 +17,19 @@ Dialogue: 0,0:00:05.58,0:00:10.29,Subtitle,,0,0,0,,...der nur Stimmen aus der Ve
 
 -- Roumaji & kanji
 local function roumaji_kanji(ctx, ms, line)
-	-- Draw inactive sylables
+	-- Iterate through sylables
 	for si, syl in ipairs(line.syls) do
-		if ms < syl.start_time or ms >= syl.end_time then
-			ctx:set_matrix(g2d.create_matrix():translate(syl.x, syl.y))
-			ctx:path_add_text(syl.text, ass.unpack_style(line.styleref))
-			ctx:set_source(g2du.black)
-			ctx:path_fill()
-			ctx:path_clear()
-		end
-	end
-	-- Draw active sylable with effect
-	for si, syl in ipairs(line.syls) do
+		-- Set color dependent on sylable activity
 		if ms >= syl.start_time and ms < syl.end_time then
-			local pct = math.sin((ms - syl.start_time) / syl.duration * math.pi)
-			ctx:set_matrix(g2d.create_matrix():translate(syl.width/2 + syl.x, syl.height/2 + syl.y):scale(1+pct*0.5, 1+pct*0.5):translate(-syl.width/2,-syl.height/2))
-			ctx:path_add_text(syl.text, ass.unpack_style(line.styleref))
-			ctx:set_source(g2d.create_source_color(pct, 0, 0))
-			ctx:path_fill()
-			ctx:path_clear()
+			ctx:set_source(g2du.red)
+		else
+			ctx:set_source(g2du.black)
 		end
+		-- Draw sylable text
+		ctx:set_matrix(g2d.create_matrix():translate(syl.x, syl.y))
+		ctx:path_add_text(syl.text, ass.unpack_style(line.styleref))
+		ctx:path_fill()
+		ctx:path_clear()
 	end
 end
 

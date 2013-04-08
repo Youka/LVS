@@ -8,11 +8,8 @@ function GetFrame(frame, frame_i)
 	ctx:path_add_arc(500,200,80,0,360)
 	-- Transform path to wobble
 	g2du.path_transform(ctx, function(x, y)
-		return x + math.sin(y/4 + frame_i/20) * 2, y + math.cos(x/4 + frame_i/20) * 2
+		return x + math.sin(y/4 + frame_i/20) * 3, y + math.cos(x/4 + frame_i/20) * 3
 	end)
-	-- Set source to inverse destination
-	ctx:set_source(g2du.white)
-	ctx:set_composition("DIFFERENCE")
 	-- Fill path
 	ctx:path_fill()
 end
