@@ -6,9 +6,9 @@ function GetFrame(frame, frame_i)
 	-- Iterate through frame pixels
 	for y = 0, VIDEO_HEIGHT - 1 do
 		for x = 0, VIDEO_WIDTH - 1 do
-			local data_i = 1 + y * VIDEO_WIDTH * channels + x * channels
 			-- Set new pixel color
 			if math.random(0,2) == 0 then
+				local data_i = 1 + y * VIDEO_WIDTH * channels + x * channels
 				data[data_i] = 0
 				data[data_i+1] = 0
 				data[data_i+2] = 0

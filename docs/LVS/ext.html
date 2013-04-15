@@ -50,19 +50,41 @@
 		padding: 10px;
 	}
 	a.index{
-		font-weight: bold;
 		text-decoration: none;
 		color: black;
+		display: block;
+	}
+	span.index_h1, span.index_h2{
+		font-weight: bold;
+		display: block;
+		text-decoration: underline;
+	}
+	span.index_h1{
+		text-align: center;
+	}
+	span.index_h2{
+		font-style: italic;
 	}
 </style>
 <script type="text/javascript">
-var index_entries = new Array();
+var index_buffer = "";
+
+function Title1(text){
+	document.write("<h1>"+text+"</h1>");
+	index_buffer += "<span class='index_h1'>"+text+"</span>";
+}
+function Title2(text){
+	document.write("<h2>"+text+"</h2>");
+	index_buffer += "<span class='index_h2'>"+text+"</span>";
+}
+function Separator(){
+	document.write("<hr/>");
+}
 function VarEntry(v){
-	index_entries.push(v);
 	document.write("<p class='def'><a name='"+v+"'>"+v+"</a></p>");
+	index_buffer += '<a class="index" href="#'+v+'">'+v+'</a>';
 }
 function FuncEntry(ret, func, arguments){
-	index_entries.push(func);
 	var buffer = "<p class='def'><a name='"+func+"'>";
 	if(ret.length > 0)
 		buffer += "<span style='color: green;'>"+ret+"</span> = ";
@@ -71,7 +93,9 @@ function FuncEntry(ret, func, arguments){
 		buffer += "<span style='color: red;'>"+arguments+"</span>";
 	buffer += ")</a></p>";
 	document.write(buffer);
+	index_buffer += '<a class="index" href="#'+func+'">'+func+'</a>';
 }
+
 function Desc(text){
 	document.write("<p>"+text+"</p>");
 }
@@ -91,20 +115,26 @@ function EndArgs(){
 </head>
 
 <body>
-<h1>Math</h1>
+<a class="index" href="#"><div class="index" style='position: fixed; right: 0px; top: 0px; padding: 0px;'>
+Top
+</div></a>
+<a name="func_index"><div id="index" class="index">
+</div></a>
 <script>
+Separator();
+Title1("Math");
 FuncEntry("point", "math.bezier", "pct, points");
 Desc("Calculates point on bezier curve.");
 BeginArgs();
 Arg("pct", "number in range 0-1");
-Arg("points", "curve points (table)");
-Ret("point", "point on curve (table)");
+Arg("points", "curve points in 2D or 3D (table)");
+Ret("point", "3D point on curve (table)");
 EndArgs();
 FuncEntry("deg", "math.degree", "vec1, vec2");
 Desc("Calculates degree between two vectors.");
 BeginArgs();
-Arg("vec1", "first vector (table)");
-Arg("vec2", "second vector (table)");
+Arg("vec1", "first 3D vector (table)");
+Arg("vec2", "second 3D vector (table)");
 Ret("deg", "degree between vectors (number)");
 EndArgs();
 FuncEntry("len", "math.distance", "w, h[, d]");
@@ -124,7 +154,7 @@ Arg("a", "ellipse angle (number)");
 Ret("x, y", "point on ellipse (number)");
 EndArgs();
 FuncEntry("res", "math.interpolate", "min, max, pct");
-Desc("Calculates number between two by <i>pct</i>.");
+Desc("Calculates number between two numbers by <i>pct</i>.");
 BeginArgs();
 Arg("min", "minimal number");
 Arg("max", "maximal number");
@@ -134,9 +164,9 @@ EndArgs();
 FuncEntry("vec", "math.ortho", "vec1, vec2");
 Desc("Calculates orthogonal vector of two given vectors.");
 BeginArgs();
-Arg("vec1", "first vector (table)");
-Arg("vec2", "second vector (table)");
-Ret("vec", "orthogonal vector (table)");
+Arg("vec1", "first 3D vector (table)");
+Arg("vec2", "second 3D vector (table)");
+Ret("vec", "orthogonal 3D vector (table)");
 EndArgs();
 FuncEntry("n", "math.randomsteps", "min, max, step");
 Desc("Generates a random number in range <i>min</i> until <i>max</i> and with gaps of <i>step</i>.");
@@ -160,10 +190,8 @@ Arg("min", "minimal number");
 Arg("max", "maximal number");
 Ret("result", "trimmed number");
 EndArgs();
-</script>
-<hr>
-<h1>String</h1>
-<script>
+Separator();
+Title1("String");
 FuncEntry("len", "string.ucharrange", "s, pos");
 Desc("Returns length of unicode character at given position in text.");
 BeginArgs();
@@ -182,12 +210,10 @@ FuncEntry("len", "string.ulen", "s");
 Desc("Returns length of unicode text.");
 BeginArgs();
 Arg("s", "unicode text (string)");
-Ret("len", "text length (number)");
+Ret("len", "unicode characters number (number)");
 EndArgs();
-</script>
-<hr>
-<h1>Table</h1>
-<script>
+Separator();
+Title1("Table");
 FuncEntry("t2", "table.copy", "t1")
 Desc("Creates a deep table copy.");
 BeginArgs();
@@ -200,31 +226,29 @@ BeginArgs();
 Arg("t", "any table");
 Ret("info", "table information (string)")
 EndArgs();
-</script>
-<hr>
-<h1>Media</h1>
-<script>
+Separator();
+Title1("Media");
 VarEntry("VIDEO_WIDTH");
-Desc("Video width.");
+Desc("Video width. (Video script only)");
 VarEntry("VIDEO_HEIGHT");
-Desc("Video height.");
+Desc("Video height. (Video script only)");
 VarEntry("VIDEO_HAS_ALPHA");
-Desc("Video has an alpha channel.");
+Desc("Video has an alpha channel. (Video script only)");
 VarEntry("VIDEO_FPS");
-Desc("Video frames per second.");
+Desc("Video frames per second. (Video script only)");
 VarEntry("VIDEO_FRAMES");
-Desc("Video frames number.");
+Desc("Video frames number. (Video script only)");
 VarEntry("AUDIO_CHANNELS");
-Desc("Audio channels.");
+Desc("Audio channels. (Audio script only)");
 VarEntry("AUDIO_SAMPLE_RATE");
-Desc("Audio samples per second (per channel).");
+Desc("Audio samples per second (per channel). (Audio script only)");
 VarEntry("AUDIO_SAMPLES");
-Desc("Audio samples number (for all channels).");
-</script>
-<hr>
-<h1>G2D library</h1>
-<h2>Image creation</h2>
-<script>
+Desc("Audio samples number (for all channels). (Audio script only)");
+VarEntry("USERDATA");
+Desc("Passed data string from LVS call. (Avisynth only)");
+Separator();
+Title1("G2D library");
+Title2("Image creation");
 FuncEntry("image", "g2d.create_image", "format, width, height");
 Desc("Creates an image with given size and colorspace.");
 BeginArgs();
@@ -251,26 +275,20 @@ BeginArgs();
 Arg("image", "image object");
 Ret("filename", "name of a new PNG file (string)");
 EndArgs();
-</script>
-<h2>Context creation</h2>
-<script>
+Title2("Context creation");
 FuncEntry("context", "g2d.create_context", "image");
 Desc("Creates a drawing context for given image.");
 BeginArgs();
 Arg("image", "image object");
 Ret("context", "context object");
 EndArgs();
-</script>
-<h2>Matrix creation</h2>
-<script>
+Title2("Matrix creation");
 FuncEntry("matrix", "g2d.create_matrix", "");
 Desc("Creates a matrix.");
 BeginArgs();
 Ret("matrix", "matrix object");
 EndArgs();
-</script>
-<h2>Source creation</h2>
-<script>
+Title2("Source creation");
 FuncEntry("source", "g2d.create_source_color", "r, g, b[, a]");
 Desc("Creates a source of given color.");
 BeginArgs();
@@ -295,14 +313,12 @@ BeginArgs();
 Ret("source", "source object");
 EndArgs();
 FuncEntry("source", "g2d.create_source_image", "image");
-Desc("Creates a source as given image.");
+Desc("Creates a source from given image.");
 BeginArgs();
 Arg("image", "image object");
 Ret("source", "source object");
 EndArgs();
-</script>
-<h2>Utilities</h2>
-<script>
+Title2("Utilities");
 FuncEntry("image", "g2d.image_convolution", "image, kernel");
 Desc("Applies given convolution filter kernel to image.");
 BeginArgs();
@@ -320,11 +336,9 @@ Arg("bold, italic, underline, strikeout", "font style (boolean, optional)");
 Ret("width, height", "text extents (number)");
 Ret("ascent, descent, internal_leading, external_leading", "font metrics (number)");
 EndArgs();
-</script>
-<hr>
-<h1>Image object</h1>
-<h2>Header data</h2>
-<script>
+Separator();
+Title1("Image object");
+Title2("Header data");
 FuncEntry("width", "image:get_width", "");
 Desc("Returns image width.");
 BeginArgs();
@@ -340,9 +354,7 @@ Desc("Returns image format/colorspace.");
 BeginArgs();
 Ret("format", '"RGBA", "RGB", "ALPHA" or "BINARY"');
 EndArgs();
-</script>
-<h2>Pixels data</h2>
-<script>
+Title2("Pixels data");
 FuncEntry("pixels", "image:get_data", "x0, y0, x1, y1");
 Desc("Returns image data of given area.");
 BeginArgs();
@@ -355,11 +367,9 @@ BeginArgs();
 Arg("x0, y0, x1, y1", "image area (number)");
 Arg("pixels", "pixels palette (table)");
 EndArgs();
-</script>
-<hr>
-<h1>Matrix object</h1>
-<h2>Data</h2>
-<script>
+Separator();
+Title1("Matrix object");
+Title2("Data");
 FuncEntry("xx, yx, xy, yy, x0, y0", "matrix:get_data", "");
 Desc("Returns matrix values.");
 BeginArgs();
@@ -370,9 +380,7 @@ Desc("Sets matrix values.");
 BeginArgs();
 Arg("xx, yx, xy, yy, x0, y0", "matrix fields (number)");
 EndArgs();
-</script>
-<h2>Manipulation</h2>
-<script>
+Title2("Manipulation");
 FuncEntry("matrix", "matrix:identity", "");
 Desc("Sets matrix to identity.");
 BeginArgs();
@@ -413,20 +421,16 @@ BeginArgs();
 Arg("x, y", "shear (number)");
 Ret("matrix", "matrix object from input");
 EndArgs();
-</script>
-<h2>Transformation</h2>
-<script>
+Title2("Transformation");
 FuncEntry("x, y", "matrix:transform", "x, y");
-Desc("Multiplies matrix with point.");
+Desc("Multiplies point with matrix.");
 BeginArgs();
 Arg("x, y", "point (number)");
 Ret("x, y", "transformed point (number)");
 EndArgs();
-</script>
-<hr>
-<h1>Source object</h1>
-<h2>Add data</h2>
-<script>
+Separator();
+Title1("Source object");
+Title2("Add data");
 FuncEntry("source", "source:add_color", "pct, r, g, b[, a]");
 Desc("Adds a color to color gradient source.");
 BeginArgs();
@@ -436,15 +440,13 @@ Arg("a", "alpha strength in range 0-1 (number, optional)");
 Ret("source", "source object from input");
 EndArgs();
 FuncEntry("source", "source:add_mesh", "x0, y0, r0, g0, b0, a0, x1, y1, r1, g1, b1, a1, x2, y2, r2, g2, b2, a2[, x3, y3, r3, g3, b3, a3]");
-Desc("Adds a color gradient mesh to meshes source");
+Desc("Adds a color gradient mesh to meshes source.");
 BeginArgs();
 Arg("x0, y0, r0, g0, b0, a0, x1, y1, r1, g1, b1, a1, x2, y2, r2, g2, b2, a", "mesh points and colors in range 0-1 (number)");
 Arg("x3, y3, r3, g3, b3, a3", "fourth mesh point and color (number, optional)");
 Ret("source", "source object from input");
 EndArgs();
-</script>
-<h2>Get data</h2>
-<script>
+Title2("Get data");
 FuncEntry("[pct, ]r, g, b, a", "source:get_color", "[index]");
 Desc("Returns (gradient offset and) color of color (gradient) source.");
 BeginArgs();
@@ -473,9 +475,7 @@ Desc("Returns image of image source.");
 BeginArgs();
 Ret("image", "image object");
 EndArgs();
-</script>
-<h2>Properties</h2>
-<script>
+Title2("Properties");
 FuncEntry("type", "source:get_type", "");
 Desc("Returns source type.");
 BeginArgs();
@@ -511,18 +511,14 @@ Desc("Sets source transformation matrix.");
 BeginArgs();
 Arg("matrix", "matrix object");
 EndArgs();
-</script>
-<hr>
-<h1>Context object</h1>
-<h2>State</h2>
-<script>
+Separator();
+Title1("Context object");
+Title2("State");
 FuncEntry("", "context:push_state", "");
 Desc("Pushes current context state onto the internal state stack.");
 FuncEntry("", "context:pop_state", "");
 Desc("Pops a context state from the internal state stack and sets it as current.");
-</script>
-<h2>Transformation</h2>
-<script>
+Title2("Transformation");
 FuncEntry("matrix", "context:get_matrix", "");
 Desc("Returns context transformation matrix.");
 BeginArgs();
@@ -533,9 +529,7 @@ Desc("Sets context transformation matrix.");
 BeginArgs();
 Arg("matrix", "matrix object");
 EndArgs();
-</script>
-<h2>Raster source</h2>
-<script>
+Title2("Raster source");
 FuncEntry("source", "context:get_source", "");
 Desc("Returns context source.");
 BeginArgs();
@@ -546,9 +540,7 @@ Desc("Sets context source.");
 BeginArgs();
 Arg("source", "source object");
 EndArgs();
-</script>
-<h2>Render properties</h2>
-<script>
+Title2("Render properties");
 FuncEntry("antialiasing", "context:get_antialiasing", "");
 Desc("Returns antialiasing mode.");
 BeginArgs();
@@ -579,23 +571,21 @@ Desc("Sets composition.");
 BeginArgs();
 Arg("composition", '"SOURCE", "OVER", "INSIDE", "OUTSIDE", "MIX", "XOR", "ADD", "SATURATE", "MULTIPLY" or "DIFFERENCE"');
 EndArgs();
-</script>
-<h2>Stroke properties</h2>
-<script>
+Title2("Stroke properties");
 FuncEntry("offset, dashes", "context:get_dash", "");
-Desc("Sets the dash pattern for path stroking.");
+Desc("Returns the dash pattern for path stroking.");
 BeginArgs();
 Ret("offset", "dash pattern offset for stroke start (number)");
 Ret("dashes", "length of 'on' and 'off' portions in stroke (table of numbers)");
 EndArgs();
 FuncEntry("", "context:set_dash", "offset, dashes");
-Desc("Returns the dash pattern for path stroking.");
+Desc("Sets the dash pattern for path stroking.");
 BeginArgs();
 Arg("offset", "dash pattern offset for stroke start (number)");
 Arg("dashes", "length of 'on' and 'off' portions in stroke (table of numbers)");
 EndArgs();
 FuncEntry("line_cap", "context:get_line_cap", "");
-Desc("Gets line cap.");
+Desc("Returns line cap.");
 BeginArgs();
 Ret("line_cap", '"FLAT", "ROUND" or "SQUARE"');
 EndArgs();
@@ -634,9 +624,7 @@ Desc("Sets line width.");
 BeginArgs();
 Arg("width", "line width (number)");
 EndArgs();
-</script>
-<h2>Clipping</h2>
-<script>
+Title2("Clipping");
 FuncEntry("", "context:clip_from_path", "");
 Desc("Defines clipping region from current path.");
 FuncEntry("", "context:clip_clear", "");
@@ -646,9 +634,7 @@ Desc("Returns clipping region describing rectangles.");
 BeginArgs();
 Ret("rectangles", "rectangles with fields <i>x</i>, <i>y</i>, <i>width</i> and <i>height</i> (tables in table)");
 EndArgs();
-</script>
-<h2>Path definition</h2>
-<script>
+Title2("Path definition");
 FuncEntry("", "context:path_move_to", "x, y");
 Desc("Adds a movement to current path.");
 BeginArgs();
@@ -660,7 +646,7 @@ BeginArgs();
 Arg("x, y", "point (number)");
 EndArgs();
 FuncEntry("", "context:path_curve_to", "x0, y0, x1, y1, x2, y2");
-Desc("Adds a bezier curve to current path.");
+Desc("Adds a cubic bezier curve to current path.");
 BeginArgs();
 Arg("x0, y0, x1, y1, x2, y2", "points (number)");
 EndArgs();
@@ -677,7 +663,7 @@ Arg("cx, cy, r", "arc (number)");
 Arg("angle0, angle1", "start and end angle of arc (number)");
 EndArgs();
 FuncEntry("", "context:path_add_text", "text, face, size[, bold, italic, underline, strikeout]");
-Desc("Adds a closed text path to current path.");
+Desc("Adds a closed text to current path.");
 BeginArgs();
 Arg("text", "any text (string)");
 Arg("face", "font face (string)");
@@ -689,14 +675,12 @@ Desc("Closes current path.");
 FuncEntry("", "context:path_clear", "");
 Desc("Clears path.");
 FuncEntry("", "context:path_transform", "filter[, flatten]");
-Desc("Passes current path points (type + coordinate) through a filter function for manipulation.");
+Desc("Passes current path points through a filter function for manipulation.");
 BeginArgs();
-Arg("filter", "path points filter (function)");
+Arg("filter", "path points filter (function, [type_string,x,y -> x,y])");
 Arg("flatten", "curves flattened before? (boolean)");
 EndArgs();
-</script>
-<h2>Drawing</h2>
-<script>
+Title2("Drawing");
 FuncEntry("", "context:path_fill", "");
 Desc("Fills path with source.");
 FuncEntry("", "context:path_stroke", "");
@@ -708,9 +692,7 @@ Desc("Paints source with alpha mask.");
 BeginArgs();
 Arg("mask", "source object");
 EndArgs();
-</script>
-<h2>Bounding</h2>
-<script>
+Title2("Bounding");
 FuncEntry("x0, y0, x1, y1", "context:clip_bounding", "");
 Desc("Calculates the bounding box/area of the clipping region.");
 BeginArgs();
@@ -731,9 +713,7 @@ Desc("Calculates the bounding box/area of the stroking path.");
 BeginArgs();
 Ret("x0, y0, x1, y1", "area (number)");
 EndArgs();
-</script>
-<h2>Point test</h2>
-<script>
+Title2("Point test");
 FuncEntry("hit", "context:clip_contains", "x, y");
 Desc("Checks if point is inside of the clipping region.");
 BeginArgs();
@@ -752,11 +732,9 @@ BeginArgs();
 Arg("x, y", "point (number)");
 Ret("hit", "is inside (boolean)");
 EndArgs();
-</script>
-<hr>
-<h1>G2DU library</h1>
-<h2>Kernel generation</h2>
-<script>
+Separator();
+Title1("G2DU library");
+Title2("Kernel generation");
 FuncEntry("kernel", "g2du.create_box_blur_kernel", "r")
 Desc("Generates a box blur filter kernel.");
 BeginArgs();
@@ -788,9 +766,7 @@ BeginArgs();
 Arg("r", "kernel radius (number, integer)");
 Ret("kernel", "filter kernel (table)");
 EndArgs();
-</script>
-<h2>Stock objects</h2>
-<script>
+Title2("Stock objects");
 VarEntry("g2du.identity");
 Desc("Identity matrix.");
 VarEntry("g2du.white");
@@ -857,18 +833,14 @@ VarEntry("g2du.sapphire");
 Desc("Sapphire color source.");
 VarEntry("g2du.transparent");
 Desc("Transparent color source.");
-</script>
-<h2>Path manipulation</h2>
-<script>
+Title2("Path manipulation");
 FuncEntry("", "g2du.path_transform", "ctx, filter")
-Desc("Splits context path into tiny line segments and passes their points (just coordinate) through a filter function for manipulation.");
+Desc("Splits context path into tiny line segments and passes their points through a filter function for manipulation.");
 BeginArgs();
 Arg("ctx", "context object");
-Ret("filter", "path points filter (function)");
+Ret("filter", "path points filter (function, [x,y -> x,y])");
 EndArgs();
-</script>
-<h2>Matrix manipulation</h2>
-<script>
+Title2("Matrix manipulation");
 FuncEntry("mat", "g2du.rotate_xy", "mat, x, y")
 Desc("Prepends x-axis + y-axis rotation to matrix.");
 BeginArgs();
@@ -884,7 +856,6 @@ Arg("x, y", "angles (number)");
 Ret("mat", "matrix object from input");
 EndArgs();
 </script>
-<hr>
 <!--
 FuncEntry("", "", "")
 Desc("");
@@ -893,21 +864,9 @@ Arg("", "");
 Ret("", "");
 EndArgs();
 -->
-<a name="func_index"><div id="func_index" class="index">
 <script>
-for(var i = 0; i < index_entries.length; i++){
-	document.write('<a class="index" href="#'+index_entries[i]+'">'+index_entries[i]+'</a>');
-	if(i != index_entries.length-1)
-		document.write("<br/>");
-}
+document.getElementById("index").innerHTML = index_buffer;
 </script>
-</div></a>
-<a class="index" href="#"><div class="index" style='position: fixed; right: 0px; top: 0px; padding: 0px;'>
-Top
-</div></a>
-<a class="index" href="#func_index"><div class="index" style='position: fixed; right: 0px; top: 26px; padding: 0px;'>
-Index
-</div></a>
 </body>
 
 </html>

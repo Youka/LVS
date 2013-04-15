@@ -24,4 +24,4 @@ ColorBars(width = 720, height = 480, pixel_type = "YV12").AssumeFPS(fps).Trim(0,
 
 #KARAOKE EXAMPLES
 #LVS("karaoke\basic.lua")
-LVS("karaoke\simple.lua")
+#LVS("karaoke\simple.lua")

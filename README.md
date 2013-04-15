@@ -4,9 +4,10 @@
 **LVS** (Lua Video Sync) is a *video frameserver plugin* to edit video frames 
 with the capability of scripting language *Lua* + 2D image processing functionality.
 
+Supported video colorspaces are RGB24 & RGBA32.  
 Implented plugin interfaces are currently *Avisynth*, *VirtualDub* and *DirectShow*.  
 (Avisynth permits also a way to edit audio data and pass userdata.)  
-The provided plugin already includes a Lua 5.2 interpreter with a graphic library, 
+The provided plugin already includes a Lua 5.2 interpreter with a graphics library, 
 so there's no additionaly dependency to install.
 
 LVS aims at user groups like programmers, video editors and karaoke effects makers. 

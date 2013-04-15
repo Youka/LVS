@@ -218,6 +218,7 @@ g2du = {
 			end
 		end
 	end,
+	-- Matrix 3D manipulation (rotate x+y)
 	rotate_xy = function(mat, x, y)
 		if getmetatable(mat) ~= "g2d matrix" or type(x) ~= "number" or type(y) ~= "number" then
 			error("g2d matrix, number and number expected", 2)
@@ -231,6 +232,7 @@ g2du = {
 		-- Return input matrix
 		return mat
 	end,
+	-- Matrix 3D manipulation (rotate y+x)
 	rotate_yx = function(mat, x, y)
 		if getmetatable(mat) ~= "g2d matrix" or type(x) ~= "number" or type(y) ~= "number" then
 			error("g2d matrix, number and number expected", 2)

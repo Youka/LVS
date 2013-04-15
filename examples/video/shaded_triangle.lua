@@ -1,8 +1,8 @@
 -- Triangle points
 local points = {
-	{x = 400, y = 200},
-	{x = 500, y = 200},
-	{x = 450, y = 130}
+	{x = 100, y = 400},
+	{x = 500, y = 400},
+	{x = 300, y = 100}
 }
 -- Create triangle gradient (note: aliased)
 local gradient = g2d.create_source_mesh_gradient():add_mesh(

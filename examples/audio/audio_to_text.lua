@@ -10,6 +10,6 @@ function GetSamples(samples, samples_n, start_sample_i)
 		samples[sample_i] = samples[sample_i] - samples[sample_i] % 0.0001
 	end
 	-- Write samples to file
-	file:write(table.concat(samples, "\n", 1, samples_n))
+	file:write(table.concat(samples, "\n"))
 	file:write("\n")
 end
