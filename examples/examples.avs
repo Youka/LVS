@@ -15,11 +15,12 @@ ColorBars(width = 720, height = 480, pixel_type = "YV12").AssumeFPS(fps).Trim(0,
 #LVS("video\animation.lua")
 #LVS("video\composition.lua")
 #LVS("video\convolution.lua")
-#LVS("video\info.lua")
+#LVS("video\info.lua", data="String from Avisynth!")
 #LVS("video\logo.lua")
 #LVS("video\noise.lua")
 #LVS("video\overlay.lua")
 #LVS("video\shaded_triangle.lua")
+#LVS("video\stroke.lua")
 #LVS("video\wobble.lua")
 
 #KARAOKE EXAMPLES
