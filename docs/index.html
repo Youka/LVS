@@ -47,7 +47,7 @@
 		text-decoration: underline;
 		margin: 10px 0px 0px -10px;
 	}
-	ol{
+	ol, ul{
 		margin: 0px 0px 0px 0px;
 		text-align: left;
 	}
@@ -86,11 +86,11 @@
 		elem.parentNode.style.height = height == "100%" ? default_height : "100%";
 	}
 	function generateLinkList(){
-		var content = "<ol style='margin-left: 200px;'>",
+		var content = "<ul style='margin-left: 200px;'>",
 			entries = Math.floor(arguments.length / 2);
 		for(var i = 0; i < entries; i++)
 			content += "<li><a class='intern' href='" + arguments[i*2+1] + "' target='_blank'>" + arguments[i*2] + "</a></li>";
-		content += "</ol>";
+		content += "</ul>";
 		document.write(content);
 	}
 </script>
@@ -108,7 +108,7 @@
 LVS allows linear video frame editing by writing scripts. This gives users more control than a function-limited GUI and encourages creativity.
 <h2>Plugin interfaces</h2>
 Plugin interfaces for frameserver application <a href="http://en.wikipedia.org/wiki/Avisynth" target="_blank">Avisynth</a> and <a href="http://en.wikipedia.org/wiki/DirectShow" target="_blank">DirectShow</a> 
-and video editor <a href="http://en.wikipedia.org/wiki/VirtualDub" target="_blank">VirtualDub</a> are available. Supported colorspaces are RGB24 & RGBA32.
+and video editor <a href="http://en.wikipedia.org/wiki/VirtualDub" target="_blank">VirtualDub</a> are available. Supported colorspaces are <a href="http://en.wikipedia.org/wiki/Rgb" target="_blank">RGB24</a> & <a href="http://en.wikipedia.org/wiki/RGBA" target="_blank">RGBA32</a>.
 <h2>Workflow</h2>
 <ol>
 <li>Load <b>LVS.dll</b> into your application.</li>

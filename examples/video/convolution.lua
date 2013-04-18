@@ -4,6 +4,12 @@ local gaussian_blur_kernel = g2du.create_gaussian_blur_kernel(3)
 local motion_blur_kernel = g2du.create_motion_blur_kernel(3, 45)
 local sharpen_kernel = g2du.create_sharpen_kernel(1)
 local edge_detect_kernel = g2du.create_edge_detect_kernel(1)
+local emboss_kernel = {
+	width = 3, height = 3,
+	1, 1, 0,
+	1, 0, -1,
+	0, -1, -1
+}
 
 -- Process frames
 function GetFrame(frame, frame_i)
@@ -20,5 +26,7 @@ function GetFrame(frame, frame_i)
 		g2d.image_convolution(frame, sharpen_kernel)
 	elseif frame_i < 600 then
 		g2d.image_convolution(frame, edge_detect_kernel)
+	elseif frame_i < 700 then
+		g2d.image_convolution(frame, emboss_kernel)
 	end
 end
