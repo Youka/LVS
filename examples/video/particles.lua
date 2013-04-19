@@ -46,7 +46,7 @@ local function update(pct)
 	for i=1, 20 do
 		particles.n = particles.n + 1
 		particles[particles.n] = {
-			cur_pos = {pos[1] + math.random(0,10) * 0.5, pos[2] + math.random(0,10) * 0.5},
+			cur_pos = {pos[1] + math.random(-6,6) * 0.5, pos[2] + math.random(-6,6) * 0.5},
 			dir = {math.random(-10,10) * 0.5, math.random(-10,10) * 0.5},
 			life = 5,
 			max_life = 5
