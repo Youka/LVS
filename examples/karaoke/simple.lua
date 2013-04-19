@@ -5,7 +5,7 @@ ass.load("karaoke\\chihaya_ed.ass")
 local function roumaji_kanji(ctx, ms, line)
 	-- Calculate transparency dependent on in- & outfade effect
 	local alpha = ms < line.start_time and (ms - (line.start_time - line.infade/2)) / (line.infade/2) or ms > line.end_time and 1 - (ms - line.end_time) / (line.outfade/2) or 1
-	-- Draw inactive sylables
+	-- Draw inactive sylables and collect active one
 	local active_syl
 	for si, syl in ipairs(line.syls) do
 		if ms >= syl.start_time and ms < syl.end_time then
