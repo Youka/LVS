@@ -1,0 +1,7 @@
+0.0.2
+--------------------
+* changed g2d.create_sub_image to g2du.create_sub_image with color conversion
+* changed g2d context default line join&cap to "ROUND"
+* added 'Extensions' entry to documentation
+* accelerated internal pixel transfer !!!TODO!!!
+* added examples !!!TODO!!!

@@ -212,7 +212,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\threads.h"
+				RelativePath=".\threads.hpp"
 				>
 			</File>
 		</Filter>

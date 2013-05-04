@@ -1,6 +1,6 @@
 #include "llibs.hpp"
 #include "cairo.hpp"
-#include "threads.h"	// For image convolution multithreading
+#include "threads.hpp"	// For image convolution multithreading
 #include "textconv.hpp"	// For library text functions
 #include <memory>	// For smart pointers
 #define M_PI       3.14159265358979323846	// From "math.h"
@@ -94,7 +94,7 @@ inline cairo_line_cap_t cairo_line_cap_from_string(const char *line_cap_string){
 	if(strcmp(line_cap_string, "FLAT") == 0) return CAIRO_LINE_CAP_BUTT;
 	else if(strcmp(line_cap_string, "ROUND") == 0) return CAIRO_LINE_CAP_ROUND;
 	else if(strcmp(line_cap_string, "SQUARE") == 0) return CAIRO_LINE_CAP_SQUARE;
-	else return CAIRO_LINE_CAP_BUTT;
+	else return CAIRO_LINE_CAP_ROUND;
 }
 
 inline const char* cairo_line_cap_to_string(cairo_line_cap_t line_cap){
@@ -110,7 +110,7 @@ inline cairo_line_join_t cairo_line_join_from_string(const char *line_join_strin
 	if(strcmp(line_join_string, "MITER") == 0) return CAIRO_LINE_JOIN_MITER;
 	else if(strcmp(line_join_string, "ROUND") == 0) return CAIRO_LINE_JOIN_ROUND;
 	else if(strcmp(line_join_string, "BEVEL") == 0) return CAIRO_LINE_JOIN_BEVEL;
-	else return CAIRO_LINE_JOIN_MITER;
+	else return CAIRO_LINE_JOIN_ROUND;
 }
 
 inline const char* cairo_line_join_to_string(cairo_line_join_t line_join){
@@ -167,28 +167,6 @@ LUA_FUNC_1ARG(create_image, 3)
 	}
 	// Push image to Lua
 	*lua_createuserdata<cairo_surface_t*>(L, G2D_IMAGE) = surface;
-	return 1;
-LUA_FUNC_END
-
-LUA_FUNC_1ARG(create_sub_image, 5)
-	// Get parameters
-	cairo_surface_t *surface = *reinterpret_cast<cairo_surface_t**>(luaL_checkuserdata(L, 1, G2D_IMAGE));
-	int x0 = luaL_checknumber(L, 2);
-	int y0 = luaL_checknumber(L, 3);
-	int x1 = luaL_checknumber(L, 4);
-	int y1 = luaL_checknumber(L, 5);
-	if(x0 < 0 || y0 < 0 ||
-		x1 <= x0 || y1 <= y0 ||
-		x1 > cairo_image_surface_get_width(surface) || y1 > cairo_image_surface_get_height(surface))
-		luaL_error2(L, "invalid area");
-	// Create sub image
-	cairo_surface_t *sub_surface = cairo_image_surface_create(cairo_image_surface_get_format(surface), x1-x0, y1-y0);
-	cairo_t *ctx = cairo_create(sub_surface);
-	cairo_set_source_surface(ctx, surface, x0, y0);
-	cairo_paint(ctx);
-	cairo_destroy(ctx);
-	// Push image to Lua
-	*lua_createuserdata<cairo_surface_t*>(L, G2D_IMAGE) = sub_surface;
 	return 1;
 LUA_FUNC_END
 
@@ -253,6 +231,9 @@ LUA_FUNC_1ARG(create_context, 1)
 		cairo_destroy(ctx);
 		luaL_error2(L, cairo_status_to_string(status));
 	}
+	// Set defaults
+	cairo_set_line_join(ctx, CAIRO_LINE_JOIN_ROUND);
+	cairo_set_line_cap(ctx, CAIRO_LINE_CAP_ROUND);
 	// Push context to Lua
 	*lua_createuserdata<cairo_t*>(L, G2D_CONTEXT) = ctx;
 	return 1;
@@ -1346,7 +1327,6 @@ int luaopen_g2d(lua_State *L){
 	// Register 'g2d' functions to table
 	const luaL_Reg g2d_lib[] = {
 		"create_image", l_create_image,
-		"create_sub_image", l_create_sub_image,
 		"create_image_from_png", l_create_image_from_png,
 		"create_png_from_image", l_create_png_from_image,
 		"create_context", l_create_context,

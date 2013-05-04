@@ -1,7 +1,7 @@
 #pragma once
 
 /*
-Lua 5.2 extension header
+Lua 5.2 extensions header
 */
 
 #include <lua.hpp>

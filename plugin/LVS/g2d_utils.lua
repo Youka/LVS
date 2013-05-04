@@ -1,5 +1,30 @@
 -- G2D utility library
 g2du = {
+	-- Create sub-image (with color conversion)
+	create_sub_image = function(image, color_type, x0, y0, x1, y1)
+		-- Check parameters type
+		if getmetatable(image) ~= "g2d image" or type(color_type) ~= "string" or
+			type(x0) ~= "number" or type(y0) ~= "number" or type(x1) ~= "number" or type(y1) ~= "number" then
+			error("g2d image, string and 4 numbers expected", 2)
+		end
+		-- Check color type
+		if color_type ~= "RGBA" and color_type ~= "RGB" and color_type ~= "ALPHA" and color_type ~= "BINARY" then
+			error("valid color type expected", 2)
+		end
+		-- Check image area
+		if x0 < 0 or y0 < 0 or x1 > image:get_width() or y1 > image:get_height() or x0 >= x1 or y0 >= y1 then
+			error("invalid image area", 2)
+		end
+		-- Create new image
+		local new_image = g2d.create_image(color_type, x1 - x0, y1 - y0)
+		-- Draw old image on new one
+		local ctx = g2d.create_context(new_image)
+		ctx:set_matrix(g2d.create_matrix(1,0,0,1,-x0,-y0))
+		ctx:set_source(g2d.create_source_image(image))
+		ctx:paint()
+		-- Return new image
+		return new_image
+	end,
 	-- Create box blur kernel
 	create_box_blur_kernel = function(strength)
 		if type(strength) ~= "number" or strength < 1 or math.floor(strength) ~= strength then

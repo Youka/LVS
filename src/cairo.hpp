@@ -114,7 +114,7 @@ static void cairo_win32_text_path(cairo_t *ctx, const wchar_t *text, const wchar
 	DeleteDC(dc);
 	// Convert windows path (64-fold downscaled) to cairo path
 	int point_i = 0;
-	while(point_i < points_n)
+	while(point_i < points_n){
 		switch(types[point_i]){
 			case PT_MOVETO:
 				cairo_close_path(ctx);
@@ -135,6 +135,9 @@ static void cairo_win32_text_path(cairo_t *ctx, const wchar_t *text, const wchar
 				point_i += 3;
 				break;
 		}
+		if(types[point_i] & PT_CLOSEFIGURE)
+			cairo_close_path(ctx);
+	}
 	cairo_close_path(ctx);
 	// Free path resources
 	if(points_n > 0){
