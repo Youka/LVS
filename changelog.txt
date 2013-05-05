@@ -4,4 +4,3 @@
 * changed g2d context default line join&cap to "ROUND"
 * added 'Extensions' entry to documentation
 * accelerated internal pixel transfer !!!TODO!!!
-* added examples !!!TODO!!!

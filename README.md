@@ -36,6 +36,9 @@ LVS source code.
 ***gitignore***  
 Git ignored files.
 
+***changelog.txt***  
+LVS changelog.
+
 ***LICENSE***  
 LVS license (LGPLv3).
 

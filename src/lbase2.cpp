@@ -71,8 +71,6 @@ LUA_FUNC_NARG(print, 0)
 				break;
 			}
 		}
-	// Flush standard output stream
-	fflush(stdout);
 LUA_FUNC_END
 
 LUA_FUNC_1ARG(table_create, 2)
