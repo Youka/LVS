@@ -2,9 +2,8 @@
 function GetFrame(frame, frame_i)
 	-- Create image/frame context
 	local ctx = g2d.create_context(frame)
-	-- Set stroke rule
+	-- Set line thickness
 	ctx:set_line_width(6)
-	ctx:set_line_cap("ROUND")
 	-- Draw 5 progress lines
 	for i = -2, 2 do
 		-- Calculate progress status

@@ -13,7 +13,6 @@ function GetFrame(frame, frame_i)
 	ctx:path_add_text(info:format(frame_i+1), "Arial", 20)
 	-- Stroke path
 	ctx:set_line_width(6)
-	ctx:set_line_join("ROUND")
 	ctx:set_source(g2du.black)
 	ctx:path_stroke()
 	-- Fill path
