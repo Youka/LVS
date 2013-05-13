@@ -1,5 +1,9 @@
 #pragma once
 
+// GUI functions
+#include <windows.h>
+#include <Commdlg.h>
+
 // IDs for VirtualDub / DirectShow configuration dialog
 #define ID_CONFIG_TITLE 101
 #define ID_CONFIG_DIALOG 102

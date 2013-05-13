@@ -7,7 +7,6 @@
 #include "LVS.hpp"
 // Include GUI
 #include "config_dialog.hpp"
-#include <Commdlg.h>
 // Include utilities
 #include "fileinfo.hpp"
 #include "textconv.hpp"

@@ -16,7 +16,7 @@ void CairoImage::Load(register unsigned char *frame, int pitch, API api){
 			frame += pitch * (this->height-1);
 			if(this->has_alpha)
 				for(int y = 0; y < this->height; y++){
-					memcpy(image, frame, this->stride);
+					::memcpy(image, frame, this->stride);
 					frame -= pitch;
 					image += this->stride;
 				}
@@ -37,7 +37,7 @@ void CairoImage::Load(register unsigned char *frame, int pitch, API api){
 		case VDUB:{
 			frame += pitch * (this->height-1);
 			for(int y = 0; y < this->height; y++){
-				memcpy(image, frame, this->stride);
+				::memcpy(image, frame, this->stride);
 				frame -= pitch;
 				image += this->stride;
 			}
@@ -46,7 +46,7 @@ void CairoImage::Load(register unsigned char *frame, int pitch, API api){
 			frame += this->stride * (this->height-1);
 			if(this->has_alpha)
 				for(int y = 0; y < this->height; y++){
-					memcpy(image, frame, this->stride);
+					::memcpy(image, frame, this->stride);
 					frame -= this->stride;
 					image += this->stride;
 				}
@@ -76,7 +76,7 @@ void CairoImage::Save(register unsigned char *frame, int pitch, API api){
 			frame += pitch * (this->height-1);
 			if(this->has_alpha)
 				for(int y = 0; y < this->height; y++){
-					memcpy(frame, image, this->stride);
+					::memcpy(frame, image, this->stride);
 					image += this->stride;
 					frame -= pitch;
 				}
@@ -97,7 +97,7 @@ void CairoImage::Save(register unsigned char *frame, int pitch, API api){
 		case VDUB:{
 			frame += pitch * (this->height-1);
 			for(int y = 0; y < this->height; y++){
-				memcpy(frame, image, this->stride);
+				::memcpy(frame, image, this->stride);
 				image += this->stride;
 				frame -= pitch;
 			}
@@ -106,7 +106,7 @@ void CairoImage::Save(register unsigned char *frame, int pitch, API api){
 			frame += this->stride * (this->height-1);
 			if(this->has_alpha)
 				for(int y = 0; y < this->height; y++){
-					memcpy(frame, image, this->stride);
+					::memcpy(frame, image, this->stride);
 					image += this->stride;
 					frame -= this->stride;
 				}

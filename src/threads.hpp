@@ -33,7 +33,7 @@ class Threads{
 			delete[] this->data;
 		}
 		// Get CPUs/threads number
-		inline DWORD size(){
+		inline const DWORD size(){
 			return this->cpu_num;
 		}
 		// Thread data

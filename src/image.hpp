@@ -6,7 +6,7 @@ struct CairoImage{
 	// RGB or RGBA?
 	const bool has_alpha;
 	// Pixel data
-	const unsigned char *data;
+	unsigned char *data;
 	// Constructor / initialize image information & data
 	CairoImage(int width, int height, bool has_alpha);
 	// Destructor / free image data

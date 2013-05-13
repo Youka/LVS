@@ -58,8 +58,8 @@ void LVSMediaBase::LoadExternalLibs(){
 							throw e;
 						}
 						// Free resources
-						lua_gc(this->L, LUA_GCCOLLECT, 0);
 						delete[] filename;
+						lua_gc(this->L, LUA_GCCOLLECT, 0);
 					}
 				}while(FindNextFileW(finder, &file_data));
 				FindClose(finder);

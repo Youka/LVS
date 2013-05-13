@@ -1,6 +1,6 @@
 #include "llibs.hpp"
-#include "cstdlib"
-#include "cstring"
+#include <cstdlib>
+#include <cstring>
 
 LUA_FUNC_NARG(print, 0)
 	// Number of arguments
