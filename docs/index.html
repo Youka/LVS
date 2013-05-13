@@ -107,7 +107,7 @@
 <h2>Purpose</h2>
 LVS allows linear video frame editing by writing scripts. This gives users more control than a function-limited GUI and encourages creativity.
 <h2>Plugin interfaces</h2>
-Plugin interfaces for frameserver application <a href="http://en.wikipedia.org/wiki/Avisynth" target="_blank">Avisynth</a> and <a href="http://en.wikipedia.org/wiki/DirectShow" target="_blank">DirectShow</a> 
+Plugin interfaces for frameserver applications <a href="http://en.wikipedia.org/wiki/Avisynth" target="_blank">Avisynth</a> and <a href="http://en.wikipedia.org/wiki/DirectShow" target="_blank">DirectShow</a> 
 and video editor <a href="http://en.wikipedia.org/wiki/VirtualDub" target="_blank">VirtualDub</a> are available. Supported colorspaces are <a href="http://en.wikipedia.org/wiki/Rgb" target="_blank">RGB24</a> & <a href="http://en.wikipedia.org/wiki/RGBA" target="_blank">RGBA32</a>.
 <h2>Workflow</h2>
 <ol>
@@ -122,13 +122,23 @@ and video editor <a href="http://en.wikipedia.org/wiki/VirtualDub" target="_blan
 <h1 onclick="fold(this);">Usage</h1>
 <span>
 <h2>Avisynth</h2>
+Load the C++ plugin with function <b>LoadPlugin</b>. This registers function...<br/>
+<b>LVS(clip, string video, string audio, string data)</b><br/>
+<b>clip</b> is the needed input clip.<br/>
+<b>video</b> is the video script.<br/>
+<b>audio</b> is the audio script.<br/>
+<b>data</b> is any string which appears in both scripting environments.<br/>
 <code>LoadPlugin("E:\PROJEKTE\LVS\release\LVS.dll")
 
 BlankClip()
 LVS(video = "test_video.lua", audio = "test_audio.lua", data="Hello World!")</code>
 <h2>VirtualDub</h2>
+Load the plugin with menu <b> Video -> Filter... -> Add... -> Load... -> "<i>directory\</i>LVS.dll"</b>.<br/>
+Adding the filter <b>LVS</b> shows a dialog which expects the video script.<br/>
 <img src="LVS/vdub.png" alt="VirtualDub - LVS filter" />
 <h2>DirectShow</h2>
+For plugin loading, see the documentation of your chosen program.<br/>
+Filter addition is similar to VirtualDub.<br/>
 <img src="LVS/dshow.png" alt="DirectShow - LVS filter" />
 <h2>Getting started</h2>
 A script creation begins with defining the required callback function for streaming data.<br/>
@@ -146,8 +156,8 @@ For audio editing, the callback function is...<br/>
 <br/>
 See into the <b>examples</b> folder for commented scripts. This, in combination with reading the references, is the best way to learn LVS.
 <h2>Extensions</h2>
-When the filter input file loads, all Lua scripts in autoload folder <b>LVS</b> (in the same directory like the plugin) are already loaded.<br>
-Users can write their own libraries, put them into this folder and extend their environment permanently.
+When the filter starts his work, all Lua scripts in autoload folder <b>LVS</b> (in the same directory like the plugin) are already loaded.<br>
+Users can write their own libraries and put them into this folder. This way they extend their environment permanently.
 </span>
 </div>
 <div class="index">
