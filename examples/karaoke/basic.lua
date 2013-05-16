@@ -27,7 +27,7 @@ local function roumaji_kanji(ctx, ms, line)
 		end
 		-- Draw sylable text
 		ctx:set_matrix(g2d.create_matrix():translate(syl.x, syl.y))
-		ctx:path_add_text(syl.text, ass.unpack_style(line.styleref))
+		ctx:path_add_text(syl.text, ass.unpack_font(line.styleref))
 		ctx:path_fill()
 		ctx:path_clear()
 	end
@@ -37,7 +37,7 @@ end
 local function subtitle(ctx, ms, line)
 	-- Draw line text
 	ctx:set_matrix(g2d.create_matrix():translate(line.x, line.y))
-	ctx:path_add_text(line.text, ass.unpack_style(line.styleref))
+	ctx:path_add_text(line.text, ass.unpack_font(line.styleref))
 	ctx:set_source(g2du.yellow)
 	ctx:path_fill()
 	ctx:path_clear()

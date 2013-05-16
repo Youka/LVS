@@ -2,7 +2,7 @@
 <html lang="en-US">
 
 <head>
-<title>G2D</title>
+<title>Lua extensions</title>
 <base href="" target="_self" />
 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
 <meta name="application-name" content="LVS">
@@ -221,6 +221,13 @@ Desc("Creates a deep table copy.");
 BeginArgs();
 Arg("t1", "any table");
 Ret("t2", "table copy");
+EndArgs();
+FuncEntry("t", "table.create", "array_size, hash_size")
+Desc("Creates a table with reserved memory.");
+BeginArgs();
+Arg("array_size", "size of table array part (number)");
+Arg("hash_size", "size of table hash part (number)");
+Ret("t", "table with custom size");
 EndArgs();
 FuncEntry("info", "table.tostring", "t")
 Desc("Returns table as string.")
@@ -729,50 +736,13 @@ Ret("hit", "is inside (boolean)");
 EndArgs();
 Separator();
 Title1("G2DU library");
-Title2("Image conversion");
-FuncEntry("image", "g2du.create_sub_image", "image, format, x0, y0, x1, y1")
-Desc("Creates a subimage with new colorspace of given image.");
-BeginArgs();
-Arg("image", "image object");
-Arg("format", '"RGBA", "RGB", "ALPHA" or "BINARY"');
-Arg("x0, y0, x1, y1", "image area (number)");
-Ret("image", "image object");
-EndArgs();
-Title2("Kernel generation");
-FuncEntry("kernel", "g2du.create_box_blur_kernel", "r")
-Desc("Generates a box blur filter kernel.");
-BeginArgs();
-Arg("r", "kernel radius (number, integer)");
-Ret("kernel", "filter kernel (table)");
-EndArgs();
-FuncEntry("kernel", "g2du.create_gaussian_blur_kernel", "r")
-Desc("Generates a gaussian blur filter kernel.");
-BeginArgs();
-Arg("r", "kernel radius (number, integer)");
-Ret("kernel", "filter kernel (table)");
-EndArgs();
-FuncEntry("kernel", "g2du.create_motion_blur_kernel", "r, angle")
-Desc("Generates a motion blur filter kernel.");
-BeginArgs();
-Arg("r", "kernel radius (number, integer)");
-Arg("angle", "blur direction as angle (number)");
-Ret("kernel", "filter kernel (table)");
-EndArgs();
-FuncEntry("kernel", "g2du.create_sharpen_kernel", "r")
-Desc("Generates a sharpen filter kernel.");
-BeginArgs();
-Arg("r", "kernel radius (number, integer)");
-Ret("kernel", "filter kernel (table)");
-EndArgs();
-FuncEntry("kernel", "g2du.create_edge_detect_kernel", "r")
-Desc("Generates an edge detection filter kernel.");
-BeginArgs();
-Arg("r", "kernel radius (number, integer)");
-Ret("kernel", "filter kernel (table)");
-EndArgs();
 Title2("Stock objects");
 VarEntry("g2du.identity");
 Desc("Identity matrix.");
+VarEntry("g2du.flip_h");
+Desc("Horizontal flip matrix.");
+VarEntry("g2du.flip_v");
+Desc("Vertical flip matrix.");
 VarEntry("g2du.white");
 Desc("White color source.");
 VarEntry("g2du.black");
@@ -837,12 +807,52 @@ VarEntry("g2du.sapphire");
 Desc("Sapphire color source.");
 VarEntry("g2du.transparent");
 Desc("Transparent color source.");
-Title2("Path manipulation");
-FuncEntry("", "g2du.path_transform", "ctx, filter")
-Desc("Splits context path into tiny line segments and passes their points through a filter function for manipulation.");
+Title2("Image conversion");
+FuncEntry("image", "g2du.create_sub_image", "image, format, x0, y0, x1, y1");
+Desc("Creates a subimage with new colorspace of given image.");
 BeginArgs();
-Arg("ctx", "context object");
-Ret("filter", "path points filter (function, [x,y -> x,y])");
+Arg("image", "image object");
+Arg("format", '"RGBA", "RGB", "ALPHA" or "BINARY"');
+Arg("x0, y0, x1, y1", "image area (number)");
+Ret("image", "image object");
+EndArgs();
+FuncEntry("pixels", "g2du.get_pixels", "image");
+Desc("Creates a pixels table of 'visible' image pixels. 'Visible' means <i>alpha > 0</i> in RGBA, <i>not black</i> in RGB or <i>value > 0</i> in ALPHA or BINARY.");
+BeginArgs();
+Arg("image", "image object");
+Ret("pixels", "pixels informations with fields <i>r</i>, <i>g</i>, <i>b</i>, <i>a</i>, <i>x</i> and <i>y</i> (tables in table)");
+EndArgs();
+Title2("Kernel generation");
+FuncEntry("kernel", "g2du.create_box_blur_kernel", "r")
+Desc("Generates a box blur filter kernel.");
+BeginArgs();
+Arg("r", "kernel radius (number, integer)");
+Ret("kernel", "filter kernel (table)");
+EndArgs();
+FuncEntry("kernel", "g2du.create_gaussian_blur_kernel", "r")
+Desc("Generates a gaussian blur filter kernel.");
+BeginArgs();
+Arg("r", "kernel radius (number, integer)");
+Ret("kernel", "filter kernel (table)");
+EndArgs();
+FuncEntry("kernel", "g2du.create_motion_blur_kernel", "r, angle")
+Desc("Generates a motion blur filter kernel.");
+BeginArgs();
+Arg("r", "kernel radius (number, integer)");
+Arg("angle", "blur direction as angle (number)");
+Ret("kernel", "filter kernel (table)");
+EndArgs();
+FuncEntry("kernel", "g2du.create_sharpen_kernel", "r")
+Desc("Generates a sharpen filter kernel.");
+BeginArgs();
+Arg("r", "kernel radius (number, integer)");
+Ret("kernel", "filter kernel (table)");
+EndArgs();
+FuncEntry("kernel", "g2du.create_edge_detect_kernel", "r")
+Desc("Generates an edge detection filter kernel.");
+BeginArgs();
+Arg("r", "kernel radius (number, integer)");
+Ret("kernel", "filter kernel (table)");
 EndArgs();
 Title2("Matrix manipulation");
 FuncEntry("mat", "g2du.rotate_xy", "mat, x, y")
@@ -858,6 +868,13 @@ BeginArgs();
 Arg("mat", "matrix object");
 Arg("x, y", "angles (number)");
 Ret("mat", "matrix object from input");
+EndArgs();
+Title2("Path manipulation");
+FuncEntry("", "g2du.path_transform", "ctx, filter")
+Desc("Splits context path into tiny line segments and passes their points through a filter function for manipulation.");
+BeginArgs();
+Arg("ctx", "context object");
+Ret("filter", "path points filter (function, [x,y -> x,y])");
 EndArgs();
 </script>
 <!--

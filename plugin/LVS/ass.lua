@@ -464,11 +464,18 @@ ass = {
 		AddPositions()
 		AddInOutTimes(1000.1)
 	end,
-	-- ASS style unpacker
-	unpack_style = function(style)
+	-- ASS font unpacker
+	unpack_font = function(style)
 		if type(style) ~= "table" then
 			error("table expected", 2)
 		end
 		return style.fontname, style.fontsize, style.bold, style.italic, style.underline, style.strikeout
+	end,
+	-- ASS color unpacker
+	unpack_color = function(color)
+		if type(color) ~= "table" then
+			error("table expected", 2)
+		end
+		return color.r, color.g, color.b, color.a
 	end
 }

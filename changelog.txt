@@ -1,6 +1,11 @@
 0.0.2
 --------------------
-* changed g2d.create_sub_image to g2du.create_sub_image with color conversion
 * changed g2d context default line join&cap to "ROUND"
-* added 'Extensions' entry to documentation
-* accelerated internal pixel transfer !!!TODO!!!
+* changed g2d.create_sub_image to g2du.create_sub_image (with color conversion)
+* changed ass.unpack_style to ass.unpack_font
+* added ass.unpack_color
+* added g2du.flip_h
+* added g2du.flip_v
+* added g2du.get_pixels
+* extended 'Usage' documentation
+* added table.copy to Lua extensions reference
