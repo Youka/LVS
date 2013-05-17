@@ -5,7 +5,7 @@
 	- g2d.create_sub_image to g2du.create_sub_image (with color conversion)
 	- ass.unpack_style to ass.unpack_font
 * added:
-	-ass.unpack_color
+	- ass.unpack_color
 	- g2du.flip_h
 	- g2du.flip_v
 	- g2du.get_pixels
@@ -13,5 +13,3 @@
 	- 3D example
 	- 'table.copy' to Lua extensions reference
 	- 'Usage' documentation details
-* removed:
-	-zlib.dll dependency
