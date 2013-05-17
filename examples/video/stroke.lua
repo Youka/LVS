@@ -11,9 +11,8 @@ end
 function GetFrame(frame, frame_i)
 	-- Create image/frame context
 	local ctx = g2d.create_context(frame)
-	-- Set lines color
+	-- Set lines color & width
 	ctx:set_source(g2du.white)
-	-- Set lines width
 	ctx:set_line_width(10)
 	-- Draw lines with round edges
 	ctx:set_line_cap("ROUND")

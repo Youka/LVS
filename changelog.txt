@@ -9,3 +9,4 @@
 * added g2du.get_pixels
 * extended 'Usage' documentation
 * added table.copy to Lua extensions reference
+* added 3D example

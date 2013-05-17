@@ -5,6 +5,8 @@ ass.load("karaoke\\chihaya_ed.ass")
 local function roumaji_kanji(ctx, ms, line)
 	-- Calculate transparency dependent on in- & outfade effect
 	local alpha = ms < line.start_time and (ms - (line.start_time - line.infade/2)) / (line.infade/2) or ms > line.end_time and 1 - (ms - line.end_time) / (line.outfade/2) or 1
+	-- Get line color
+	local r, g, b = ass.unpack_color(line.styleref.color1)
 	-- Draw inactive sylables and collect active one
 	local active_syl
 	for si, syl in ipairs(line.syls) do
@@ -13,7 +15,7 @@ local function roumaji_kanji(ctx, ms, line)
 		else
 			ctx:set_matrix(g2d.create_matrix():translate(syl.x, syl.y))
 			ctx:path_add_text(syl.text, ass.unpack_font(line.styleref))
-			ctx:set_source(g2d.create_source_color(line.styleref.color1.r, line.styleref.color1.g, line.styleref.color1.b, alpha))
+			ctx:set_source(g2d.create_source_color(r, g, b, alpha))
 			ctx:path_fill()
 			ctx:path_clear()
 		end
