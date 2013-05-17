@@ -7,6 +7,7 @@
 * added g2du.flip_h
 * added g2du.flip_v
 * added g2du.get_pixels
+* added table.distributor
 * extended 'Usage' documentation
 * added table.copy to Lua extensions reference
 * added 3D example

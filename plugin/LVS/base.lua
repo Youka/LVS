@@ -200,6 +200,22 @@ function table.copy(old_t)
 	return new_t
 end
 
+function table.distributor(t)
+	if type(t) ~= "table" or #t < 1 then
+		error("table expected (not empty)", 2)
+	end
+	local func_t = {}
+	func_t.__index = func_t
+	local index = 1
+	function func_t:get()
+		if index > #self then index = 1 end
+		local val = self[index]
+		index = index + 1
+		return val
+	end
+	return setmetatable(t, func_t)
+end
+
 function table.tostring(t)
 	if type(t) ~= "table" then
 		error("table expected", 2)

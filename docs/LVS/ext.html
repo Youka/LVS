@@ -229,6 +229,12 @@ Arg("array_size", "size of table array part (number)");
 Arg("hash_size", "size of table hash part (number)");
 Ret("t", "table with custom size");
 EndArgs();
+FuncEntry("distro", "table.distributor", "t")
+Desc("Sets a metatable to given table for continuous element getting.");
+BeginArgs();
+Arg("t", "any table")
+Ret("distro", "table from input with method <i>get()</i>");
+EndArgs();
 FuncEntry("info", "table.tostring", "t")
 Desc("Returns table as string.")
 BeginArgs();
