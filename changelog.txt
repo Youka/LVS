@@ -1,13 +1,17 @@
 0.0.2
 --------------------
-* changed g2d context default line join&cap to "ROUND"
-* changed g2d.create_sub_image to g2du.create_sub_image (with color conversion)
-* changed ass.unpack_style to ass.unpack_font
-* added ass.unpack_color
-* added g2du.flip_h
-* added g2du.flip_v
-* added g2du.get_pixels
-* added table.distributor
-* extended 'Usage' documentation
-* added table.copy to Lua extensions reference
-* added 3D example
+* changed:
+	- g2d context default line join&cap to "ROUND"
+	- g2d.create_sub_image to g2du.create_sub_image (with color conversion)
+	- ass.unpack_style to ass.unpack_font
+* added:
+	-ass.unpack_color
+	- g2du.flip_h
+	- g2du.flip_v
+	- g2du.get_pixels
+	- table.distributor
+	- 3D example
+	- 'table.copy' to Lua extensions reference
+	- 'Usage' documentation details
+* removed:
+	-zlib.dll dependency
