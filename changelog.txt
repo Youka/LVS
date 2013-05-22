@@ -21,7 +21,6 @@
 * optimization:
 	- faster pixel transfer internally
 
-
 0.0.2
 --------------------
 * changed:

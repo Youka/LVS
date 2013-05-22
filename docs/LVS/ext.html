@@ -46,9 +46,18 @@
 	}
 	div.index{
 		color: black;
-		background-color: #FFF0F0;
-		display: table;
-		border: 5px groove red;
+		background-color: white;
+		border: 8px groove red;
+		display: inline-block;
+		overflow-y: scroll;
+		height: 80%;
+		position: fixed; right: 0px; top: 0px;
+		width: 0px;
+		padding-top: 10px;
+		padding-bottom: 10px;
+	}
+	div.index:hover{
+		width: auto;
 		padding: 10px;
 	}
 	a.index{
@@ -117,13 +126,9 @@ function EndArgs(){
 </head>
 
 <body>
-<a class="index" href="#"><div class="index" style='position: fixed; right: 0px; top: 0px; padding: 0px;'>
-<b>Top</b>
-</div></a>
-<a name="func_index"><div id="index" class="index">
-</div></a>
+<div id="index" class="index">
+</div>
 <script>
-Separator();
 Title1("Math");
 FuncEntry("point", "math.bezier", "pct, points");
 Desc("Calculates a point on bezier curve.");

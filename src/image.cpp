@@ -1,12 +1,6 @@
 #include "image.hpp"
 #include <cstring>
 
-CairoImage::CairoImage(int width, int height, bool has_alpha) : width(width), height(height), stride(width<<2), has_alpha(has_alpha), data(new unsigned char[stride*height]){}
-
-CairoImage::~CairoImage(){
-	delete[] this->data;
-}
-
 void CairoImage::Load(register unsigned char *frame, int pitch, API api){
 	// Image pointer
 	register unsigned char *image = const_cast<unsigned char*>(this->data);

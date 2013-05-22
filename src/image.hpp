@@ -6,11 +6,11 @@ struct CairoImage{
 	// RGB or RGBA?
 	const bool has_alpha;
 	// Pixel data
-	unsigned char *data;
+	unsigned char* const data;
 	// Constructor / initialize image information & data
-	CairoImage(int width, int height, bool has_alpha);
+	CairoImage(int width, int height, bool has_alpha) : width(width), height(height), stride(width<<2), has_alpha(has_alpha), data(new unsigned char[stride*height]){}
 	// Destructor / free image data
-	~CairoImage();
+	~CairoImage(){delete[] this->data;}
 	// Frame types
 	enum API : unsigned char{AVS = 0, VDUB, DSHOW};
 	// Load from frame
