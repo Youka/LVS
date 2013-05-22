@@ -15,20 +15,19 @@ local function roumaji_kanji(ctx, ms, line)
 		else
 			ctx:set_matrix(g2d.create_matrix():translate(syl.x, syl.y))
 			ctx:path_add_text(syl.text, ass.unpack_font(line.styleref))
-			ctx:set_source(g2d.create_source_color(r, g, b, alpha))
-			ctx:path_fill()
+			ctx:set_source(g2d.create_color(r, g, b, alpha))
+			ctx:fill()
 			ctx:path_clear()
 		end
 	end
 	-- Draw active sylable with effect
 	if active_syl then
 		local syl = line.syls[active_syl]
-		local pct = math.sin((ms - syl.start_time) / syl.duration * math.pi)
-		local r, g, b = math.interpolate(line.styleref.color1.r, 1, pct), math.interpolate(line.styleref.color1.g, 0, pct), math.interpolate(line.styleref.color1.b, 0, pct)
+		local pct = math.sin(math.inrange(syl.start_time, syl.end_time, ms) * math.pi)
 		ctx:set_matrix(g2d.create_matrix():translate(syl.width/2 + syl.x, syl.height/2 + syl.y):scale(1+pct*0.5, 1+pct*0.5):translate(-syl.width/2,-syl.height/2))
 		ctx:path_add_text(syl.text, ass.unpack_font(line.styleref))
-		ctx:set_source(g2d.create_source_color(r, g, b, alpha))
-		ctx:path_fill()
+		ctx:set_source(g2d.create_color(math.interpolate(r, 1, pct), math.interpolate(g, 0, pct), math.interpolate(b, 0, pct), alpha))
+		ctx:fill()
 		ctx:path_clear()
 	end
 end
@@ -42,15 +41,15 @@ local function subtitle(ctx, ms, line)
 	-- Draw line text
 	ctx:set_matrix(g2d.create_matrix():translate(line.x, line.y))
 	ctx:path_add_text(line.text, ass.unpack_font(line.styleref))
-	ctx:set_source(g2d.create_source_color(r, g, b, alpha))
-	ctx:path_fill()
+	ctx:set_source(g2d.create_color(r, g, b, alpha))
+	ctx:fill()
 	ctx:path_clear()
 end
 
 -- Process frames
 function GetFrame(frame, frame_i)
 	-- Create drawing context
-	local ctx = g2d.create_context(frame)
+	local ctx = frame:get_context()
 	-- Get frame time
 	local ms = frame_i / VIDEO_FPS * 1000
 	-- Look for frame-related ASS lines

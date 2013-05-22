@@ -7,15 +7,15 @@ local translation = g2d.create_matrix():translate(10,10)
 -- Process frames
 function GetFrame(frame, frame_i)
 	-- Create image/frame context
-	local ctx = g2d.create_context(frame)
+	local ctx = frame:get_context()
 	-- Define path
 	ctx:set_matrix(translation)
 	ctx:path_add_text(info:format(frame_i+1), "Arial", 20)
 	-- Stroke path
 	ctx:set_line_width(6)
 	ctx:set_source(g2du.black)
-	ctx:path_stroke()
+	ctx:stroke()
 	-- Fill path
 	ctx:set_source(g2du.yellow)
-	ctx:path_fill()
+	ctx:fill()
 end

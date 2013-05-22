@@ -17,16 +17,16 @@ function GetFrame(frame, frame_i)
 	if frame_i < 100 then
 		-- No change/original
 	elseif frame_i < 200 then
-		g2d.image_convolution(frame, box_blur_kernel)
+		frame:convolute(box_blur_kernel)
 	elseif frame_i < 300 then
-		g2d.image_convolution(frame, gaussian_blur_kernel)
+		frame:convolute(gaussian_blur_kernel)
 	elseif frame_i < 400 then
-		g2d.image_convolution(frame, motion_blur_kernel)
+		frame:convolute(motion_blur_kernel)
 	elseif frame_i < 500 then
-		g2d.image_convolution(frame, sharpen_kernel)
+		frame:convolute(sharpen_kernel)
 	elseif frame_i < 600 then
-		g2d.image_convolution(frame, edge_detect_kernel)
+		frame:convolute(edge_detect_kernel)
 	elseif frame_i < 700 then
-		g2d.image_convolution(frame, emboss_kernel)
+		frame:convolute(emboss_kernel)
 	end
 end

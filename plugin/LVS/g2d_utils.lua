@@ -5,38 +5,38 @@ g2du = {
 	flip_h = g2d.create_matrix(-1,0,0,1,0,0),
 	flip_v = g2d.create_matrix(1,0,0,-1,0,0),
 	-- Stock color sources
-	white = g2d.create_source_color(1, 1, 1),
-	black = g2d.create_source_color(0, 0, 0),
-	grey = g2d.create_source_color(0.5, 0.5, 0.5),
-	dark_grey = g2d.create_source_color(0.25, 0.25, 0.25),
-	bright_grey = g2d.create_source_color(0.75, 0.75, 0.75),
-	red = g2d.create_source_color(1, 0, 0),
-	dark_red = g2d.create_source_color(0.5, 0, 0),
-	bright_red = g2d.create_source_color(1, 0.5, 0.5),
-	green = g2d.create_source_color(0, 1, 0),
-	dark_green = g2d.create_source_color(0, 0.5, 0),
-	bright_green = g2d.create_source_color(0.5, 1, 0.5),
-	blue = g2d.create_source_color(0, 0, 1),
-	dark_blue = g2d.create_source_color(0, 0, 0.5),
-	bright_blue = g2d.create_source_color(0.5, 0.5, 1),
-	yellow = g2d.create_source_color(1, 1, 0),
-	dark_yellow = g2d.create_source_color(0.5, 0.5, 0),
-	bright_yellow = g2d.create_source_color(1, 1, 0.5),
-	aqua = g2d.create_source_color(0, 1, 1),
-	dark_aqua = g2d.create_source_color(0, 0.5, 0.5),
-	bright_aqua = g2d.create_source_color(0.5, 1, 1),
-	purple = g2d.create_source_color(1, 0, 1),
-	dark_purple = g2d.create_source_color(0.5, 0, 0.5),
-	bright_purple = g2d.create_source_color(1, 0.5, 1),
-	orange = g2d.create_source_color(1, 0.5, 0),
-	lime = g2d.create_source_color(0.5, 1, 0),
-	spring = g2d.create_source_color(0, 1, 0.5),
-	azure = g2d.create_source_color(0, 0.5, 1),
-	pink = g2d.create_source_color(1, 0, 0.5),
-	violet = g2d.create_source_color(0.5, 0, 1),
-	brown = g2d.create_source_color(0.5, 0.25, 0.125),
-	sapphire = g2d.create_source_color(0.125, 0.25, 0.5),
-	transparent = g2d.create_source_color(0, 0, 0, 0),
+	white = g2d.create_color(1, 1, 1),
+	black = g2d.create_color(0, 0, 0),
+	grey = g2d.create_color(0.5, 0.5, 0.5),
+	dark_grey = g2d.create_color(0.25, 0.25, 0.25),
+	bright_grey = g2d.create_color(0.75, 0.75, 0.75),
+	red = g2d.create_color(1, 0, 0),
+	dark_red = g2d.create_color(0.5, 0, 0),
+	bright_red = g2d.create_color(1, 0.5, 0.5),
+	green = g2d.create_color(0, 1, 0),
+	dark_green = g2d.create_color(0, 0.5, 0),
+	bright_green = g2d.create_color(0.5, 1, 0.5),
+	blue = g2d.create_color(0, 0, 1),
+	dark_blue = g2d.create_color(0, 0, 0.5),
+	bright_blue = g2d.create_color(0.5, 0.5, 1),
+	yellow = g2d.create_color(1, 1, 0),
+	dark_yellow = g2d.create_color(0.5, 0.5, 0),
+	bright_yellow = g2d.create_color(1, 1, 0.5),
+	aqua = g2d.create_color(0, 1, 1),
+	dark_aqua = g2d.create_color(0, 0.5, 0.5),
+	bright_aqua = g2d.create_color(0.5, 1, 1),
+	purple = g2d.create_color(1, 0, 1),
+	dark_purple = g2d.create_color(0.5, 0, 0.5),
+	bright_purple = g2d.create_color(1, 0.5, 1),
+	orange = g2d.create_color(1, 0.5, 0),
+	lime = g2d.create_color(0.5, 1, 0),
+	spring = g2d.create_color(0, 1, 0.5),
+	azure = g2d.create_color(0, 0.5, 1),
+	pink = g2d.create_color(1, 0, 0.5),
+	violet = g2d.create_color(0.5, 0, 1),
+	brown = g2d.create_color(0.5, 0.25, 0.125),
+	sapphire = g2d.create_color(0.125, 0.25, 0.5),
+	transparent = g2d.create_color(0, 0, 0, 0),
 	-- Create sub-image (with color conversion)
 	create_sub_image = function(image, color_type, x0, y0, x1, y1)
 		-- Check parameters type
@@ -55,9 +55,9 @@ g2du = {
 		-- Create new image
 		local new_image = g2d.create_image(color_type, x1 - x0, y1 - y0)
 		-- Draw old image on new one
-		local ctx = g2d.create_context(new_image)
+		local ctx = new_image:get_context()
 		ctx:set_matrix(g2d.create_matrix(1,0,0,1,-x0,-y0))
-		ctx:set_source(g2d.create_source_image(image))
+		ctx:set_source(g2d.create_pattern(image))
 		ctx:paint()
 		-- Return new image
 		return new_image
@@ -254,12 +254,8 @@ g2du = {
 		end
 		-- Convert angles to radians
 		x, y = math.rad(x), math.rad(y)
-		-- Create xy-rotation matrix
-		local xx, yx, xy, yy, x0, y0 = math.cos(y), 0, math.sin(x)*math.sin(y), math.cos(x), 0, 0
 		-- Apply xy-rotation to matrix
-		mat:multiply(xx, yx, xy, yy, x0, y0)
-		-- Return input matrix
-		return mat
+		return mat:multiply(math.cos(y), 0, math.sin(x)*math.sin(y), math.cos(x), 0, 0)
 	end,
 	-- Matrix 3D manipulation (rotate y+x)
 	rotate_yx = function(mat, x, y)
@@ -268,12 +264,8 @@ g2du = {
 		end
 		-- Convert angles to radians
 		x, y = math.rad(x), math.rad(y)
-		-- Create yx-rotation matrix
-		local xx, yx, xy, yy, x0, y0 = math.cos(y), -math.sin(x) * -math.sin(y), 0, math.cos(x), 0, 0
 		-- Apply yx-rotation to matrix
-		mat:multiply(xx, yx, xy, yy, x0, y0)
-		-- Return input matrix
-		return mat
+		return mat:multiply(math.cos(y), -math.sin(x) * -math.sin(y), 0, math.cos(x), 0, 0)
 	end,
 	-- Path transformation (points of tiny outline segments)
 	path_transform = function(ctx, filter)

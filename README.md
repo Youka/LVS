@@ -55,9 +55,9 @@ test.avs:
 test.lua:
 
     function GetFrame(frame, frame_i)
-    	local ctx = g2d.create_context(frame)
+    	local ctx = frame:get_context()
     	ctx:set_matrix( g2d.create_matrix():translate(100,100):rotate(45) )
     	ctx:path_add_rectangle(-50,-50,100,100)
-    	ctx:set_source(g2d.create_source_color(1,0,0,1))
-    	ctx:path_fill()
+    	ctx:set_source(g2d.create_color(1,0,0,1))
+    	ctx:fill()
     end

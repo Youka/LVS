@@ -28,7 +28,7 @@ local function roumaji_kanji(ctx, ms, line)
 		-- Draw sylable text
 		ctx:set_matrix(g2d.create_matrix():translate(syl.x, syl.y))
 		ctx:path_add_text(syl.text, ass.unpack_font(line.styleref))
-		ctx:path_fill()
+		ctx:fill()
 		ctx:path_clear()
 	end
 end
@@ -39,14 +39,14 @@ local function subtitle(ctx, ms, line)
 	ctx:set_matrix(g2d.create_matrix():translate(line.x, line.y))
 	ctx:path_add_text(line.text, ass.unpack_font(line.styleref))
 	ctx:set_source(g2du.yellow)
-	ctx:path_fill()
+	ctx:fill()
 	ctx:path_clear()
 end
 
 -- Process frames
 function GetFrame(frame, frame_i)
 	-- Create drawing context
-	local ctx = g2d.create_context(frame)
+	local ctx = frame:get_context()
 	-- Get frame time
 	local ms = frame_i / VIDEO_FPS * 1000
 	-- Look for frame-related ASS lines

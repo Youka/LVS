@@ -3,14 +3,14 @@ local function draw_lines(ctx, off_x, off_y)
 	ctx:path_move_to(off_x, off_y)
 	ctx:path_line_to(off_x+100, off_y+100)
 	ctx:path_line_to(off_x+200, off_y)
-	ctx:path_stroke()
+	ctx:stroke()
 	ctx:path_clear()
 end
 
 -- Process frames
 function GetFrame(frame, frame_i)
 	-- Create image/frame context
-	local ctx = g2d.create_context(frame)
+	local ctx = frame:get_context()
 	-- Set lines color & width
 	ctx:set_source(g2du.white)
 	ctx:set_line_width(10)

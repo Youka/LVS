@@ -222,24 +222,6 @@ LUA_FUNC_1ARG(create_png_from_image, 2)
 		luaL_error2(L, cairo_status_to_string(status));
 LUA_FUNC_END
 
-LUA_FUNC_1ARG(create_context, 1)
-	// Get parameter
-	cairo_surface_t *surface = *reinterpret_cast<cairo_surface_t**>(luaL_checkuserdata(L, 1, G2D_IMAGE));
-	// Create context
-	cairo_t *ctx = cairo_create(surface);
-	cairo_status_t status = cairo_status(ctx);
-	if(status != CAIRO_STATUS_SUCCESS){
-		cairo_destroy(ctx);
-		luaL_error2(L, cairo_status_to_string(status));
-	}
-	// Set defaults
-	cairo_set_line_join(ctx, CAIRO_LINE_JOIN_ROUND);
-	cairo_set_line_cap(ctx, CAIRO_LINE_CAP_ROUND);
-	// Push context to Lua
-	*lua_createuserdata<cairo_t*>(L, G2D_CONTEXT) = ctx;
-	return 1;
-LUA_FUNC_END
-
 LUA_FUNC_2ARG(create_matrix, 0, 6)
 	if(lua_gettop(L) == 0){
 		// Create matrix
@@ -255,7 +237,7 @@ LUA_FUNC_2ARG(create_matrix, 0, 6)
 	return 1;
 LUA_FUNC_END
 
-LUA_FUNC_2ARG(create_source_color, 3, 4)
+LUA_FUNC_2ARG(create_color, 3, 4)
 	// Get parameters
 	double r = luaL_checknumber(L, 1);
 	double g = luaL_checknumber(L, 2);
@@ -273,7 +255,7 @@ LUA_FUNC_2ARG(create_source_color, 3, 4)
 	return 1;
 LUA_FUNC_END
 
-LUA_FUNC_1ARG(create_source_linear_gradient, 4)
+LUA_FUNC_1ARG(create_lgradient, 4)
 	// Get parameters
 	double x0 = luaL_checknumber(L, 1);
 	double y0 = luaL_checknumber(L, 2);
@@ -291,7 +273,7 @@ LUA_FUNC_1ARG(create_source_linear_gradient, 4)
 	return 1;
 LUA_FUNC_END
 
-LUA_FUNC_1ARG(create_source_radial_gradient, 6)
+LUA_FUNC_1ARG(create_rgradient, 6)
 	// Get parameters
 	double cx0 = luaL_checknumber(L, 1);
 	double cy0 = luaL_checknumber(L, 2);
@@ -311,7 +293,7 @@ LUA_FUNC_1ARG(create_source_radial_gradient, 6)
 	return 1;
 LUA_FUNC_END
 
-LUA_FUNC_1ARG(create_source_mesh_gradient, 0)
+LUA_FUNC_1ARG(create_mgradient, 0)
 	// Create source
 	cairo_pattern_t *pattern = cairo_pattern_create_mesh();
 	cairo_status_t status = cairo_pattern_status(pattern);
@@ -324,7 +306,7 @@ LUA_FUNC_1ARG(create_source_mesh_gradient, 0)
 	return 1;
 LUA_FUNC_END
 
-LUA_FUNC_1ARG(create_source_image, 1)
+LUA_FUNC_1ARG(create_pattern, 1)
 	// Get parameter
 	cairo_surface_t *surface = *reinterpret_cast<cairo_surface_t**>(luaL_checkuserdata(L, 1, G2D_IMAGE));
 	// Create source
@@ -336,149 +318,6 @@ LUA_FUNC_1ARG(create_source_image, 1)
 	}
 	// Push source to Lua
 	*lua_createuserdata<cairo_pattern_t*>(L, G2D_SOURCE) = pattern;
-	return 1;
-LUA_FUNC_END
-
-// Thread data for function below
-struct THREAD_DATA{
-	int image_width, image_height, image_stride, image_first_row, image_last_row;
-	cairo_format_t image_format;
-	float *image_src;
-	unsigned char *image_dst;
-	int filter_width, filter_height;
-	float *filter_kernel;
-};
-// Thread function for cairo image surface (ARGB32+RGB24+A8) convolution
-static DWORD WINAPI cairo_image_surface_convolution(void *userdata){
-	THREAD_DATA *thread_data = reinterpret_cast<THREAD_DATA*>(userdata);
-	// RGB(A) or A8?
-	if(thread_data->image_format == CAIRO_FORMAT_ARGB32 || thread_data->image_format == CAIRO_FORMAT_RGB24){
-		// Storages for pixel processing
-		int image_x, image_y;
-		float dst_buf[4];
-		unsigned char *dst_pixel;
-		// Iterate through source image pixels
-		for(register int y = thread_data->image_first_row; y <= thread_data->image_last_row; y++)
-			for(register int x = 0; x < thread_data->image_width; x++){
-				// Accumulate pixels by filter rule
-				__m128 accum = _mm_setzero_ps();
-				for(int yy = 0; yy < thread_data->filter_height; yy++){
-					image_y = y - (thread_data->filter_height >> 1) + yy;
-					if(image_y < 0 || image_y >= thread_data->image_height)
-						continue;
-					for(int xx = 0; xx < thread_data->filter_width; xx++){
-						image_x = x - (thread_data->filter_width >> 1) + xx;
-						if(image_x < 0 || image_x >= thread_data->image_width)
-							continue;
-						accum = _mm_add_ps(
-							accum,
-							_mm_mul_ps(
-								_mm_loadu_ps(thread_data->image_src + image_y * thread_data->image_stride + (image_x << 2)),
-								_mm_set_ps1(thread_data->filter_kernel[yy * thread_data->filter_width + xx])
-							)
-						);
-					}
-				}
-				// Trim and set accumulator to destination image pixel
-				_mm_storeu_ps(
-					dst_buf,
-					_mm_max_ps(
-						_mm_setzero_ps(),
-						_mm_min_ps(
-							_mm_set_ps1(255),
-							accum
-						)
-					)
-				);
-				dst_pixel = thread_data->image_dst + y * thread_data->image_stride + (x << 2);
-				dst_pixel[0] = dst_buf[0];
-				dst_pixel[1] = dst_buf[1];
-				dst_pixel[2] = dst_buf[2];
-				dst_pixel[3] = dst_buf[3];
-			}
-	}else if(thread_data->image_format == CAIRO_FORMAT_A8){
-		// Storages for pixel processing
-		float accum;
-		int image_x, image_y;
-		// Iterate through source image pixels
-		for(register int y = thread_data->image_first_row; y <= thread_data->image_last_row; y++)
-			for(register int x = 0; x < thread_data->image_width; x++){
-				// Accumulate pixels by filter rule
-				accum = 0;
-				for(int yy = 0; yy < thread_data->filter_height; yy++){
-					image_y = y - (thread_data->filter_height >> 1) + yy;
-					if(image_y < 0 || image_y >= thread_data->image_height)
-						continue;
-					for(int xx = 0; xx < thread_data->filter_width; xx++){
-						image_x = x - (thread_data->filter_width >> 1) + xx;
-						if(image_x < 0 || image_x >= thread_data->image_width)
-							continue;
-						accum += thread_data->image_src[image_y * thread_data->image_stride + image_x] * thread_data->filter_kernel[yy * thread_data->filter_width + xx];
-					}
-				}
-				// Set accumulator to destination image pixel
-				thread_data->image_dst[y * thread_data->image_stride + x] = accum > 255 ? 255 : (accum < 0 ? 0 : accum);
-			}
-	}
-	return 0;
-}
-LUA_FUNC_1ARG(image_convolution, 2)
-	// Get parameters
-	cairo_surface_t *surface = *reinterpret_cast<cairo_surface_t**>(luaL_checkuserdata(L, 1, G2D_IMAGE));
-	size_t filter_size;
-	float *convolution_filter = luaL_checktable<float>(L, 2, &filter_size);
-	std::auto_ptr<float> convolution_filter_obj(convolution_filter);
-	lua_getfield(L, 2, "width");
-	if(!lua_isnumber(L, -1)) luaL_error2(L, "table needs a valid field 'width'");
-	int filter_width = lua_tonumber(L, -1);
-	lua_pop(L, 1);
-	lua_getfield(L, 2, "height");
-	if(!lua_isnumber(L, -1)) luaL_error2(L, "table needs a valid field 'height'");
-	int filter_height = lua_tonumber(L, -1);
-	lua_pop(L, 1);
-	if(filter_width < 1 || !filter_width&0x1 || filter_height < 1 || !filter_height&0x1)
-		luaL_error2(L, "table field(s) invalid");
-	else if(filter_width * filter_height != filter_size)
-		luaL_error2(L, "table fields and elements number don't fit");
-	// Get image data
-	cairo_format_t image_format = cairo_image_surface_get_format(surface);
-	int image_width = cairo_image_surface_get_width(surface);
-	int image_height = cairo_image_surface_get_height(surface);
-	int image_stride = cairo_image_surface_get_stride(surface);
-	cairo_surface_flush(surface);
-	unsigned char *image_data = cairo_image_surface_get_data(surface);
-	// Image data copy (use copy as source, original as destination)
-	unsigned long image_data_size = image_height * image_stride;
-	float *image_data_copy = new float[image_data_size];
-	for(unsigned long int i = 0; i < image_data_size; i++)
-		image_data_copy[i] = image_data[i];
-	// Threading data
-	static Threads<THREAD_DATA> threads(cairo_image_surface_convolution);
-	THREAD_DATA *data;
-	int image_row_step = image_height /  threads.size();
-	for(DWORD i = 0; i < threads.size(); i++){
-		// Set current thread data
-		data = threads.get(i);
-		data->image_width = image_width;
-		data->image_height = image_height;
-		data->image_stride = image_stride;
-		data->image_first_row = i * image_row_step;
-		data->image_last_row = i == threads.size() - 1 ? image_height-1 : data->image_first_row + image_row_step-1;
-		data->image_format = image_format;
-		data->image_src = image_data_copy;
-		data->image_dst = image_data;
-		data->filter_width = filter_width;
-		data->filter_height = filter_height;
-		data->filter_kernel = convolution_filter;
-	}
-	// Apply convolution filter to image in multiple threads
-	threads.Run();
-	// Free image data copy
-	delete[] image_data_copy;
-	// Set image data as dirty
-	cairo_surface_mark_dirty(surface);
-	// Return image
-	lua_pushvalue(L, 1);
 	return 1;
 LUA_FUNC_END
 
@@ -693,6 +532,167 @@ LUA_FUNC_1ARG(image_set_data, 6)
 	}
 	// Set image data as dirty
 	cairo_surface_mark_dirty_rectangle(surface, x0, y0, area_width, area_height);
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(image_get_context, 1)
+	// Get parameter
+	cairo_surface_t *surface = *reinterpret_cast<cairo_surface_t**>(luaL_checkuserdata(L, 1, G2D_IMAGE));
+	// Create context
+	cairo_t *ctx = cairo_create(surface);
+	cairo_status_t status = cairo_status(ctx);
+	if(status != CAIRO_STATUS_SUCCESS){
+		cairo_destroy(ctx);
+		luaL_error2(L, cairo_status_to_string(status));
+	}
+	// Set defaults
+	cairo_set_line_join(ctx, CAIRO_LINE_JOIN_ROUND);
+	cairo_set_line_cap(ctx, CAIRO_LINE_CAP_ROUND);
+	// Push context to Lua
+	*lua_createuserdata<cairo_t*>(L, G2D_CONTEXT) = ctx;
+	return 1;
+LUA_FUNC_END
+
+// Thread data for function below
+struct THREAD_DATA{
+	int image_width, image_height, image_stride, image_first_row, image_last_row;
+	cairo_format_t image_format;
+	float *image_src;
+	unsigned char *image_dst;
+	int filter_width, filter_height;
+	float *filter_kernel;
+};
+// Thread function for cairo image surface (ARGB32+RGB24+A8) convolution
+static DWORD WINAPI cairo_image_surface_convolution(void *userdata){
+	THREAD_DATA *thread_data = reinterpret_cast<THREAD_DATA*>(userdata);
+	// RGB(A) or A8?
+	if(thread_data->image_format == CAIRO_FORMAT_ARGB32 || thread_data->image_format == CAIRO_FORMAT_RGB24){
+		// Storages for pixel processing
+		int image_x, image_y;
+		float dst_buf[4];
+		unsigned char *dst_pixel;
+		// Iterate through source image pixels
+		for(register int y = thread_data->image_first_row; y <= thread_data->image_last_row; y++)
+			for(register int x = 0; x < thread_data->image_width; x++){
+				// Accumulate pixels by filter rule
+				__m128 accum = _mm_setzero_ps();
+				for(int yy = 0; yy < thread_data->filter_height; yy++){
+					image_y = y - (thread_data->filter_height >> 1) + yy;
+					if(image_y < 0 || image_y >= thread_data->image_height)
+						continue;
+					for(int xx = 0; xx < thread_data->filter_width; xx++){
+						image_x = x - (thread_data->filter_width >> 1) + xx;
+						if(image_x < 0 || image_x >= thread_data->image_width)
+							continue;
+						accum = _mm_add_ps(
+							accum,
+							_mm_mul_ps(
+								_mm_loadu_ps(thread_data->image_src + image_y * thread_data->image_stride + (image_x << 2)),
+								_mm_set_ps1(thread_data->filter_kernel[yy * thread_data->filter_width + xx])
+							)
+						);
+					}
+				}
+				// Trim and set accumulator to destination image pixel
+				_mm_storeu_ps(
+					dst_buf,
+					_mm_max_ps(
+						_mm_setzero_ps(),
+						_mm_min_ps(
+							_mm_set_ps1(255),
+							accum
+						)
+					)
+				);
+				dst_pixel = thread_data->image_dst + y * thread_data->image_stride + (x << 2);
+				dst_pixel[0] = dst_buf[0];
+				dst_pixel[1] = dst_buf[1];
+				dst_pixel[2] = dst_buf[2];
+				dst_pixel[3] = dst_buf[3];
+			}
+	}else if(thread_data->image_format == CAIRO_FORMAT_A8){
+		// Storages for pixel processing
+		float accum;
+		int image_x, image_y;
+		// Iterate through source image pixels
+		for(register int y = thread_data->image_first_row; y <= thread_data->image_last_row; y++)
+			for(register int x = 0; x < thread_data->image_width; x++){
+				// Accumulate pixels by filter rule
+				accum = 0;
+				for(int yy = 0; yy < thread_data->filter_height; yy++){
+					image_y = y - (thread_data->filter_height >> 1) + yy;
+					if(image_y < 0 || image_y >= thread_data->image_height)
+						continue;
+					for(int xx = 0; xx < thread_data->filter_width; xx++){
+						image_x = x - (thread_data->filter_width >> 1) + xx;
+						if(image_x < 0 || image_x >= thread_data->image_width)
+							continue;
+						accum += thread_data->image_src[image_y * thread_data->image_stride + image_x] * thread_data->filter_kernel[yy * thread_data->filter_width + xx];
+					}
+				}
+				// Set accumulator to destination image pixel
+				thread_data->image_dst[y * thread_data->image_stride + x] = accum > 255 ? 255 : (accum < 0 ? 0 : accum);
+			}
+	}
+	return 0;
+}
+LUA_FUNC_1ARG(image_convolute, 2)
+	// Get parameters
+	cairo_surface_t *surface = *reinterpret_cast<cairo_surface_t**>(luaL_checkuserdata(L, 1, G2D_IMAGE));
+	size_t filter_size;
+	float *convolution_filter = luaL_checktable<float>(L, 2, &filter_size);
+	std::auto_ptr<float> convolution_filter_obj(convolution_filter);
+	lua_getfield(L, 2, "width");
+	if(!lua_isnumber(L, -1)) luaL_error2(L, "table needs a valid field 'width'");
+	int filter_width = lua_tonumber(L, -1);
+	lua_pop(L, 1);
+	lua_getfield(L, 2, "height");
+	if(!lua_isnumber(L, -1)) luaL_error2(L, "table needs a valid field 'height'");
+	int filter_height = lua_tonumber(L, -1);
+	lua_pop(L, 1);
+	if(filter_width < 1 || !filter_width&0x1 || filter_height < 1 || !filter_height&0x1)
+		luaL_error2(L, "table field(s) invalid");
+	else if(filter_width * filter_height != filter_size)
+		luaL_error2(L, "table fields and elements number don't fit");
+	// Get image data
+	cairo_format_t image_format = cairo_image_surface_get_format(surface);
+	int image_width = cairo_image_surface_get_width(surface);
+	int image_height = cairo_image_surface_get_height(surface);
+	int image_stride = cairo_image_surface_get_stride(surface);
+	cairo_surface_flush(surface);
+	unsigned char *image_data = cairo_image_surface_get_data(surface);
+	// Image data copy (use copy as source, original as destination)
+	unsigned long image_data_size = image_height * image_stride;
+	float *image_data_copy = new float[image_data_size];
+	for(unsigned long int i = 0; i < image_data_size; i++)
+		image_data_copy[i] = image_data[i];
+	// Threading data
+	static Threads<THREAD_DATA> threads(cairo_image_surface_convolution);
+	THREAD_DATA *data;
+	int image_row_step = image_height /  threads.size();
+	for(DWORD i = 0; i < threads.size(); i++){
+		// Set current thread data
+		data = threads.get(i);
+		data->image_width = image_width;
+		data->image_height = image_height;
+		data->image_stride = image_stride;
+		data->image_first_row = i * image_row_step;
+		data->image_last_row = i == threads.size() - 1 ? image_height-1 : data->image_first_row + image_row_step-1;
+		data->image_format = image_format;
+		data->image_src = image_data_copy;
+		data->image_dst = image_data;
+		data->filter_width = filter_width;
+		data->filter_height = filter_height;
+		data->filter_kernel = convolution_filter;
+	}
+	// Apply convolution filter to image in multiple threads
+	threads.Run();
+	// Free image data copy
+	delete[] image_data_copy;
+	// Set image data as dirty
+	cairo_surface_mark_dirty(surface);
+	// Return image
+	lua_pushvalue(L, 1);
+	return 1;
 LUA_FUNC_END
 
 // MATRIX OBJECT
@@ -1349,12 +1349,12 @@ LUA_FUNC_1ARG(context_path_bounding, 1)
 	return 4;
 LUA_FUNC_END
 
-LUA_FUNC_1ARG(context_path_fill, 1)
+LUA_FUNC_1ARG(context_fill, 1)
 	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
 	cairo_fill_preserve(ctx);
 LUA_FUNC_END
 
-LUA_FUNC_1ARG(context_path_fill_bounding, 1)
+LUA_FUNC_1ARG(context_fill_bounding, 1)
 	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
 	double x1, y1, x2, y2;
 	cairo_fill_extents(ctx, &x1, &y1, &x2, &y2);
@@ -1365,18 +1365,18 @@ LUA_FUNC_1ARG(context_path_fill_bounding, 1)
 	return 4;
 LUA_FUNC_END
 
-LUA_FUNC_1ARG(context_path_fill_contains, 3)
+LUA_FUNC_1ARG(context_fill_contains, 3)
 	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
 	lua_pushboolean(L, cairo_in_fill(ctx, luaL_checknumber(L, 2), luaL_checknumber(L, 3)));
 	return 1;
 LUA_FUNC_END
 
-LUA_FUNC_1ARG(context_path_stroke, 1)
+LUA_FUNC_1ARG(context_stroke, 1)
 	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
 	cairo_stroke_preserve(ctx);
 LUA_FUNC_END
 
-LUA_FUNC_1ARG(context_path_stroke_bounding, 1)
+LUA_FUNC_1ARG(context_stroke_bounding, 1)
 	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
 	double x1, y1, x2, y2;
 	cairo_stroke_extents(ctx, &x1, &y1, &x2, &y2);
@@ -1387,7 +1387,7 @@ LUA_FUNC_1ARG(context_path_stroke_bounding, 1)
 	return 4;
 LUA_FUNC_END
 
-LUA_FUNC_1ARG(context_path_stroke_contains, 3)
+LUA_FUNC_1ARG(context_stroke_contains, 3)
 	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
 	lua_pushboolean(L, cairo_in_stroke(ctx, luaL_checknumber(L, 2), luaL_checknumber(L, 3)));
 	return 1;
@@ -1413,14 +1413,12 @@ int luaopen_g2d(lua_State *L){
 		"create_image", l_create_image,
 		"create_image_from_png", l_create_image_from_png,
 		"create_png_from_image", l_create_png_from_image,
-		"create_context", l_create_context,
 		"create_matrix", l_create_matrix,
-		"create_source_color", l_create_source_color,
-		"create_source_linear_gradient", l_create_source_linear_gradient,
-		"create_source_radial_gradient", l_create_source_radial_gradient,
-		"create_source_mesh_gradient", l_create_source_mesh_gradient,
-		"create_source_image", l_create_source_image,
-		"image_convolution", l_image_convolution,
+		"create_color", l_create_color,
+		"create_lgradient", l_create_lgradient,
+		"create_rgradient", l_create_rgradient,
+		"create_mgradient", l_create_mgradient,
+		"create_pattern", l_create_pattern,
 		"text_extents", l_text_extents,
 		0, 0
 	};
@@ -1437,6 +1435,8 @@ int luaopen_g2d(lua_State *L){
 	lua_pushcfunction(L, l_image_get_format); lua_setfield(L, -2, "get_format");
 	lua_pushcfunction(L, l_image_get_data); lua_setfield(L, -2, "get_data");
 	lua_pushcfunction(L, l_image_set_data); lua_setfield(L, -2, "set_data");
+	lua_pushcfunction(L, l_image_get_context); lua_setfield(L, -2, "get_context");
+	lua_pushcfunction(L, l_image_convolute); lua_setfield(L, -2, "convolute");
 	lua_pop(L, 1);
 	// Define matrix object methods
 	luaL_newmetatable(L, G2D_MATRIX);
@@ -1515,12 +1515,12 @@ int luaopen_g2d(lua_State *L){
 	lua_pushcfunction(L, l_context_path_clear); lua_setfield(L, -2, "path_clear");
 	lua_pushcfunction(L, l_context_path_transform); lua_setfield(L, -2, "path_transform");
 	lua_pushcfunction(L, l_context_path_bounding); lua_setfield(L, -2, "path_bounding");
-	lua_pushcfunction(L, l_context_path_fill); lua_setfield(L, -2, "path_fill");
-	lua_pushcfunction(L, l_context_path_fill_bounding); lua_setfield(L, -2, "path_fill_bounding");
-	lua_pushcfunction(L, l_context_path_fill_contains); lua_setfield(L, -2, "path_fill_contains");
-	lua_pushcfunction(L, l_context_path_stroke); lua_setfield(L, -2, "path_stroke");
-	lua_pushcfunction(L, l_context_path_stroke_bounding); lua_setfield(L, -2, "path_stroke_bounding");
-	lua_pushcfunction(L, l_context_path_stroke_contains); lua_setfield(L, -2, "path_stroke_contains");
+	lua_pushcfunction(L, l_context_fill); lua_setfield(L, -2, "fill");
+	lua_pushcfunction(L, l_context_fill_bounding); lua_setfield(L, -2, "fill_bounding");
+	lua_pushcfunction(L, l_context_fill_contains); lua_setfield(L, -2, "fill_contains");
+	lua_pushcfunction(L, l_context_stroke); lua_setfield(L, -2, "stroke");
+	lua_pushcfunction(L, l_context_stroke_bounding); lua_setfield(L, -2, "stroke_bounding");
+	lua_pushcfunction(L, l_context_stroke_contains); lua_setfield(L, -2, "stroke_contains");
 	lua_pushcfunction(L, l_context_paint); lua_setfield(L, -2, "paint");
 	lua_pushcfunction(L, l_context_masked_paint); lua_setfield(L, -2, "masked_paint");
 	lua_pop(L, 1);

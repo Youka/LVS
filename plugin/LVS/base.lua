@@ -42,17 +42,32 @@ end
 function math.degree(vec1, vec2)
 	if type(vec1) ~= "table" or type(vec2) ~= "table" then
 		error("table and table expected", 2)
-	elseif type(vec1[1]) ~= "number" or type(vec1[2]) ~= "number" or type(vec1[3]) ~= "number" or
-			type(vec2[1]) ~= "number" or type(vec2[2]) ~= "number" or type(vec2[3]) ~= "number" then
+	end
+	if type(vec1[1]) == "number" and type(vec1[2]) == "number" and
+		type(vec2[1]) == "number" and type(vec2[2]) == "number" then
+		local degree
+		if type(vec1[3]) == "number" and type(vec2[3]) == "number" then
+			-- 3D variant
+			degree = math.deg(
+				math.acos(
+					(vec1[1] * vec2[1] + vec1[2] * vec2[2] + vec1[3] * vec2[3]) /
+					(math.distance(vec1[1], vec1[2], vec1[3]) * math.distance(vec2[1], vec2[2], vec2[3]))
+				)
+			)
+		else
+			-- 2D variant
+			degree = math.deg(
+				math.acos(
+					(vec1[1] * vec2[1] + vec1[2] * vec2[2]) /
+					(math.distance(vec1[1], vec1[2]) * math.distance(vec2[1], vec2[2]))
+				)
+			)
+		end
+		-- Return result
+		return	(vec1[1]*vec2[2] - vec1[2]*vec2[1]) < 0 and -degree or degree
+	else
 		error("invalid table content", 2)
 	end
-	local degree = math.deg(
-			math.acos(
-				(vec1[1] * vec2[1] + vec1[2] * vec2[2] + vec1[3] * vec2[3]) /
-				(math.distance(vec1[1], vec1[2], vec1[3]) * math.distance(vec2[1], vec2[2], vec2[3]))
-			)
-	)
-	return	(vec1[1]*vec2[2] - vec1[2]*vec2[1]) < 0 and -degree or degree
 end
 
 function math.distance(w, h, d)
@@ -76,6 +91,15 @@ function math.ellipse(x, y, w, h, a)
 	end
 	local ra = math.rad(a)
 	return x + w/2 * math.sin(ra), y + h/2 * math.cos(ra)
+end
+
+function math.inrange(a, c, b)
+	if type(a) ~= "number" or type(c) ~= "number" or type(b) ~= "number" then
+		error("number, number and number expected", 2)
+	end
+	if b <= c and b >= a then
+		return (b-a) / (c-a)
+	end
 end
 
 function math.interpolate(a, b, pct)

@@ -5,15 +5,15 @@ local particles = {n = 0}
 local particle_source
 do
 	local particle_image = g2d.create_image("RGBA", 22, 22)
-	local ctx = g2d.create_context(particle_image)
+	local ctx = particle_image:get_context()
 	ctx:path_move_to(1,11)
 	ctx:path_curve_to(11,11,11,11,11,1)
 	ctx:path_curve_to(11,11,11,11,21,11)
 	ctx:path_curve_to(11,11,11,11,11,21)
 	ctx:path_curve_to(11,11,11,11,1,11)
 	ctx:set_source(g2du.white)
-	ctx:path_fill()
-	particle_source = g2d.create_source_image(g2d.image_convolution(particle_image, g2du.create_gaussian_blur_kernel(1)))
+	ctx:fill()
+	particle_source = g2d.create_pattern(particle_image:convolute(g2du.create_gaussian_blur_kernel(1)))
 end
 
 -- Particles way
@@ -63,7 +63,7 @@ local function draw(ctx)
 		-- Set particle source
 		ctx:set_source(particle_source)
 		-- Paint fading particle
-		ctx:masked_paint(g2d.create_source_color(1,1,1,particle.life / particle.max_life))
+		ctx:masked_paint(g2d.create_color(1,1,1,particle.life / particle.max_life))
 	end
 end
 
@@ -72,5 +72,5 @@ function GetFrame(frame, frame_i)
 	-- Update particle objects
 	update(frame_i % 101 / 100)
 	-- Draw particles
-	draw(g2d.create_context(frame))
+	draw(frame:get_context())
 end
