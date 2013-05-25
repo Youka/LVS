@@ -553,17 +553,19 @@ LUA_FUNC_1ARG(image_get_context, 1)
 LUA_FUNC_END
 
 // Thread data for function below
-struct THREAD_DATA{
+struct THREAD_DATA_CONVOLUTION{
+	// Images
 	int image_width, image_height, image_stride, image_first_row, image_last_row;
 	cairo_format_t image_format;
 	float *image_src;
 	unsigned char *image_dst;
+	// Filter
 	int filter_width, filter_height;
 	float *filter_kernel;
 };
 // Thread function for cairo image surface (ARGB32+RGB24+A8) convolution
 static DWORD WINAPI cairo_image_surface_convolution(void *userdata){
-	THREAD_DATA *thread_data = reinterpret_cast<THREAD_DATA*>(userdata);
+	THREAD_DATA_CONVOLUTION *thread_data = reinterpret_cast<THREAD_DATA_CONVOLUTION*>(userdata);
 	// RGB(A) or A8?
 	if(thread_data->image_format == CAIRO_FORMAT_ARGB32 || thread_data->image_format == CAIRO_FORMAT_RGB24){
 		// Storages for pixel processing
@@ -666,17 +668,18 @@ LUA_FUNC_1ARG(image_convolute, 2)
 	for(unsigned long int i = 0; i < image_data_size; i++)
 		image_data_copy[i] = image_data[i];
 	// Threading data
-	static Threads<THREAD_DATA> threads(cairo_image_surface_convolution);
-	THREAD_DATA *data;
-	int image_row_step = image_height /  threads.size();
-	for(DWORD i = 0; i < threads.size(); i++){
+	static Threads<THREAD_DATA_CONVOLUTION> threads(cairo_image_surface_convolution);
+	static const DWORD passes =  threads.size();
+	const int image_row_step = image_height / passes;
+	THREAD_DATA_CONVOLUTION *data;
+	for(DWORD i = 0; i < passes; i++){
 		// Set current thread data
 		data = threads.get(i);
 		data->image_width = image_width;
 		data->image_height = image_height;
 		data->image_stride = image_stride;
 		data->image_first_row = i * image_row_step;
-		data->image_last_row = i == threads.size() - 1 ? image_height-1 : data->image_first_row + image_row_step-1;
+		data->image_last_row = i == passes - 1 ? image_height-1 : data->image_first_row + image_row_step-1;
 		data->image_format = image_format;
 		data->image_src = image_data_copy;
 		data->image_dst = image_data;

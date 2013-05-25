@@ -19,7 +19,7 @@
 * added:
 	- math.inrange
 * optimization:
-	- faster pixel transfer internally
+	- minor speed improvements
 
 0.0.2
 --------------------

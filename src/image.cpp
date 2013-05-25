@@ -15,7 +15,7 @@ void CairoImage::Load(register unsigned char *frame, int pitch, API api){
 					image += this->stride;
 				}
 			else{
-				int rowsize = this->width * 3;
+				const int rowsize_pitch = this->width * 3 + pitch;
 				for(int y = 0; y < this->height; y++){
 					for(int x = 0; x < this->width; x++){
 						image[0] = frame[0];
@@ -24,7 +24,7 @@ void CairoImage::Load(register unsigned char *frame, int pitch, API api){
 						frame += 3;
 						image += 4;
 					}
-					frame -= pitch + rowsize;
+					frame -= rowsize_pitch;
 				}
 			}
 		}break;
@@ -45,7 +45,7 @@ void CairoImage::Load(register unsigned char *frame, int pitch, API api){
 					image += this->stride;
 				}
 			else{
-				int rowsize = this->width * 3;
+				const int rowsize2 = (this->width * 3) << 1;
 				for(int y = 0; y < this->height; y++){
 					for(int x = 0; x < this->width; x++){
 						image[0] = frame[0];
@@ -54,7 +54,7 @@ void CairoImage::Load(register unsigned char *frame, int pitch, API api){
 						frame += 3;
 						image += 4;
 					}
-					frame -= rowsize << 1;
+					frame -= rowsize2;
 				}
 			}
 		}break;
@@ -75,7 +75,7 @@ void CairoImage::Save(register unsigned char *frame, int pitch, API api){
 					frame -= pitch;
 				}
 			else{
-				int rowsize = this->width * 3;
+				const int rowsize_pitch = this->width * 3 + pitch;
 				for(int y = 0; y < this->height; y++){
 					for(int x = 0; x < this->width; x++){
 						frame[0] = image[0];
@@ -84,7 +84,7 @@ void CairoImage::Save(register unsigned char *frame, int pitch, API api){
 						image += 4;
 						frame += 3;
 					}
-					frame -= pitch + rowsize;
+					frame -= rowsize_pitch;
 				}
 			}
 		}break;
@@ -105,7 +105,7 @@ void CairoImage::Save(register unsigned char *frame, int pitch, API api){
 					frame -= this->stride;
 				}
 			else{
-				int rowsize = this->width * 3;
+				const int rowsize2 = (this->width * 3) << 1;
 				for(int y = 0; y < this->height; y++){
 					for(int x = 0; x < this->width; x++){
 						frame[0] = image[0];
@@ -114,7 +114,7 @@ void CairoImage::Save(register unsigned char *frame, int pitch, API api){
 						image += 4;
 						frame += 3;
 					}
-					frame -= rowsize << 1;
+					frame -= rowsize2;
 				}
 			}
 		}break;

@@ -11,6 +11,7 @@
 <meta name="keywords" content="LVS,Lua,Image,2D,Editing">
 <link rel="icon" type="image/png" href="LVS.png">
 <style type="text/css" media="screen">
+	/* Body classes */
 	body{
 		background-color: black;
 		color: white;
@@ -37,13 +38,14 @@
 	p{
 		margin: 0px 0px 0px 10px;
 	}
-	p.def{
+	p.definition{
 		color: black;
 		background-color: #F0F0F0;
 		display: table;
 		border: 2px groove black;
 		font-weight: bold;
 	}
+	/* Index classes */
 	div.index{
 		color: black;
 		background-color: white;
@@ -78,832 +80,2310 @@
 	}
 </style>
 <script type="text/javascript">
+// Buffer for index creation
 var index_buffer = "";
 
+// Add main title
 function Title1(text){
-	document.write("<h1>"+text+"</h1>");
 	index_buffer += "<span class='index_h1'>"+text+"</span>";
-}
-function Title2(text){
-	document.write("<h2>"+text+"</h2>");
-	index_buffer += "<span class='index_h2'>"+text+"</span>";
-}
-function Separator(){
-	document.write("<hr/>");
-}
-function VarEntry(v){
-	document.write("<p class='def'><a name='"+v+"'>"+v+"</a></p>");
-	index_buffer += '<a class="index" href="#'+v+'">'+v+'</a>';
-}
-function FuncEntry(ret, func, arguments){
-	var buffer = "<p class='def'><a name='"+func+"'>";
-	if(ret.length > 0)
-		buffer += "<span style='color: green;'>"+ret+"</span> = ";
-	buffer += func+"(";
-	if(arguments.length > 0)
-		buffer += "<span style='color: red;'>"+arguments+"</span>";
-	buffer += ")</a></p>";
-	document.write(buffer);
-	index_buffer += '<a class="index" href="#'+func+'">'+func+'</a>';
+	document.write("<hr/><h1>"+text+"</h1>");
 }
 
-function Desc(text){
-	document.write("<p>"+text+"</p>");
+// Add subtitle
+function Title2(text){
+	index_buffer += "<span class='index_h2'>"+text+"</span>";
+	document.write("<h2>"+text+"</h2>");
 }
-function BeginArgs(){
-	document.write("<div style='margin: 0px 0px 10px 30px;'>");
-}
-function Arg(arg, desc){
-	document.write("<div><span style='color: red;'>"+arg+"</span>: "+desc+"</div>");
-}
-function Ret(arg, desc){
-	document.write("<div><span style='color: green;'>"+arg+"</span>: "+desc+"</div>");
-}
-function EndArgs(){
-	document.write("</div>");
+
+// Add function or variable entry
+function Entry(data){
+	// Function entry?
+	if(data.func){
+		// Register function to index
+		index_buffer += '<a class="index" href="#'+data.func.name+'">'+data.func.name+'</a>';
+		// Write function definition
+		document.write("<p class='definition'><a name='"+data.func.name+"'>");
+		if(data.func.ret)
+			document.write("<span style='color: green;'>"+data.func.ret+"</span> = ");
+		document.write(data.func.name+"(");
+		if(data.func.args)
+			document.write("<span style='color: red;'>"+data.func.args+"</span>");
+		document.write(")</a></p>");
+		// Write function description
+		document.write("<p>"+data.desc+"</p>");
+		// Write function arguments & return values description
+		if(data.args || data.ret){
+			document.write("<div style='margin: 0px 0px 10px 30px;'>");
+			if(data.args)
+				for(var i=0; i < data.args.length; i++){
+					var arg = data.args[i];
+					document.write("<div><span style='color: red;'>"+arg.name+"</span>: "+arg.desc+"</div>");
+				}
+			if(data.ret)
+				for(var i=0; i < data.ret.length; i++){
+					var ret = data.ret[i];
+					document.write("<div><span style='color: green;'>"+ret.name+"</span>: "+ret.desc+"</div>");
+				}
+			document.write("</div>");
+		}else
+			document.write("<span style='display: block; margin-top: 10px;'/>");
+	// Variable entry?
+	}else if(data.var){
+		// Register variable to index
+		index_buffer += '<a class="index" href="#'+data.var+'">'+data.var+'</a>';
+		// Write variable name
+		document.write("<p class='definition'><a name='"+data.var+"'>"+data.var+"</a></p>");
+		// Write variable description
+		document.write("<p style='margin-bottom: 10px;'>"+data.desc+"</p>");
+	}
 }
 </script>
 </head>
 
 <body>
-<div id="index" class="index">
-</div>
+<!-- Index -->
+<span style="position: fixed; right: 20px; top: 20px; font-style: italic;">Index  --></span>
+<div id="index" class="index"></div>
 <script>
+// Create page content
 Title1("Math");
-FuncEntry("point", "math.bezier", "pct, points");
-Desc("Calculates a point on bezier curve.");
-BeginArgs();
-Arg("pct", "number in range 0-1");
-Arg("points", "curve points in 2D or 3D (table)");
-Ret("point", "3D point on curve (table)");
-EndArgs();
-FuncEntry("deg", "math.degree", "vec1, vec2");
-Desc("Calculates degree between two vectors.");
-BeginArgs();
-Arg("vec1", "first 2D or 3D vector (table)");
-Arg("vec2", "second 2D or 3D vector (table)");
-Ret("deg", "degree between vectors (number)");
-EndArgs();
-FuncEntry("len", "math.distance", "w, h[, d]");
-Desc("Calculates vector length.");
-BeginArgs();
-Arg("w", "width (number)");
-Arg("h", "height (number)");
-Arg("d", "depth (number, optional)");
-Ret("len", "length (number)");
-EndArgs();
-FuncEntry("x, y", "math.ellipse", "cx, cy, w, h, a");
-Desc("Calculates an ellipse point.");
-BeginArgs();
-Arg("cx, cy", "ellipse center (number)");
-Arg("w, h", "ellipse dimension (number)");
-Arg("a", "ellipse angle (number)");
-Ret("x, y", "point on ellipse (number)");
-EndArgs();
-FuncEntry("res", "math.inrange", "min, max, value");
-Desc("Calculates whether <i>value</i> is in range <i>min</i> until <i>max</i> and how far.");
-BeginArgs();
-Arg("min", "minimal number");
-Arg("max", "maximal number");
-Arg("value", "any number");
-Ret("res", "number or nil");
-EndArgs();
-FuncEntry("res", "math.interpolate", "min, max, pct");
-Desc("Calculates a number between two numbers by <i>pct</i>.");
-BeginArgs();
-Arg("min", "minimal number");
-Arg("max", "maximal number");
-Arg("pct", "number in range 0-1");
-Ret("res", "interpolation result (number)");
-EndArgs();
-FuncEntry("vec", "math.ortho", "vec1, vec2");
-Desc("Calculates the orthogonal vector of two given vectors.");
-BeginArgs();
-Arg("vec1", "first 3D vector (table)");
-Arg("vec2", "second 3D vector (table)");
-Ret("vec", "orthogonal 3D vector (table)");
-EndArgs();
-FuncEntry("n", "math.randomsteps", "min, max, step");
-Desc("Generates a random number in range <i>min</i> until <i>max</i> and with gaps of <i>step</i>.");
-BeginArgs();
-Arg("min", "minimal number");
-Arg("max", "maximal number");
-Arg("step", "gap size (number)");
-Ret("n", "random number");
-EndArgs();
-FuncEntry("n", "math.round", "num");
-Desc("Rounds a number.");
-BeginArgs();
-Arg("num", "any number");
-Ret("n", "integer");
-EndArgs();
-FuncEntry("result", "math.trim", "num, min, max");
-Desc("Returns the result of number trimming to range <i>min</i> until <i>max</i>.");
-BeginArgs();
-Arg("num", "any number");
-Arg("min", "minimal number");
-Arg("max", "maximal number");
-Ret("result", "trimmed number");
-EndArgs();
-Separator();
+Entry({
+	'func':{
+		'name':"math.bezier",
+		'args':"pct, points",
+		'ret':"point"
+	},
+	'desc':"Calculates a point on bezier curve.",
+	'args':new Array(
+		{
+			'name':"pct",
+			'desc':"number in range 0-1"
+		},
+		{
+			'name':"points",
+			'desc':"curve points in 2D or 3D (table)"
+		}
+	),
+	'ret':new Array(
+		{
+			'name':"point",
+			'desc':"3D point on curve (table)"
+		}
+	)
+});
+Entry({
+	'func':{
+		'name':"math.degree",
+		'args':"vec1, vec2",
+		'ret':"deg"
+	},
+	'desc':"Calculates degree between two vectors.",
+	'args':new Array(
+		{
+			'name':"vec1",
+			'desc':"first 2D or 3D vector (table)"
+		},
+		{
+			'name':"vec2",
+			'desc':"second 2D or 3D vector (table)"
+		}
+	),
+	'ret':new Array(
+		{
+			'name':"deg",
+			'desc':"degree between vectors (number)"
+		}
+	)
+});
+Entry({
+	'func':{
+		'name':"math.distance",
+		'args':"w, h[, d]",
+		'ret':"len"
+	},
+	'desc':"Calculates vector length.",
+	'args':new Array(
+		{
+			'name':"w",
+			'desc':"width (number)"
+		},
+		{
+			'name':"h",
+			'desc':"height (number)"
+		},
+		{
+			'name':"d",
+			'desc':"depth (number, optional)"
+		}
+	),
+	'ret':new Array(
+		{
+			'name':"len",
+			'desc':"length (number)"
+		}
+	)
+});
+Entry({
+	'func':{
+		'name':"math.ellipse",
+		'args':"cx, cy, w, h, a",
+		'ret':"x, y"
+	},
+	'desc':"Calculates an ellipse point.",
+	'args':new Array(
+		{
+			'name':"cx, cy",
+			'desc':"ellipse center (number)"
+		},
+		{
+			'name':"w, h",
+			'desc':"ellipse dimension (number)"
+		},
+		{
+			'name':"a",
+			'desc':"ellipse angle (number)"
+		}
+	),
+	'ret':new Array(
+		{
+			'name':"x, y",
+			'desc':"point on ellipse (number)"
+		}
+	)
+});
+Entry({
+	'func':{
+		'name':"math.inrange",
+		'args':"min, max, value",
+		'ret':"res"
+	},
+	'desc':"Calculates whether <i>value</i> is in range <i>min</i> until <i>max</i> and how far.",
+	'args':new Array(
+		{
+			'name':"min",
+			'desc':"minimal number"
+		},
+		{
+			'name':"max",
+			'desc':"maximal number"
+		},
+		{
+			'name':"value",
+			'desc':"any number"
+		}
+	),
+	'ret':new Array(
+		{
+			'name':"res",
+			'desc':"number or nil"
+		}
+	)
+});
+Entry({
+	'func':{
+		'name':"math.interpolate",
+		'args':"min, max, pct",
+		'ret':"res"
+	},
+	'desc':"Calculates a number between two numbers by <i>pct</i>.",
+	'args':new Array(
+		{
+			'name':"min",
+			'desc':"minimal number"
+		},
+		{
+			'name':"max",
+			'desc':"maximal number"
+		},
+		{
+			'name':"pct",
+			'desc':"number in range 0-1"
+		}
+	),
+	'ret':new Array(
+		{
+			'name':"res",
+			'desc':"interpolation result (number)"
+		}
+	)
+});
+Entry({
+	'func':{
+		'name':'math.ortho',
+		'args':'vec1, vec2',
+		'ret':'vec'
+	},
+	'desc':'Calculates the orthogonal vector of two given vectors.',
+	'args':new Array(
+			{
+				'name':'vec1',
+				'desc':'first 3D vector (table)'
+			},
+			{
+				'name':'vec2',
+				'desc':'second 3D vector (table)'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'vec',
+				'desc':'orthogonal 3D vector (table)'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'math.randomsteps',
+		'args':'min, max, step',
+		'ret':'n'
+	},
+	'desc':'Generates a random number in range <i>min</i> until <i>max</i> and with gaps of <i>step</i>.',
+	'args':new Array(
+			{
+				'name':'min',
+				'desc':'minimal number'
+			},
+			{
+				'name':'max',
+				'desc':'maximal number'
+			},
+			{
+				'name':'step',
+				'desc':'gap size (number)'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'n',
+				'desc':'random number'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'math.round',
+		'args':'num',
+		'ret':'n'
+	},
+	'desc':'Rounds a number.',
+	'args':new Array(
+			{
+				'name':'num',
+				'desc':'any number'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'n',
+				'desc':'integer'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'math.trim',
+		'args':'num, min, max',
+		'ret':'result'
+	},
+	'desc':'Returns the result of number trimming to range <i>min</i> until <i>max</i>.',
+	'args':new Array(
+			{
+				'name':'num',
+				'desc':'any number'
+			},
+			{
+				'name':'min',
+				'desc':'minimal number'
+			},
+			{
+				'name':'max',
+				'desc':'maximal number'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'result',
+				'desc':'trimmed number'
+			}
+	)
+});
 Title1("String");
-FuncEntry("len", "string.ucharrange", "s, pos");
-Desc("Returns length of an unicode character at given position in text.");
-BeginArgs();
-Arg("s", "unicode text (string)");
-Arg("pos", "text position (number)");
-Ret("len", "byte length (number)");
-EndArgs();
-FuncEntry("ci, char", "string.uchars", "s");
-Desc("Iterator function for unicode text characters.");
-BeginArgs();
-Arg("s", "unicode text (string)");
-Ret("ci", "index of unicode character (number)");
-Ret("char", "unicode character (string)");
-EndArgs();
-FuncEntry("len", "string.ulen", "s");
-Desc("Returns length of an unicode text.");
-BeginArgs();
-Arg("s", "unicode text (string)");
-Ret("len", "unicode characters number (number)");
-EndArgs();
-Separator();
+Entry({
+	'func':{
+		'name':'string.ucharrange',
+		'args':'s, pos',
+		'ret':'len'
+	},
+	'desc':'Returns length of an unicode character at given position in text.',
+	'args':new Array(
+			{
+				'name':'s',
+				'desc':'unicode text (string)'
+			},
+			{
+				'name':'pos',
+				'desc':'text position (number)'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'len',
+				'desc':'byte length (number)'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'string.uchars',
+		'args':'s',
+		'ret':'ci, char'
+	},
+	'desc':'Iterator function for unicode text characters.',
+	'args':new Array(
+			{
+				'name':'s',
+				'desc':'unicode text (string)'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'ci',
+				'desc':'index of unicode character (number)'
+			},
+			{
+				'name':'char',
+				'desc':'unicode character (string)'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'string.ulen',
+		'args':'s',
+		'ret':'len'
+	},
+	'desc':'Returns length of an unicode text.',
+	'args':new Array(
+			{
+				'name':'s',
+				'desc':'unicode text (string)'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'len',
+				'desc':'unicode characters number (number)'
+			}
+	)
+});
 Title1("Table");
-FuncEntry("t2", "table.copy", "t1")
-Desc("Creates a deep table copy.");
-BeginArgs();
-Arg("t1", "any table");
-Ret("t2", "table copy");
-EndArgs();
-FuncEntry("t", "table.create", "array_size, hash_size")
-Desc("Creates a table with reserved memory.");
-BeginArgs();
-Arg("array_size", "size of table array part (number)");
-Arg("hash_size", "size of table hash part (number)");
-Ret("t", "table with custom size");
-EndArgs();
-FuncEntry("distro", "table.distributor", "t")
-Desc("Sets a metatable to given table for continuous element getting.");
-BeginArgs();
-Arg("t", "any table")
-Ret("distro", "table from input with method <i>get()</i>");
-EndArgs();
-FuncEntry("info", "table.tostring", "t")
-Desc("Returns a table as string.")
-BeginArgs();
-Arg("t", "any table");
-Ret("info", "table information (string)")
-EndArgs();
-Separator();
+Entry({
+	'func':{
+		'name':'table.copy',
+		'args':'t1',
+		'ret':'t2'
+	},
+	'desc':'Creates a deep table copy.',
+	'args':new Array(
+			{
+				'name':'t1',
+				'desc':'any table'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'t2',
+				'desc':'table copy'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'table.create',
+		'args':'array_size, hash_size',
+		'ret':'t'
+	},
+	'desc':'Creates a table with reserved memory.',
+	'args':new Array(
+			{
+				'name':'array_size',
+				'desc':'size of table array part (number)'
+			},
+			{
+				'name':'hash_size',
+				'desc':'size of table hash part (number)'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'t',
+				'desc':'table with custom size'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'table.distributor',
+		'args':'t',
+		'ret':'distro'
+	},
+	'desc':'Sets a metatable to given table for continuous element getting.',
+	'args':new Array(
+			{
+				'name':'t',
+				'desc':'any table'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'distro',
+				'desc':'table from input with method <i>get()</i>'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'table.tostring',
+		'args':'t',
+		'ret':'info'
+	},
+	'desc':'Returns a table as string.',
+	'args':new Array(
+			{
+				'name':'t',
+				'desc':'any table'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'info',
+				'desc':'table information (string)'
+			}
+	)
+});
 Title1("Media");
-VarEntry("VIDEO_WIDTH");
-Desc("Video width. (number, video script only)");
-VarEntry("VIDEO_HEIGHT");
-Desc("Video height. (number, video script only)");
-VarEntry("VIDEO_HAS_ALPHA");
-Desc("Video has an alpha channel. (boolean, video script only)");
-VarEntry("VIDEO_FPS");
-Desc("Video frames per second. (number, video script only)");
-VarEntry("VIDEO_FRAMES");
-Desc("Video frames number. (number, video script only)");
-VarEntry("AUDIO_CHANNELS");
-Desc("Audio channels. (number, audio script only)");
-VarEntry("AUDIO_SAMPLE_RATE");
-Desc("Audio samples per second (per channel). (number, audio script only)");
-VarEntry("AUDIO_SAMPLES");
-Desc("Audio samples number (for all channels). (number, audio script only)");
-VarEntry("USERDATA");
-Desc("Passed data string from LVS call. (string, avisynth only)");
-Separator();
+Entry({
+	'var':'VIDEO_WIDTH',
+	'desc':'Video width. (number, video script only)'
+});
+Entry({
+	'var':'VIDEO_HEIGHT',
+	'desc':'Video height. (number, video script only)'
+});
+Entry({
+	'var':'VIDEO_HAS_ALPHA',
+	'desc':'Video has an alpha channel. (boolean, video script only)'
+});
+Entry({
+	'var':'VIDEO_FPS',
+	'desc':'Video frames per second. (number, video script only)'
+});
+Entry({
+	'var':'VIDEO_FRAMES',
+	'desc':'Video frames number. (number, video script only)'
+});
+Entry({
+	'var':'AUDIO_CHANNELS',
+	'desc':'Audio channels. (number, audio script only)'
+});
+Entry({
+	'var':'AUDIO_SAMPLE_RATE',
+	'desc':'Audio samples per second (per channel). (number, audio script only)'
+});
+Entry({
+	'var':'AUDIO_SAMPLES',
+	'desc':'Audio samples number (for all channels). (number, audio script only)'
+});
+Entry({
+	'var':'USERDATA',
+	'desc':'Passed data string from LVS call. (string, avisynth only)'
+});
 Title1("G2D library");
 Title2("Image creation");
-FuncEntry("image", "g2d.create_image", "format, width, height");
-Desc("Creates an image with given size and colorspace.");
-BeginArgs();
-Arg("format", '"RGBA", "RGB", "ALPHA" or "BINARY"');
-Arg("width, height", "size (number)");
-Ret("image", "image object");
-EndArgs();
-FuncEntry("image", "g2d.create_image_from_png", "filename");
-Desc("Creates an image from a PNG file.");
-BeginArgs();
-Arg("filename", "name of a PNG file (string)");
-Ret("image", "image object");
-EndArgs();
-FuncEntry("", "g2d.create_png_from_image", "image, filename");
-Desc("Creates a PNG file from an image.");
-BeginArgs();
-Arg("image", "image object");
-Ret("filename", "name of a new PNG file (string)");
-EndArgs();
+Entry({
+	'func':{
+		'name':'g2d.create_image',
+		'args':'format, width, height',
+		'ret':'image'
+	},
+	'desc':'Creates an image with given size and colorspace.',
+	'args':new Array(
+			{
+				'name':'format',
+				'desc':'"RGBA", "RGB", "ALPHA" or "BINARY"'
+			},
+			{
+				'name':'width, height',
+				'desc':'size (number)'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'image',
+				'desc':'image object'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'g2d.create_image_from_png',
+		'args':'filename',
+		'ret':'image'
+	},
+	'desc':'Creates an image from a PNG file.',
+	'args':new Array(
+			{
+				'name':'filename',
+				'desc':'name of a PNG file (string)'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'image',
+				'desc':'image object'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'g2d.create_png_from_image',
+		'args':'image, filename',
+		'ret':''
+	},
+	'desc':'Creates a PNG file from an image.',
+	'args':new Array(
+			{
+				'name':'image',
+				'desc':'image object'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'filename',
+				'desc':'name of a new PNG file (string)'
+			}
+	)
+});
 Title2("Matrix creation");
-FuncEntry("matrix", "g2d.create_matrix", "");
-Desc("Creates a matrix.");
-BeginArgs();
-Ret("matrix", "matrix object");
-EndArgs();
+Entry({
+	'func':{
+		'name':'g2d.create_matrix',
+		'args':'',
+		'ret':'matrix'
+	},
+	'desc':'Creates a matrix.',
+	'ret':new Array(
+			{
+				'name':'matrix',
+				'desc':'matrix object'
+			}
+	)
+});
 Title2("Source creation");
-FuncEntry("source", "g2d.create_color", "r, g, b[, a]");
-Desc("Creates a source of given color.");
-BeginArgs();
-Arg("r, g, b, a", "color strength in range 0-1 (number)");
-Ret("source", "source object");
-EndArgs();
-FuncEntry("source", "g2d.create_lgradient", "x0, y0, x1, y1");
-Desc("Creates a source as color gradient along given vector.");
-BeginArgs();
-Arg("x0, y0, x1, y1", "vector (number)");
-Ret("source", "source object");
-EndArgs();
-FuncEntry("source", "g2d.create_rgradient", "cx0, cy0, r0, cx1, cy1, r1");
-Desc("Creates a source as color gradient along two circles.");
-BeginArgs();
-Arg("cx0, cy0, r0, cx1, cy1, r1", "circles (number)");
-Ret("source", "source object");
-EndArgs();
-FuncEntry("source", "g2d.create_mgradient", "");
-Desc("Creates a source as color gradient meshes.");
-BeginArgs();
-Ret("source", "source object");
-EndArgs();
-FuncEntry("source", "g2d.create_pattern", "image");
-Desc("Creates a source from given image.");
-BeginArgs();
-Arg("image", "image object");
-Ret("source", "source object");
-EndArgs();
+Entry({
+	'func':{
+		'name':'g2d.create_color',
+		'args':'r, g, b[, a]',
+		'ret':'source'
+	},
+	'desc':'Creates a source of given color.',
+	'args':new Array(
+			{
+				'name':'r, g, b, a',
+				'desc':'color strength in range 0-1 (number)'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'source',
+				'desc':'source object'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'g2d.create_lgradient',
+		'args':'x0, y0, x1, y1',
+		'ret':'source'
+	},
+	'desc':'Creates a source as color gradient along given vector.',
+	'args':new Array(
+			{
+				'name':'x0, y0, x1, y1',
+				'desc':'vector (number)'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'source',
+				'desc':'source object'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'g2d.create_rgradient',
+		'args':'cx0, cy0, r0, cx1, cy1, r1',
+		'ret':'source'
+	},
+	'desc':'Creates a source as color gradient along two circles.',
+	'args':new Array(
+			{
+				'name':'cx0, cy0, r0, cx1, cy1, r1',
+				'desc':'circles (number)'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'source',
+				'desc':'source object'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'g2d.create_mgradient',
+		'args':'',
+		'ret':'source'
+	},
+	'desc':'Creates a source as color gradient meshes.',
+	'ret':new Array(
+			{
+				'name':'source',
+				'desc':'source object'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'g2d.create_pattern',
+		'args':'image',
+		'ret':'source'
+	},
+	'desc':'Creates a source from given image.',
+	'args':new Array(
+			{
+				'name':'image',
+				'desc':'image object'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'source',
+				'desc':'source object'
+			}
+	)
+});
 Title2("Utilities");
-FuncEntry("width, height, ascent, descent, internal_leading, external_leading", "g2d.text_extents", "text, face, size[, bold, italic, underline, strikeout]");
-Desc("Calculates text extents and font metrics.");
-BeginArgs();
-Arg("text", "any text (string)");
-Arg("face", "font face (string)");
-Arg("size", "font size (number)");
-Arg("bold, italic, underline, strikeout", "font style (boolean, optional)");
-Ret("width, height", "text extents (number)");
-Ret("ascent, descent, internal_leading, external_leading", "font metrics (number)");
-EndArgs();
-Separator();
+Entry({
+	'func':{
+		'name':'g2d.text_extents',
+		'args':'text, face, size[, bold, italic, underline, strikeout]',
+		'ret':'width, height, ascent, descent, internal_leading, external_leading'
+	},
+	'desc':'Calculates text extents and font metrics.',
+	'args':new Array(
+			{
+				'name':'text',
+				'desc':'any text (string)'
+			},
+			{
+				'name':'face',
+				'desc':'font face (string)'
+			},
+			{
+				'name':'size',
+				'desc':'font size (number)'
+			},
+			{
+				'name':'bold, italic, underline, strikeout',
+				'desc':'font style (boolean, optional)'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'width, height',
+				'desc':'text extents (number)'
+			},
+			{
+				'name':'ascent, descent, internal_leading, external_leading',
+				'desc':'font metrics (number)'
+			}
+	)
+});
 Title1("Image object");
 Title2("Header data");
-FuncEntry("width", "image:get_width", "");
-Desc("Returns image width.");
-BeginArgs();
-Ret("width", "image width (number)");
-EndArgs();
-FuncEntry("height", "image:get_height", "");
-Desc("Returns image height.");
-BeginArgs();
-Ret("height", "image height (number)");
-EndArgs();
-FuncEntry("format", "image:get_format", "");
-Desc("Returns image format/colorspace.");
-BeginArgs();
-Ret("format", '"RGBA", "RGB", "ALPHA" or "BINARY"');
-EndArgs();
+Entry({
+	'func':{
+		'name':'image:get_width',
+		'args':'',
+		'ret':'width'
+	},
+	'desc':'Returns image width.',
+	'ret':new Array(
+			{
+				'name':'width',
+				'desc':'image width (number)'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'image:get_height',
+		'args':'',
+		'ret':'height'
+	},
+	'desc':'Returns image height.',
+	'ret':new Array(
+			{
+				'name':'height',
+				'desc':'image height (number)'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'image:get_format',
+		'args':'',
+		'ret':'format'
+	},
+	'desc':'Returns image format/colorspace.',
+	'ret':new Array(
+			{
+				'name':'format',
+				'desc':'"RGBA", "RGB", "ALPHA" or "BINARY"'
+			}
+	)
+});
 Title2("Pixels data");
-FuncEntry("pixels", "image:get_data", "x0, y0, x1, y1");
-Desc("Returns image data of given area.");
-BeginArgs();
-Arg("x0, y0, x1, y1", "image area (number)");
-Ret("pixels", "pixels palette (table)");
-EndArgs();
-FuncEntry("", "image:set_data", "x0, y0, x1, y1, pixels");
-Desc("Sets image data to given area.");
-BeginArgs();
-Arg("x0, y0, x1, y1", "image area (number)");
-Arg("pixels", "pixels palette (table)");
-EndArgs();
+Entry({
+	'func':{
+		'name':'image:get_data',
+		'args':'x0, y0, x1, y1',
+		'ret':'pixels'
+	},
+	'desc':'Returns image data of given area.',
+	'args':new Array(
+			{
+				'name':'x0, y0, x1, y1',
+				'desc':'image area (number)'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'pixels',
+				'desc':'pixels palette (table)'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'image:set_data',
+		'args':'x0, y0, x1, y1, pixels',
+		'ret':''
+	},
+	'desc':'Sets image data to given area.',
+	'args':new Array(
+			{
+				'name':'x0, y0, x1, y1',
+				'desc':'image area (number)'
+			},
+			{
+				'name':'pixels',
+				'desc':'pixels palette (table)'
+			}
+	)
+});
 Title2("Context");
-FuncEntry("context", "image:get_context", "");
-Desc("Creates an image drawing context.");
-BeginArgs();
-Ret("context", "context object");
-EndArgs();
+Entry({
+	'func':{
+		'name':'image:get_context',
+		'args':'',
+		'ret':'context'
+	},
+	'desc':'Creates an image drawing context.',
+	'ret':new Array(
+			{
+				'name':'context',
+				'desc':'context object'
+			}
+	)
+});
 Title2("Manipulation");
-FuncEntry("image", "image:convolute", "kernel");
-Desc("Applies given convolution filter kernel to image.");
-BeginArgs();
-Arg("kernel", "convolution kernel with fields <i>width</i>, <i>height</i> and kernel elements (table)");
-Ret("image", "image object from input");
-EndArgs();
-Separator();
+Entry({
+	'func':{
+		'name':'image:convolute',
+		'args':'kernel',
+		'ret':'image'
+	},
+	'desc':'Applies given convolution filter kernel to image.',
+	'args':new Array(
+			{
+				'name':'kernel',
+				'desc':'convolution kernel with fields <i>width</i>, <i>height</i> and kernel elements (table)'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'image',
+				'desc':'image object from input'
+			}
+	)
+});
 Title1("Matrix object");
 Title2("Data");
-FuncEntry("xx, yx, xy, yy, x0, y0", "matrix:get_data", "");
-Desc("Returns matrix values.");
-BeginArgs();
-Ret("xx, yx, xy, yy, x0, y0", "matrix fields (number)");
-EndArgs();
-FuncEntry("", "matrix:set_data", "xx, yx, xy, yy, x0, y0");
-Desc("Sets matrix values.");
-BeginArgs();
-Arg("xx, yx, xy, yy, x0, y0", "matrix fields (number)");
-EndArgs();
+Entry({
+	'func':{
+		'name':'matrix:get_data',
+		'args':'',
+		'ret':'xx, yx, xy, yy, x0, y0'
+	},
+	'desc':'Returns matrix values.',
+	'ret':new Array(
+			{
+				'name':'xx, yx, xy, yy, x0, y0',
+				'desc':'matrix fields (number)'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'matrix:set_data',
+		'args':'xx, yx, xy, yy, x0, y0',
+		'ret':''
+	},
+	'desc':'Sets matrix values.',
+	'args':new Array(
+			{
+				'name':'xx, yx, xy, yy, x0, y0',
+				'desc':'matrix fields (number)'
+			}
+	)
+});
 Title2("Manipulation");
-FuncEntry("matrix", "matrix:identity", "");
-Desc("Sets matrix to identity.");
-BeginArgs();
-Ret("matrix", "matrix object from input");
-EndArgs();
-FuncEntry("matrix", "matrix:invert", "");
-Desc("Inverts matrix.");
-BeginArgs();
-Ret("matrix", "matrix object from input");
-EndArgs();
-FuncEntry("matrix", "matrix:multiply", "xx, yx, xy, yy, x0, y0");
-Desc("Multiplies matrix with given matrix.");
-BeginArgs();
-Arg("xx, yx, xy, yy, x0, y0", "matrix fields (number)");
-Ret("matrix", "matrix object from input");
-EndArgs();
-FuncEntry("matrix", "matrix:translate", "x, y");
-Desc("Prepends translation to matrix.");
-BeginArgs();
-Arg("x, y", "translation (number)");
-Ret("matrix", "matrix object from input");
-EndArgs();
-FuncEntry("matrix", "matrix:scale", "x, y");
-Desc("Prepends scaling to matrix.");
-BeginArgs();
-Arg("x, y", "scale (number)");
-Ret("matrix", "matrix object from input");
-EndArgs();
-FuncEntry("matrix", "matrix:rotate", "angle");
-Desc("Prepends z-axis rotation to matrix.");
-BeginArgs();
-Arg("angle", "rotation angle (number)");
-Ret("matrix", "matrix object from input");
-EndArgs();
-FuncEntry("matrix", "matrix:shear", "x, y");
-Desc("Prepends shearing to matrix.");
-BeginArgs();
-Arg("x, y", "shear (number)");
-Ret("matrix", "matrix object from input");
-EndArgs();
+Entry({
+	'func':{
+		'name':'matrix:identity',
+		'args':'',
+		'ret':'matrix'
+	},
+	'desc':'Sets matrix to identity.',
+	'ret':new Array(
+			{
+				'name':'matrix',
+				'desc':'matrix object from input'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'matrix:invert',
+		'args':'',
+		'ret':'matrix'
+	},
+	'desc':'Inverts matrix.',
+	'ret':new Array(
+			{
+				'name':'matrix',
+				'desc':'matrix object from input'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'matrix:multiply',
+		'args':'xx, yx, xy, yy, x0, y0',
+		'ret':'matrix'
+	},
+	'desc':'Multiplies matrix with given matrix.',
+	'args':new Array(
+			{
+				'name':'xx, yx, xy, yy, x0, y0',
+				'desc':'matrix fields (number)'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'matrix',
+				'desc':'matrix object from input'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'matrix:translate',
+		'args':'x, y',
+		'ret':'matrix'
+	},
+	'desc':'Prepends translation to matrix.',
+	'args':new Array(
+			{
+				'name':'x, y',
+				'desc':'translation (number)'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'matrix',
+				'desc':'matrix object from input'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'matrix:scale',
+		'args':'x, y',
+		'ret':'matrix'
+	},
+	'desc':'Prepends scaling to matrix.',
+	'args':new Array(
+			{
+				'name':'x, y',
+				'desc':'scale (number)'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'matrix',
+				'desc':'matrix object from input'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'matrix:rotate',
+		'args':'angle',
+		'ret':'matrix'
+	},
+	'desc':'Prepends z-axis rotation to matrix.',
+	'args':new Array(
+			{
+				'name':'angle',
+				'desc':'rotation angle (number)'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'matrix',
+				'desc':'matrix object from input'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'matrix:shear',
+		'args':'x, y',
+		'ret':'matrix'
+	},
+	'desc':'Prepends shearing to matrix.',
+	'args':new Array(
+			{
+				'name':'x, y',
+				'desc':'shear (number)'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'matrix',
+				'desc':'matrix object from input'
+			}
+	)
+});
 Title2("Transformation");
-FuncEntry("x, y", "matrix:transform", "x, y");
-Desc("Multiplies point with matrix.");
-BeginArgs();
-Arg("x, y", "point (number)");
-Ret("x, y", "transformed point (number)");
-EndArgs();
-Separator();
+Entry({
+	'func':{
+		'name':'matrix:transform',
+		'args':'x, y',
+		'ret':'x, y'
+	},
+	'desc':'Multiplies point with matrix.',
+	'args':new Array(
+			{
+				'name':'x, y',
+				'desc':'point (number)'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'x, y',
+				'desc':'transformed point (number)'
+			}
+	)
+});
 Title1("Source object");
 Title2("Add data");
-FuncEntry("source", "source:add_color", "pct, r, g, b[, a]");
-Desc("Adds a color to color gradient source.");
-BeginArgs();
-Arg("pct", "gradient offset in range 0-1 (number)");
-Arg("r, g, b", "color strength in range 0-1 (number)");
-Arg("a", "alpha strength in range 0-1 (number, optional)");
-Ret("source", "source object from input");
-EndArgs();
-FuncEntry("source", "source:add_mesh", "x0, y0, r0, g0, b0, a0, x1, y1, r1, g1, b1, a1, x2, y2, r2, g2, b2, a2[, x3, y3, r3, g3, b3, a3]");
-Desc("Adds a color gradient mesh to meshes source.");
-BeginArgs();
-Arg("x0, y0, r0, g0, b0, a0, x1, y1, r1, g1, b1, a1, x2, y2, r2, g2, b2, a", "mesh points and colors in range 0-1 (number)");
-Arg("x3, y3, r3, g3, b3, a3", "fourth mesh point and color (number, optional)");
-Ret("source", "source object from input");
-EndArgs();
+Entry({
+	'func':{
+		'name':'source:add_color',
+		'args':'pct, r, g, b[, a]',
+		'ret':'source'
+	},
+	'desc':'Adds a color to color gradient source.',
+	'args':new Array(
+			{
+				'name':'pct',
+				'desc':'gradient offset in range 0-1 (number)'
+			},
+			{
+				'name':'r, g, b',
+				'desc':'color strength in range 0-1 (number)'
+			},
+			{
+				'name':'a',
+				'desc':'alpha strength in range 0-1 (number, optional)'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'source',
+				'desc':'source object from input'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'source:add_mesh',
+		'args':'x0, y0, r0, g0, b0, a0, x1, y1, r1, g1, b1, a1, x2, y2, r2, g2, b2, a2[, x3, y3, r3, g3, b3, a3]',
+		'ret':'source'
+	},
+	'desc':'Adds a color gradient mesh to meshes source.',
+	'args':new Array(
+			{
+				'name':'x0, y0, r0, g0, b0, a0, x1, y1, r1, g1, b1, a1, x2, y2, r2, g2, b2, a',
+				'desc':'mesh points and colors in range 0-1 (number)'
+			},
+			{
+				'name':'x3, y3, r3, g3, b3, a3',
+				'desc':'fourth mesh point and color (number, optional)'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'source',
+				'desc':'source object from input'
+			}
+	)
+});
 Title2("Get data");
-FuncEntry("[pct, ]r, g, b, a", "source:get_color", "[index]");
-Desc("Returns (gradient offset and) color of color (gradient) source.");
-BeginArgs();
-Arg("index", "color index in color gradient source (number, optional)");
-Ret("pct", "gradient offset in range 0-1 (number, case-dependent)");
-Ret("r, g, b, a", "color and alpha in range 0-1 (number)");
-EndArgs();
-FuncEntry("x0, y0, x1, y1", "source:get_points", "");
-Desc("Returns vector of linear color gradient.");
-BeginArgs();
-Ret("x0, y0, x1, y1", "vector (number)");
-EndArgs();
-FuncEntry("cx0, cy0, r0, cx1, cy1, r1", "source:get_circles", "");
-Desc("Returns circles of radial color gradient.");
-BeginArgs();
-Ret("cx0, cy0, r0, cx1, cy1, r1", "circles (number)");
-EndArgs();
-FuncEntry("x0, y0, r0, g0, b0, a0, x1, y1, r1, g1, b1, a1, x2, y2, r2, g2, b2, a2, x3, y3, r3, g3, b3, a3", "source:get_mesh", "index");
-Desc("Returns a mesh from color gradient mesh source.");
-BeginArgs();
-Arg("index", "mesh index in color gradient mesh source (number)");
-Ret("x0, y0, r0, g0, b0, a0, x1, y1, r1, g1, b1, a1, x2, y2, r2, g2, b2, a2, x3, y3, r3, g3, b3, a3", "mesh (number)");
-EndArgs();
-FuncEntry("image", "source:get_image", "");
-Desc("Returns image of image source.");
-BeginArgs();
-Ret("image", "image object");
-EndArgs();
+Entry({
+	'func':{
+		'name':'source:get_color',
+		'args':'[index]',
+		'ret':'[pct, ]r, g, b, a'
+	},
+	'desc':'Returns (gradient offset and) color of color (gradient) source.',
+	'args':new Array(
+			{
+				'name':'index',
+				'desc':'color index in color gradient source (number, optional)'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'pct',
+				'desc':'gradient offset in range 0-1 (number, case-dependent)'
+			},
+			{
+				'name':'r, g, b, a',
+				'desc':'color and alpha in range 0-1 (number)'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'source:get_points',
+		'args':'',
+		'ret':'x0, y0, x1, y1'
+	},
+	'desc':'Returns vector of linear color gradient.',
+	'ret':new Array(
+			{
+				'name':'x0, y0, x1, y1',
+				'desc':'vector (number)'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'source:get_circles',
+		'args':'',
+		'ret':'cx0, cy0, r0, cx1, cy1, r1'
+	},
+	'desc':'Returns circles of radial color gradient.',
+	'ret':new Array(
+			{
+				'name':'cx0, cy0, r0, cx1, cy1, r1',
+				'desc':'circles (number)'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'source:get_mesh',
+		'args':'index',
+		'ret':'x0, y0, r0, g0, b0, a0, x1, y1, r1, g1, b1, a1, x2, y2, r2, g2, b2, a2, x3, y3, r3, g3, b3, a3'
+	},
+	'desc':'Returns a mesh from color gradient mesh source.',
+	'args':new Array(
+			{
+				'name':'index',
+				'desc':'mesh index in color gradient mesh source (number)'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'x0, y0, r0, g0, b0, a0, x1, y1, r1, g1, b1, a1, x2, y2, r2, g2, b2, a2, x3, y3, r3, g3, b3, a3',
+				'desc':'mesh (number)'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'source:get_image',
+		'args':'',
+		'ret':'image'
+	},
+	'desc':'Returns image of image source.',
+	'ret':new Array(
+			{
+				'name':'image',
+				'desc':'image object'
+			}
+	)
+});
 Title2("Properties");
-FuncEntry("type", "source:get_type", "");
-Desc("Returns source type.");
-BeginArgs();
-Ret("type", '"COLOR", "LINEAR_GRADIENT", "RADIAL_GRADIENT", "MESH_GRADIENT" or "IMAGE"');
-EndArgs();
-FuncEntry("extender", "source:get_extender", "");
-Desc("Returns source edge extension mode.");
-BeginArgs();
-Ret("extender", '"NONE", "REPEAT", "MIRROR" or "FLOW"');
-EndArgs();
-FuncEntry("", "source:set_extender", "extender");
-Desc("Sets source edge extension mode.");
-BeginArgs();
-Arg("extender", '"NONE", "REPEAT", "MIRROR" or "FLOW"');
-EndArgs();
-FuncEntry("filter", "source:get_filter", "");
-Desc("Returns source transformation filter.");
-BeginArgs();
-Ret("filter", '"FAST", "GOOD" or "BEST"');
-EndArgs();
-FuncEntry("", "source:set_filter", "filter");
-Desc("Sets source transformation filter.");
-BeginArgs();
-Arg("filter", '"FAST", "GOOD" or "BEST"');
-EndArgs();
-FuncEntry("matrix", "source:get_matrix", "");
-Desc("Returns source transformation matrix.");
-BeginArgs();
-Ret("matrix", "matrix object");
-EndArgs();
-FuncEntry("", "source:set_matrix", "matrix");
-Desc("Sets source transformation matrix.");
-BeginArgs();
-Arg("matrix", "matrix object");
-EndArgs();
-Separator();
+Entry({
+	'func':{
+		'name':'source:get_type',
+		'args':'',
+		'ret':'type'
+	},
+	'desc':'Returns source type.',
+	'ret':new Array(
+			{
+				'name':'type',
+				'desc':'"COLOR", "LINEAR_GRADIENT", "RADIAL_GRADIENT", "MESH_GRADIENT" or "IMAGE"'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'source:get_extender',
+		'args':'',
+		'ret':'extender'
+	},
+	'desc':'Returns source edge extension mode.',
+	'ret':new Array(
+			{
+				'name':'extender',
+				'desc':'"NONE", "REPEAT", "MIRROR" or "FLOW"'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'source:set_extender',
+		'args':'extender',
+		'ret':''
+	},
+	'desc':'Sets source edge extension mode.',
+	'args':new Array(
+			{
+				'name':'extender',
+				'desc':'"NONE", "REPEAT", "MIRROR" or "FLOW"'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'source:get_filter',
+		'args':'',
+		'ret':'filter'
+	},
+	'desc':'Returns source transformation filter.',
+	'ret':new Array(
+			{
+				'name':'filter',
+				'desc':'"FAST", "GOOD" or "BEST"'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'source:set_filter',
+		'args':'filter',
+		'ret':''
+	},
+	'desc':'Sets source transformation filter.',
+	'args':new Array(
+			{
+				'name':'filter',
+				'desc':'"FAST", "GOOD" or "BEST"'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'source:get_matrix',
+		'args':'',
+		'ret':'matrix'
+	},
+	'desc':'Returns source transformation matrix.',
+	'ret':new Array(
+			{
+				'name':'matrix',
+				'desc':'matrix object'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'source:set_matrix',
+		'args':'matrix',
+		'ret':''
+	},
+	'desc':'Sets source transformation matrix.',
+	'args':new Array(
+			{
+				'name':'matrix',
+				'desc':'matrix object'
+			}
+	)
+});
 Title1("Context object");
 Title2("State");
-FuncEntry("", "context:push_state", "");
-Desc("Pushes current context state onto the internal state stack.");
-FuncEntry("", "context:pop_state", "");
-Desc("Pops a context state from the internal state stack and sets it as current.");
+Entry({
+	'func':{
+		'name':'context:push_state',
+		'args':'',
+		'ret':''
+	},
+	'desc':'Pushes current context state onto the internal state stack.'
+});
+Entry({
+	'func':{
+		'name':'context:pop_state',
+		'args':'',
+		'ret':''
+	},
+	'desc':'Pops a context state from the internal state stack and sets it as current.'
+});
 Title2("Transformation");
-FuncEntry("matrix", "context:get_matrix", "");
-Desc("Returns context transformation matrix.");
-BeginArgs();
-Ret("matrix", "matrix object");
-EndArgs();
-FuncEntry("", "context:set_matrix", "matrix");
-Desc("Sets context transformation matrix.");
-BeginArgs();
-Arg("matrix", "matrix object");
-EndArgs();
+Entry({
+	'func':{
+		'name':'context:get_matrix',
+		'args':'',
+		'ret':'matrix'
+	},
+	'desc':'Returns context transformation matrix.',
+	'ret':new Array(
+			{
+				'name':'matrix',
+				'desc':'matrix object'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'context:set_matrix',
+		'args':'matrix',
+		'ret':''
+	},
+	'desc':'Sets context transformation matrix.',
+	'args':new Array(
+			{
+				'name':'matrix',
+				'desc':'matrix object'
+			}
+	)
+});
 Title2("Raster source");
-FuncEntry("source", "context:get_source", "");
-Desc("Returns context source.");
-BeginArgs();
-Ret("source", "source object");
-EndArgs();
-FuncEntry("", "context:set_source", "source");
-Desc("Sets context source.");
-BeginArgs();
-Arg("source", "source object");
-EndArgs();
+Entry({
+	'func':{
+		'name':'context:get_source',
+		'args':'',
+		'ret':'source'
+	},
+	'desc':'Returns context source.',
+	'ret':new Array(
+			{
+				'name':'source',
+				'desc':'source object'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'context:set_source',
+		'args':'source',
+		'ret':''
+	},
+	'desc':'Sets context source.',
+	'args':new Array(
+			{
+				'name':'source',
+				'desc':'source object'
+			}
+	)
+});
 Title2("Render properties");
-FuncEntry("antialiasing", "context:get_antialiasing", "");
-Desc("Returns antialiasing mode.");
-BeginArgs();
-Ret("antialiasing", "antialiasing mode (boolean)");
-EndArgs();
-FuncEntry("", "context:set_antialiasing", "antialiasing");
-Desc("Sets antialiasing mode.");
-BeginArgs();
-Arg("antialiasing", "antialiasing mode (boolean)");
-EndArgs();
-FuncEntry("fill_rule", "context:get_fill_rule", "");
-Desc("Returns filling rule.");
-BeginArgs();
-Ret("fill_rule", '"WINDING" or "ODD"');
-EndArgs();
-FuncEntry("", "context:set_fill_rule", "fill_rule");
-Desc("Sets filling rule.");
-BeginArgs();
-Arg("fill_rule", '"WINDING" or "ODD"');
-EndArgs();
-FuncEntry("composition", "context:get_composition", "");
-Desc("Returns composition.");
-BeginArgs();
-Ret("composition", '"SOURCE", "OVER", "INSIDE", "OUTSIDE", "MIX", "XOR", "ADD", "SATURATE", "MULTIPLY" or "DIFFERENCE"');
-EndArgs();
-FuncEntry("", "context:set_composition", "composition");
-Desc("Sets composition.");
-BeginArgs();
-Arg("composition", '"SOURCE", "OVER", "INSIDE", "OUTSIDE", "MIX", "XOR", "ADD", "SATURATE", "MULTIPLY" or "DIFFERENCE"');
-EndArgs();
+Entry({
+	'func':{
+		'name':'context:get_antialiasing',
+		'args':'',
+		'ret':'antialiasing'
+	},
+	'desc':'Returns antialiasing mode.',
+	'ret':new Array(
+			{
+				'name':'antialiasing',
+				'desc':'antialiasing mode (boolean)'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'context:set_antialiasing',
+		'args':'antialiasing',
+		'ret':''
+	},
+	'desc':'Sets antialiasing mode.',
+	'args':new Array(
+			{
+				'name':'antialiasing',
+				'desc':'antialiasing mode (boolean)'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'context:get_fill_rule',
+		'args':'',
+		'ret':'fill_rule'
+	},
+	'desc':'Returns filling rule.',
+	'ret':new Array(
+			{
+				'name':'fill_rule',
+				'desc':'"WINDING" or "ODD"'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'context:set_fill_rule',
+		'args':'fill_rule',
+		'ret':''
+	},
+	'desc':'Sets filling rule.',
+	'args':new Array(
+			{
+				'name':'fill_rule',
+				'desc':'"WINDING" or "ODD"'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'context:get_composition',
+		'args':'',
+		'ret':'composition'
+	},
+	'desc':'Returns composition.',
+	'ret':new Array(
+			{
+				'name':'composition',
+				'desc':'"SOURCE", "OVER", "INSIDE", "OUTSIDE", "MIX", "XOR", "ADD", "SATURATE", "MULTIPLY" or "DIFFERENCE"'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'context:set_composition',
+		'args':'composition',
+		'ret':''
+	},
+	'desc':'Sets composition.',
+	'args':new Array(
+			{
+				'name':'composition',
+				'desc':'"SOURCE", "OVER", "INSIDE", "OUTSIDE", "MIX", "XOR", "ADD", "SATURATE", "MULTIPLY" or "DIFFERENCE"'
+			}
+	)
+});
 Title2("Stroke properties");
-FuncEntry("offset, dashes", "context:get_dash", "");
-Desc("Returns the dash pattern for path stroking.");
-BeginArgs();
-Ret("offset", "dash pattern offset for stroke start (number)");
-Ret("dashes", "length of 'on' and 'off' portions in stroke (table of numbers)");
-EndArgs();
-FuncEntry("", "context:set_dash", "offset, dashes");
-Desc("Sets the dash pattern for path stroking.");
-BeginArgs();
-Arg("offset", "dash pattern offset for stroke start (number)");
-Arg("dashes", "length of 'on' and 'off' portions in stroke (table of numbers)");
-EndArgs();
-FuncEntry("line_cap", "context:get_line_cap", "");
-Desc("Returns line cap.");
-BeginArgs();
-Ret("line_cap", '"FLAT", "ROUND" or "SQUARE"');
-EndArgs();
-FuncEntry("", "context:set_line_cap", "line_cap");
-Desc("Sets line cap.");
-BeginArgs();
-Arg("line_cap", '"FLAT", "ROUND" or "SQUARE"');
-EndArgs();
-FuncEntry("line_join", "context:get_line_join", "");
-Desc("Returns line join.");
-BeginArgs();
-Ret("line_join", '"MITER", "ROUND" or "BEVEL"');
-EndArgs();
-FuncEntry("", "context:set_line_join", "line_join");
-Desc("Sets line join.");
-BeginArgs();
-Arg("line_join", '"MITER", "ROUND" or "BEVEL"');
-EndArgs();
-FuncEntry("miter_limit", "context:get_miter_limit", "");
-Desc("Returns miter join width limit.");
-BeginArgs();
-Ret("miter_limit", "miter limit (number)");
-EndArgs();
-FuncEntry("", "context:set_miter_limit", "miter_limit");
-Desc("Sets miter join width limit.");
-BeginArgs();
-Arg("miter_limit", "miter limit (number)");
-EndArgs();
-FuncEntry("width", "context:get_line_width", "");
-Desc("Returns line width.");
-BeginArgs();
-Ret("width", "line width (number)");
-EndArgs();
-FuncEntry("", "context:set_line_width", "width");
-Desc("Sets line width.");
-BeginArgs();
-Arg("width", "line width (number)");
-EndArgs();
+Entry({
+	'func':{
+		'name':'context:get_dash',
+		'args':'',
+		'ret':'offset, dashes'
+	},
+	'desc':'Returns the dash pattern for path stroking.',
+	'ret':new Array(
+			{
+				'name':'offset',
+				'desc':'dash pattern offset for stroke start (number)'
+			},
+			{
+				'name':'dashes',
+				'desc':'length of \'on\' and \'off\' portions in stroke (table of numbers)'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'context:set_dash',
+		'args':'offset, dashes',
+		'ret':''
+	},
+	'desc':'Sets the dash pattern for path stroking.',
+	'args':new Array(
+			{
+				'name':'offset',
+				'desc':'dash pattern offset for stroke start (number)'
+			},
+			{
+				'name':'dashes',
+				'desc':'length of \'on\' and \'off\' portions in stroke (table of numbers)'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'context:get_line_cap',
+		'args':'',
+		'ret':'line_cap'
+	},
+	'desc':'Returns line cap.',
+	'ret':new Array(
+			{
+				'name':'line_cap',
+				'desc':'"FLAT", "ROUND" or "SQUARE"'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'context:set_line_cap',
+		'args':'line_cap',
+		'ret':''
+	},
+	'desc':'Sets line cap.',
+	'args':new Array(
+			{
+				'name':'line_cap',
+				'desc':'"FLAT", "ROUND" or "SQUARE"'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'context:get_line_join',
+		'args':'',
+		'ret':'line_join'
+	},
+	'desc':'Returns line join.',
+	'ret':new Array(
+			{
+				'name':'line_join',
+				'desc':'"MITER", "ROUND" or "BEVEL"'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'context:set_line_join',
+		'args':'line_join',
+		'ret':''
+	},
+	'desc':'Sets line join.',
+	'args':new Array(
+			{
+				'name':'line_join',
+				'desc':'"MITER", "ROUND" or "BEVEL"'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'context:get_miter_limit',
+		'args':'',
+		'ret':'miter_limit'
+	},
+	'desc':'Returns miter join width limit.',
+	'ret':new Array(
+			{
+				'name':'miter_limit',
+				'desc':'miter limit (number)'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'context:set_miter_limit',
+		'args':'miter_limit',
+		'ret':''
+	},
+	'desc':'Sets miter join width limit.',
+	'args':new Array(
+			{
+				'name':'miter_limit',
+				'desc':'miter limit (number)'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'context:get_line_width',
+		'args':'',
+		'ret':'width'
+	},
+	'desc':'Returns line width.',
+	'ret':new Array(
+			{
+				'name':'width',
+				'desc':'line width (number)'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'context:set_line_width',
+		'args':'width',
+		'ret':''
+	},
+	'desc':'Sets line width.',
+	'args':new Array(
+			{
+				'name':'width',
+				'desc':'line width (number)'
+			}
+	)
+});
 Title2("Clipping");
-FuncEntry("", "context:clip_from_path", "");
-Desc("Defines clipping region from current path.");
-FuncEntry("", "context:clip_clear", "");
-Desc("Clears clipping region.");
-FuncEntry("rectangles", "context:clip_get_rectangles", "");
-Desc("Returns clipping region describing rectangles.");
-BeginArgs();
-Ret("rectangles", "rectangles with fields <i>x</i>, <i>y</i>, <i>width</i> and <i>height</i> (tables in table)");
-EndArgs();
+Entry({
+	'func':{
+		'name':'context:clip_from_path',
+		'args':'',
+		'ret':''
+	},
+	'desc':'Defines clipping region from current path.'
+});
+Entry({
+	'func':{
+		'name':'context:clip_clear',
+		'args':'',
+		'ret':''
+	},
+	'desc':'Clears clipping region.'
+});
+Entry({
+	'func':{
+		'name':'context:clip_get_rectangles',
+		'args':'',
+		'ret':'rectangles'
+	},
+	'desc':'Returns clipping region describing rectangles.',
+	'ret':new Array(
+			{
+				'name':'rectangles',
+				'desc':'rectangles with fields <i>x</i>, <i>y</i>, <i>width</i> and <i>height</i> (tables in table)'
+			}
+	)
+});
 Title2("Path definition");
-FuncEntry("", "context:path_move_to", "x, y");
-Desc("Adds a movement to current path.");
-BeginArgs();
-Arg("x, y", "point (number)");
-EndArgs();
-FuncEntry("", "context:path_line_to", "x, y");
-Desc("Adds a line to current path.");
-BeginArgs();
-Arg("x, y", "point (number)");
-EndArgs();
-FuncEntry("", "context:path_curve_to", "x0, y0, x1, y1, x2, y2");
-Desc("Adds a cubic bezier curve to current path.");
-BeginArgs();
-Arg("x0, y0, x1, y1, x2, y2", "points (number)");
-EndArgs();
-FuncEntry("", "context:path_add_rectangle", "x, y, width, height");
-Desc("Adds a closed rectangle to current path.");
-BeginArgs();
-Arg("x, y", "upper-left point of rectangle (number)");
-Arg("width, height", "dimension of rectangle (number)");
-EndArgs();
-FuncEntry("", "context:path_add_arc", "cx, cy, r, angle0, angle1");
-Desc("Adds an arc to current path.");
-BeginArgs();
-Arg("cx, cy, r", "arc (number)");
-Arg("angle0, angle1", "start and end angle of arc (number)");
-EndArgs();
-FuncEntry("", "context:path_add_text", "text, face, size[, bold, italic, underline, strikeout]");
-Desc("Adds a closed text to current path.");
-BeginArgs();
-Arg("text", "any text (string)");
-Arg("face", "font face (string)");
-Arg("size", "font size (number)");
-Arg("bold, italic, underline, strikeout", "font style (boolean, optional)");
-EndArgs();
-FuncEntry("", "context:path_close", "");
-Desc("Closes current path.");
-FuncEntry("", "context:path_clear", "");
-Desc("Clears path.");
-FuncEntry("", "context:path_transform", "filter[, flatten]");
-Desc("Passes current path points through a filter function for manipulation.");
-BeginArgs();
-Arg("filter", "path points filter (function, [type_string,x,y -> x,y])");
-Arg("flatten", "curves flattened before? (boolean)");
-EndArgs();
+Entry({
+	'func':{
+		'name':'context:path_move_to',
+		'args':'x, y',
+		'ret':''
+	},
+	'desc':'Adds a movement to current path.',
+	'args':new Array(
+			{
+				'name':'x, y',
+				'desc':'point (number)'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'context:path_line_to',
+		'args':'x, y',
+		'ret':''
+	},
+	'desc':'Adds a line to current path.',
+	'args':new Array(
+			{
+				'name':'x, y',
+				'desc':'point (number)'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'context:path_curve_to',
+		'args':'x0, y0, x1, y1, x2, y2',
+		'ret':''
+	},
+	'desc':'Adds a cubic bezier curve to current path.',
+	'args':new Array(
+			{
+				'name':'x0, y0, x1, y1, x2, y2',
+				'desc':'points (number)'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'context:path_add_rectangle',
+		'args':'x, y, width, height',
+		'ret':''
+	},
+	'desc':'Adds a closed rectangle to current path.',
+	'args':new Array(
+			{
+				'name':'x, y',
+				'desc':'upper-left point of rectangle (number)'
+			},
+			{
+				'name':'width, height',
+				'desc':'dimension of rectangle (number)'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'context:path_add_arc',
+		'args':'cx, cy, r, angle0, angle1',
+		'ret':''
+	},
+	'desc':'Adds an arc to current path.',
+	'args':new Array(
+			{
+				'name':'cx, cy, r',
+				'desc':'arc (number)'
+			},
+			{
+				'name':'angle0, angle1',
+				'desc':'start and end angle of arc (number)'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'context:path_add_text',
+		'args':'text, face, size[, bold, italic, underline, strikeout]',
+		'ret':''
+	},
+	'desc':'Adds a closed text to current path.',
+	'args':new Array(
+			{
+				'name':'text',
+				'desc':'any text (string)'
+			},
+			{
+				'name':'face',
+				'desc':'font face (string)'
+			},
+			{
+				'name':'size',
+				'desc':'font size (number)'
+			},
+			{
+				'name':'bold, italic, underline, strikeout',
+				'desc':'font style (boolean, optional)'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'context:path_close',
+		'args':'',
+		'ret':''
+	},
+	'desc':'Closes current path.'
+});
+Entry({
+	'func':{
+		'name':'context:path_clear',
+		'args':'',
+		'ret':''
+	},
+	'desc':'Clears path.'
+});
+Entry({
+	'func':{
+		'name':'context:path_transform',
+		'args':'filter[, flatten]',
+		'ret':''
+	},
+	'desc':'Passes current path points through a filter function for manipulation.',
+	'args':new Array(
+			{
+				'name':'filter',
+				'desc':'path points filter (function, [type_string,x,y -> x,y])'
+			},
+			{
+				'name':'flatten',
+				'desc':'curves flattened before? (boolean)'
+			}
+	)
+});
 Title2("Drawing");
-FuncEntry("", "context:fill", "");
-Desc("Fills path with source.");
-FuncEntry("", "context:stroke", "");
-Desc("Strokes path with source.");
-FuncEntry("", "context:paint", "");
-Desc("Paints source completely.");
-FuncEntry("", "context:masked_paint", "mask");
-Desc("Paints source with alpha mask.");
-BeginArgs();
-Arg("mask", "source object");
-EndArgs();
+Entry({
+	'func':{
+		'name':'context:fill',
+		'args':'',
+		'ret':''
+	},
+	'desc':'Fills path with source.'
+});
+Entry({
+	'func':{
+		'name':'context:stroke',
+		'args':'',
+		'ret':''
+	},
+	'desc':'Strokes path with source.'
+});
+Entry({
+	'func':{
+		'name':'context:paint',
+		'args':'',
+		'ret':''
+	},
+	'desc':'Paints source completely.'
+});
+Entry({
+	'func':{
+		'name':'context:masked_paint',
+		'args':'mask',
+		'ret':''
+	},
+	'desc':'Paints source with alpha mask.',
+	'args':new Array(
+		{
+			'name':'mask',
+			'desc':'source object'
+		}
+	)
+});
 Title2("Bounding");
-FuncEntry("x0, y0, x1, y1", "context:clip_bounding", "");
-Desc("Calculates the bounding box/area of the clipping region.");
-BeginArgs();
-Ret("x0, y0, x1, y1", "area (number)");
-EndArgs();
-FuncEntry("x0, y0, x1, y1", "context:path_bounding", "");
-Desc("Calculates the bounding box/area of all path points.");
-BeginArgs();
-Ret("x0, y0, x1, y1", "area (number)");
-EndArgs();
-FuncEntry("x0, y0, x1, y1", "context:fill_bounding", "");
-Desc("Calculates the bounding box/area of the filling path.");
-BeginArgs();
-Ret("x0, y0, x1, y1", "area (number)");
-EndArgs();
-FuncEntry("x0, y0, x1, y1", "context:stroke_bounding", "");
-Desc("Calculates the bounding box/area of the stroking path.");
-BeginArgs();
-Ret("x0, y0, x1, y1", "area (number)");
-EndArgs();
+Entry({
+	'func':{
+		'name':'context:clip_bounding',
+		'args':'',
+		'ret':'x0, y0, x1, y1'
+	},
+	'desc':'Calculates the bounding box/area of the clipping region.',
+	'ret':new Array(
+			{
+				'name':'x0, y0, x1, y1',
+				'desc':'area (number)'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'context:path_bounding',
+		'args':'',
+		'ret':'x0, y0, x1, y1'
+	},
+	'desc':'Calculates the bounding box/area of all path points.',
+	'ret':new Array(
+			{
+				'name':'x0, y0, x1, y1',
+				'desc':'area (number)'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'context:fill_bounding',
+		'args':'',
+		'ret':'x0, y0, x1, y1'
+	},
+	'desc':'Calculates the bounding box/area of the filling path.',
+	'ret':new Array(
+			{
+				'name':'x0, y0, x1, y1',
+				'desc':'area (number)'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'context:stroke_bounding',
+		'args':'',
+		'ret':'x0, y0, x1, y1'
+	},
+	'desc':'Calculates the bounding box/area of the stroking path.',
+	'ret':new Array(
+			{
+				'name':'x0, y0, x1, y1',
+				'desc':'area (number)'
+			}
+	)
+});
 Title2("Point test");
-FuncEntry("hit", "context:clip_contains", "x, y");
-Desc("Checks if point is inside of the clipping region.");
-BeginArgs();
-Arg("x, y", "point (number)");
-Ret("hit", "is inside (boolean)");
-EndArgs();
-FuncEntry("hit", "context:fill_contains", "x, y");
-Desc("Checks if point is inside of the filling path.");
-BeginArgs();
-Arg("x, y", "point (number)");
-Ret("hit", "is inside (boolean)");
-EndArgs();
-FuncEntry("hit", "context:stroke_contains", "x, y");
-Desc("Checks if point is inside of the stroking path.");
-BeginArgs();
-Arg("x, y", "point (number)");
-Ret("hit", "is inside (boolean)");
-EndArgs();
-Separator();
+Entry({
+	'func':{
+		'name':'context:clip_contains',
+		'args':'x, y',
+		'ret':'hit'
+	},
+	'desc':'Checks if point is inside of the clipping region.',
+	'args':new Array(
+			{
+				'name':'x, y',
+				'desc':'point (number)'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'hit',
+				'desc':'is inside (boolean)'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'context:fill_contains',
+		'args':'x, y',
+		'ret':'hit'
+	},
+	'desc':'Checks if point is inside of the filling path.',
+	'args':new Array(
+			{
+				'name':'x, y',
+				'desc':'point (number)'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'hit',
+				'desc':'is inside (boolean)'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'context:stroke_contains',
+		'args':'x, y',
+		'ret':'hit'
+	},
+	'desc':'Checks if point is inside of the stroking path.',
+	'args':new Array(
+			{
+				'name':'x, y',
+				'desc':'point (number)'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'hit',
+				'desc':'is inside (boolean)'
+			}
+	)
+});
 Title1("G2DU library");
 Title2("Stock objects");
-VarEntry("g2du.identity");
-Desc("Identity matrix.");
-VarEntry("g2du.flip_h");
-Desc("Horizontal flip matrix.");
-VarEntry("g2du.flip_v");
-Desc("Vertical flip matrix.");
-VarEntry("g2du.white");
-Desc("White color source.");
-VarEntry("g2du.black");
-Desc("Black color source.");
-VarEntry("g2du.grey");
-Desc("Grey color source.");
-VarEntry("g2du.dark_grey");
-Desc("Dark grey color source.");
-VarEntry("g2du.bright_grey");
-Desc("Bright grey color source.");
-VarEntry("g2du.red");
-Desc("Red color source.");
-VarEntry("g2du.dark_red");
-Desc("Dark red color source.");
-VarEntry("g2du.bright_red");
-Desc("Bright red color source.");
-VarEntry("g2du.green");
-Desc("Green color source.");
-VarEntry("g2du.dark_green");
-Desc("Dark green color source.");
-VarEntry("g2du.bright_green");
-Desc("Bright green color source.");
-VarEntry("g2du.blue");
-Desc("Blue color source.");
-VarEntry("g2du.dark_blue");
-Desc("Dark blue color source.");
-VarEntry("g2du.bright_blue");
-Desc("Bright blue color source.");
-VarEntry("g2du.yellow");
-Desc("Yellow color source.");
-VarEntry("g2du.dark_yellow");
-Desc("Dark yellow color source.");
-VarEntry("g2du.bright_yellow");
-Desc("Bright yellow color source.");
-VarEntry("g2du.aqua");
-Desc("Aqua color source.");
-VarEntry("g2du.dark_aqua");
-Desc("Dark aqua color source.");
-VarEntry("g2du.bright_aqua");
-Desc("Bright aqua color source.");
-VarEntry("g2du.purple");
-Desc("Purple color source.");
-VarEntry("g2du.dark_purple");
-Desc("Dark purple color source.");
-VarEntry("g2du.bright_purple");
-Desc("Bright purple color source.");
-VarEntry("g2du.orange");
-Desc("Orange color source.");
-VarEntry("g2du.lime");
-Desc("Lime color source.");
-VarEntry("g2du.spring");
-Desc("Spring color source.");
-VarEntry("g2du.azure");
-Desc("Azure color source.");
-VarEntry("g2du.pink");
-Desc("Pink color source.");
-VarEntry("g2du.violet");
-Desc("Violet color source.");
-VarEntry("g2du.brown");
-Desc("Brown color source.");
-VarEntry("g2du.sapphire");
-Desc("Sapphire color source.");
-VarEntry("g2du.transparent");
-Desc("Transparent color source.");
+Entry({
+	'var':'g2du.identity',
+	'desc':'Identity matrix.'
+});
+Entry({
+	'var':'g2du.flip_h',
+	'desc':'Horizontal flip matrix.'
+});
+Entry({
+	'var':'g2du.flip_v',
+	'desc':'Vertical flip matrix.'
+});
+Entry({
+	'var':'g2du.white',
+	'desc':'White color source.'
+});
+Entry({
+	'var':'g2du.black',
+	'desc':'Black color source.'
+});
+Entry({
+	'var':'g2du.grey',
+	'desc':'Grey color source.'
+});
+Entry({
+	'var':'g2du.dark_grey',
+	'desc':'Dark grey color source.'
+});
+Entry({
+	'var':'g2du.bright_grey',
+	'desc':'Bright grey color source.'
+});
+Entry({
+	'var':'g2du.red',
+	'desc':'Red color source.'
+});
+Entry({
+	'var':'g2du.dark_red',
+	'desc':'Dark red color source.'
+});
+Entry({
+	'var':'g2du.bright_red',
+	'desc':'Bright red color source.'
+});
+Entry({
+	'var':'g2du.green',
+	'desc':'Green color source.'
+});
+Entry({
+	'var':'g2du.dark_green',
+	'desc':'Dark green color source.'
+});
+Entry({
+	'var':'g2du.bright_green',
+	'desc':'Bright green color source.'
+});
+Entry({
+	'var':'g2du.blue',
+	'desc':'Blue color source.'
+});
+Entry({
+	'var':'g2du.dark_blue',
+	'desc':'Dark blue color source.'
+});
+Entry({
+	'var':'g2du.bright_blue',
+	'desc':'Bright blue color source.'
+});
+Entry({
+	'var':'g2du.yellow',
+	'desc':'Yellow color source.'
+});
+Entry({
+	'var':'g2du.dark_yellow',
+	'desc':'Dark yellow color source.'
+});
+Entry({
+	'var':'g2du.bright_yellow',
+	'desc':'Bright yellow color source.'
+});
+Entry({
+	'var':'g2du.aqua',
+	'desc':'Aqua color source.'
+});
+Entry({
+	'var':'g2du.dark_aqua',
+	'desc':'Dark aqua color source.'
+});
+Entry({
+	'var':'g2du.bright_aqua',
+	'desc':'Bright aqua color source.'
+});
+Entry({
+	'var':'g2du.purple',
+	'desc':'Purple color source.'
+});
+Entry({
+	'var':'g2du.dark_purple',
+	'desc':'Dark purple color source.'
+});
+Entry({
+	'var':'g2du.bright_purple',
+	'desc':'Bright purple color source.'
+});
+Entry({
+	'var':'g2du.orange',
+	'desc':'Orange color source.'
+});
+Entry({
+	'var':'g2du.lime',
+	'desc':'Lime color source.'
+});
+Entry({
+	'var':'g2du.spring',
+	'desc':'Spring color source.'
+});
+Entry({
+	'var':'g2du.azure',
+	'desc':'Azure color source.'
+});
+Entry({
+	'var':'g2du.pink',
+	'desc':'Pink color source.'
+});
+Entry({
+	'var':'g2du.violet',
+	'desc':'Violet color source.'
+});
+Entry({
+	'var':'g2du.brown',
+	'desc':'Brown color source.'
+});
+Entry({
+	'var':'g2du.sapphire',
+	'desc':'Sapphire color source.'
+});
+Entry({
+	'var':'g2du.transparent',
+	'desc':'Transparent color source.'
+});
 Title2("Image conversion");
-FuncEntry("image", "g2du.create_sub_image", "image, format, x0, y0, x1, y1");
-Desc("Creates a subimage with new colorspace of given image.");
-BeginArgs();
-Arg("image", "image object");
-Arg("format", '"RGBA", "RGB", "ALPHA" or "BINARY"');
-Arg("x0, y0, x1, y1", "image area (number)");
-Ret("image", "image object");
-EndArgs();
-FuncEntry("pixels", "g2du.get_pixels", "image");
-Desc("Creates a pixels table of 'visible' image pixels. 'Visible' means <i>alpha > 0</i> in RGBA, <i>not black</i> in RGB or <i>value > 0</i> in ALPHA or BINARY.");
-BeginArgs();
-Arg("image", "image object");
-Ret("pixels", "pixels informations with fields <i>r</i>, <i>g</i>, <i>b</i>, <i>a</i>, <i>x</i> and <i>y</i> (tables in table)");
-EndArgs();
+Entry({
+	'func':{
+		'name':'g2du.create_sub_image',
+		'args':'image, format, x0, y0, x1, y1',
+		'ret':'image'
+	},
+	'desc':'Creates a subimage with new colorspace of given image.',
+	'args':new Array(
+			{
+				'name':'image',
+				'desc':'image object'
+			},
+			{
+				'name':'format',
+				'desc':'"RGBA", "RGB", "ALPHA" or "BINARY"'
+			},
+			{
+				'name':'x0, y0, x1, y1',
+				'desc':'image area (number)'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'image',
+				'desc':'image object'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'g2du.get_pixels',
+		'args':'image',
+		'ret':'pixels'
+	},
+	'desc':'Creates a pixels table of \'visible\' image pixels. \'Visible\' means <i>alpha > 0</i> in RGBA, <i>not black</i> in RGB or <i>value > 0</i> in ALPHA or BINARY.',
+	'args':new Array(
+			{
+				'name':'image',
+				'desc':'image object'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'pixels',
+				'desc':'pixels informations with fields <i>r</i>, <i>g</i>, <i>b</i>, <i>a</i>, <i>x</i> and <i>y</i> (tables in table)'
+			}
+	)
+});
 Title2("Kernel generation");
-FuncEntry("kernel", "g2du.create_box_blur_kernel", "r")
-Desc("Generates a box blur filter kernel.");
-BeginArgs();
-Arg("r", "kernel radius (number, integer)");
-Ret("kernel", "filter kernel (table)");
-EndArgs();
-FuncEntry("kernel", "g2du.create_gaussian_blur_kernel", "r")
-Desc("Generates a gaussian blur filter kernel.");
-BeginArgs();
-Arg("r", "kernel radius (number, integer)");
-Ret("kernel", "filter kernel (table)");
-EndArgs();
-FuncEntry("kernel", "g2du.create_motion_blur_kernel", "r, angle")
-Desc("Generates a motion blur filter kernel.");
-BeginArgs();
-Arg("r", "kernel radius (number, integer)");
-Arg("angle", "blur direction as angle (number)");
-Ret("kernel", "filter kernel (table)");
-EndArgs();
-FuncEntry("kernel", "g2du.create_sharpen_kernel", "r")
-Desc("Generates a sharpen filter kernel.");
-BeginArgs();
-Arg("r", "kernel radius (number, integer)");
-Ret("kernel", "filter kernel (table)");
-EndArgs();
-FuncEntry("kernel", "g2du.create_edge_detect_kernel", "r")
-Desc("Generates an edge detection filter kernel.");
-BeginArgs();
-Arg("r", "kernel radius (number, integer)");
-Ret("kernel", "filter kernel (table)");
-EndArgs();
+Entry({
+	'func':{
+		'name':'g2du.create_box_blur_kernel',
+		'args':'r',
+		'ret':'kernel'
+	},
+	'desc':'Generates a box blur filter kernel.',
+	'args':new Array(
+			{
+				'name':'r',
+				'desc':'kernel radius (number, integer)'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'kernel',
+				'desc':'filter kernel (table)'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'g2du.create_gaussian_blur_kernel',
+		'args':'r',
+		'ret':'kernel'
+	},
+	'desc':'Generates a gaussian blur filter kernel.',
+	'args':new Array(
+			{
+				'name':'r',
+				'desc':'kernel radius (number, integer)'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'kernel',
+				'desc':'filter kernel (table)'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'g2du.create_motion_blur_kernel',
+		'args':'r, angle',
+		'ret':'kernel'
+	},
+	'desc':'Generates a motion blur filter kernel.',
+	'args':new Array(
+			{
+				'name':'r',
+				'desc':'kernel radius (number, integer)'
+			},
+			{
+				'name':'angle',
+				'desc':'blur direction as angle (number)'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'kernel',
+				'desc':'filter kernel (table)'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'g2du.create_sharpen_kernel',
+		'args':'r',
+		'ret':'kernel'
+	},
+	'desc':'Generates a sharpen filter kernel.',
+	'args':new Array(
+			{
+				'name':'r',
+				'desc':'kernel radius (number, integer)'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'kernel',
+				'desc':'filter kernel (table)'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'g2du.create_edge_detect_kernel',
+		'args':'r',
+		'ret':'kernel'
+	},
+	'desc':'Generates an edge detection filter kernel.',
+	'args':new Array(
+			{
+				'name':'r',
+				'desc':'kernel radius (number, integer)'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'kernel',
+				'desc':'filter kernel (table)'
+			}
+	)
+});
 Title2("Matrix manipulation");
-FuncEntry("mat", "g2du.rotate_xy", "mat, x, y")
-Desc("Prepends x-axis + y-axis rotation to matrix.");
-BeginArgs();
-Arg("mat", "matrix object");
-Arg("x, y", "angles (number)");
-Ret("mat", "matrix object from input");
-EndArgs();
-FuncEntry("mat", "g2du.rotate_yx", "mat, x, y")
-Desc("Prepends y-axis + x-axis rotation to matrix.");
-BeginArgs();
-Arg("mat", "matrix object");
-Arg("x, y", "angles (number)");
-Ret("mat", "matrix object from input");
-EndArgs();
+Entry({
+	'func':{
+		'name':'g2du.rotate_xy',
+		'args':'mat, x, y',
+		'ret':'mat'
+	},
+	'desc':'Prepends x-axis + y-axis rotation to matrix.',
+	'args':new Array(
+			{
+				'name':'mat',
+				'desc':'matrix object'
+			},
+			{
+				'name':'x, y',
+				'desc':'angles (number)'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'mat',
+				'desc':'matrix object from input'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'g2du.rotate_yx',
+		'args':'mat, x, y',
+		'ret':'mat'
+	},
+	'desc':'Prepends y-axis + x-axis rotation to matrix.',
+	'args':new Array(
+			{
+				'name':'mat',
+				'desc':'matrix object'
+			},
+			{
+				'name':'x, y',
+				'desc':'angles (number)'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'mat',
+				'desc':'matrix object from input'
+			}
+	)
+});
 Title2("Path manipulation");
-FuncEntry("", "g2du.path_transform", "ctx, filter")
-Desc("Splits context path into tiny line segments and passes their points through a filter function for manipulation.");
-BeginArgs();
-Arg("ctx", "context object");
-Ret("filter", "path points filter (function, [x,y -> x,y])");
-EndArgs();
-</script>
-<!--
-FuncEntry("", "", "")
-Desc("");
-BeginArgs();
-Arg("", "");
-Ret("", "");
-EndArgs();
--->
-<script>
+Entry({
+	'func':{
+		'name':'g2du.path_transform',
+		'args':'ctx, filter',
+		'ret':''
+	},
+	'desc':'Splits context path into tiny line segments and passes their points through a filter function for manipulation.',
+	'args':new Array(
+			{
+				'name':'ctx',
+				'desc':'context object'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'filter',
+				'desc':'path points filter (function, [x,y -> x,y])'
+			}
+	)
+});
+/*
+Entry({
+	'func':{
+		'name':"",
+		'args':"",
+		'ret':""
+	},
+	'desc':"",
+	'args':new Array(
+		{
+			'name':"",
+			'desc':""
+		},
+		{
+			'name':"",
+			'desc':""
+		}
+	),
+	'ret':new Array(
+		{
+			'name':"",
+			'desc':""
+		}
+	)
+});
+
+Entry({
+	'var':"",
+	'desc':"";
+});*/
+// Create index
 document.getElementById("index").innerHTML = index_buffer;
 </script>
 </body>
