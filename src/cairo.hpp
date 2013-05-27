@@ -111,31 +111,35 @@ static void cairo_win32_text_path(cairo_t *ctx, const wchar_t *text, const wchar
 	DeleteObject(font);
 	DeleteDC(dc);
 	// Convert windows path (64-fold downscaled) to cairo path
+	POINT last_point = {-1,-1};
 	int point_i = 0;
-	while(point_i < points_n){
+	while(point_i < points_n)
 		switch(types[point_i]){
 			case PT_MOVETO:
 				cairo_close_path(ctx);
 				cairo_move_to(ctx, static_cast<double>(points[point_i].x) / 64, static_cast<double>(points[point_i].y) / 64);
+				last_point = points[point_i];
 				point_i++;
 				break;
 			case PT_LINETO:
 			case PT_LINETO | PT_CLOSEFIGURE:
-				cairo_line_to(ctx, static_cast<double>(points[point_i].x) / 64, static_cast<double>(points[point_i].y) / 64);
+				if(!(points[point_i].x == last_point.x && points[point_i].y == last_point.y))
+					cairo_line_to(ctx, static_cast<double>(points[point_i].x) / 64, static_cast<double>(points[point_i].y) / 64);
+				last_point = points[point_i];
 				point_i++;
 				break;
 			case PT_BEZIERTO:
 			case PT_BEZIERTO | PT_CLOSEFIGURE:
+				if(!(points[point_i].x == last_point.x && points[point_i].y == last_point.y))
+					points[point_i] = points[point_i+1];
 				cairo_curve_to(ctx,
 											static_cast<double>(points[point_i].x) / 64, static_cast<double>(points[point_i].y) / 64,
 											static_cast<double>(points[point_i+1].x) / 64, static_cast<double>(points[point_i+1].y) / 64,
 											static_cast<double>(points[point_i+2].x) / 64, static_cast<double>(points[point_i+2].y) / 64);
+				last_point = points[point_i+2];
 				point_i += 3;
 				break;
 		}
-		if(types[point_i] & PT_CLOSEFIGURE)
-			cairo_close_path(ctx);
-	}
 	cairo_close_path(ctx);
 	// Free path resources
 	if(points_n > 0){
