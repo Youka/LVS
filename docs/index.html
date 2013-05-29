@@ -25,6 +25,8 @@
 		border: 8px double black;
 		height: 48px;
 		overflow: hidden;
+		text-align: left;
+		padding-left: 20px;
 	}
 	h1, h2{
 		font-weight: bold;
@@ -36,11 +38,7 @@
 		font-family: Comic Sans MS;
 		font-size: 30px;
 		margin: 0px 0px 10px 0px;
-	}
-	span{
-		text-align: left;
-		padding-left: 20px;
-		display: block;
+		text-align: center;
 	}
 	h2{
 		font-size: 18px;
@@ -49,7 +47,6 @@
 	}
 	ol, ul{
 		margin: 0px 0px 0px 0px;
-		text-align: left;
 	}
 	code{
 		font-family: Arial;
@@ -67,7 +64,7 @@
 		text-decoration: none;
 		font-style: italic;
 	}
-	a.intern{
+	a.ref{
 		font-family: Arial;
 		font-size: 18px;
 		font-style: normal;
@@ -89,7 +86,7 @@
 		var content = "<ul style='margin-left: 200px;'>",
 			entries = Math.floor(arguments.length / 2);
 		for(var i = 0; i < entries; i++)
-			content += "<li><a class='intern' href='" + arguments[i*2+1] + "' target='_blank'>" + arguments[i*2] + "</a></li>";
+			content += "<li><a class='ref' href='" + arguments[i*2+1] + "' target='_blank'>" + arguments[i*2] + "</a></li>";
 		content += "</ul>";
 		document.write(content);
 	}
@@ -100,7 +97,6 @@
 <img src="LVS/LVS.png">
 <div class="index">
 <h1 onclick="fold(this);">Definition</h1>
-<span>
 <h2>"LVS"</h2>
 <b>LVS</b> (Lua Video Sync) is a <a href="http://en.wikipedia.org/wiki/Frameserver" target="_blank">video frameserver</a> plugin to edit video frames with the capability of 
 <a href="http://en.wikipedia.org/wiki/Lua_%28programming_language%29" target="_blank">scripting language Lua</a> + <a href="http://en.wikipedia.org/wiki/2D_computer_graphics" target="_blank">2D image processing</a> functionality.
@@ -116,11 +112,9 @@ and video editor <a href="http://en.wikipedia.org/wiki/VirtualDub" target="_blan
 <li>Write the script (see 2.).</li>
 <li>Play or encode the resulting video.</li>
 </ol>
-</span>
 </div>
 <div class="index">
 <h1 onclick="fold(this);">Usage</h1>
-<span>
 <h2>Avisynth</h2>
 Load the C++ plugin with function <b>LoadPlugin</b>. This registers function...<br/>
 <b>LVS(clip, string video, string audio, string data)</b><br/>
@@ -158,16 +152,31 @@ See into the <b>examples</b> folder for commented scripts. This, in combination 
 <h2>Extensions</h2>
 When the filter starts his work, all Lua scripts in autoload folder <b>LVS</b> (in the same directory like the plugin) are already loaded.<br>
 Users can write their own libraries and put them into this folder. This way they extend their environment permanently.
-</span>
 </div>
 <div class="index">
 <h1 onclick="fold(this);">References</h1>
 <script type="text/javascript">
 generateLinkList("Lua 5.2", "Lua_5.2/Lua 5.2 Reference Manual.htm",
 			"Lua extensions", "LVS/ext.html",
-			"ASS", "LVS/ass.html",
-			"Project site", "http://sourceforge.net/projects/lua-video-sync/");
+			"ASS", "LVS/ass.html");
 </script>
+</div>
+<div class="index">
+<h1 onclick="fold(this);">FAQ</h1>
+<h2>Where's the project page?</h2>
+<a href="http://sourceforge.net/projects/lua-video-sync/" target=_blank><b>Lua Video Sync</b></a> on Sourceforge!
+<h2>Why Lua as scripting language?</h2>
+Lua is one of the fastest scripting languages (live playback and fast encoding, even with a lot of code) and a lightweight (no overload with unnecessary libraries and functions).<br/>
+Furthermore Lua is easy to learn because of human-speech-like syntax and just a few experience needed to do something.
+<h2>Playback/encoding is slow. How to speed up my code?</h2>
+<ul>
+<li><b>image:convolute</b> is a very expensive function. Try minimizing the image or use a smaller kernel.</li>
+<li><b>g2du.get_pixels</b> is easy, but <b>image:get_data</b> faster.</li>
+<li>Look for Lua code optimization articles, like <a href="http://www.lua.org/gems/sample.pdf" target=_blank>this document</a> or <a href="http://lua-users.org/wiki/OptimisationTips" target=_blank>these tips</a>.</li>
+</ul>
+<h2>I want to use audio or other video material!</h2>
+A script can be used to collect and save video/audio data in a wished format in additional files.<br/>
+After this pre-work it's easy to have access on material which wouldn't be possible in the normal processing way.
 </div>
 </body>
 

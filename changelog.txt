@@ -20,6 +20,7 @@
 	- math.inrange
 * optimization:
 	- minor speed improvements
+	- fixed text path bug by double path points
 
 0.0.2
 --------------------
