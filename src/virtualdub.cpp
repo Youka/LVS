@@ -71,24 +71,14 @@ namespace vdub{
 			return 1;
 		}
 		// Convert image to destination frame
-		inst_data->image->Save(reinterpret_cast<unsigned char*>(fdata->dst.data), fdata->dst.pitch, CairoImage::VDUB);
+		inst_data->image->Save(reinterpret_cast<unsigned char*>(fdata->src.data), fdata->src.pitch, CairoImage::VDUB);
 		// Success
 		return 0;
 	}
 	// Filter parameters check
 	long param_func(VDXFilterActivation *fdata, const VDXFilterFunctions *ffuncs){
-		// VirtualDub version supports color format other than RGB32?
-		if(version >= 12)
-			// Just RGB formats allowed
-			switch(fdata->src.mpPixmapLayout->format){
-				case nsVDXPixmap::kPixFormat_RGB888:
-				case nsVDXPixmap::kPixFormat_XRGB8888:
-					break;
-				default:
-					return FILTERPARAM_NOT_SUPPORTED;
-			}
-		// Color format accepted
-		return FILTERPARAM_SUPPORTS_ALTFORMATS | FILTERPARAM_SWAP_BUFFERS;
+		// Use default format (RGB, bottom-up)
+		return 0;
 	}
 	// Filter configuration
 	INT_PTR CALLBACK config_event_handler(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam){
@@ -192,8 +182,6 @@ namespace vdub{
 		// Check video informations
 		if(fdata->pfsi == NULL)
 			ffuncs->Except("Video informations are missing!");
-		// Get colorspace (RGB or RGBA?)
-		bool has_alpha = version < 12 ? true : (fdata->src.mpPixmapLayout->format == nsVDXPixmap::kPixFormat_XRGB8888 ? true : false);
 		// Free previous render data (in case of buggy twice start function call)
 		if(inst_data->lvs){
 			delete inst_data->lvs;
@@ -203,13 +191,13 @@ namespace vdub{
 		}
 		// Create LVS instance
 		try{
-			inst_data->lvs = new LVS(inst_data->filename, fdata->src.w, fdata->src.h, has_alpha, static_cast<double>(fdata->src.mFrameRateHi) / fdata->src.mFrameRateLo, fdata->src.mFrameCount);
+			inst_data->lvs = new LVS(inst_data->filename, fdata->src.w, fdata->src.h, false, static_cast<double>(fdata->src.mFrameRateHi) / fdata->src.mFrameRateLo, fdata->src.mFrameCount);
 		}catch(std::exception e){
 			ffuncs->Except(FILTER_NAME" initialization failed: %s", e.what());
 			return 1;
 		}
 		// Create image buffer
-		inst_data->image = new CairoImage(fdata->src.w, fdata->src.h, has_alpha);
+		inst_data->image = new CairoImage(fdata->src.w, fdata->src.h, false);
 		// Success
 		return 0;
 	}

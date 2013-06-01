@@ -304,8 +304,11 @@ class LVSVideoFilter : public CVideoTransformFilter, public ILVSVideoFilterConfi
 			HRESULT hr;
 			// Get time
 			hr = In->GetMediaTime(&start, &end);
-			if(FAILED(hr))
-				return hr;
+			if(FAILED(hr)){
+				hr = In->GetTime(&start, &end);
+				if(FAILED(hr))
+					return hr;
+			}
 			// Get frame pointers
 			hr = In->GetPointer(&src);
 			if(FAILED(hr))

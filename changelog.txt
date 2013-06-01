@@ -1,3 +1,9 @@
+1.0.1
+--------------------
+* optimization:
+	- support for VDub v12+ interface
+	- fixed DShow interface (hang by not gettable frame time)
+
 1.0.0
 --------------------
 * changed:
