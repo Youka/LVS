@@ -1773,11 +1773,15 @@ Entry({
 Entry({
 	'func':{
 		'name':'context:path_add_text',
-		'args':'text, face, size[, bold, italic, underline, strikeout]',
+		'args':'x, y, text, face, size[, bold, italic, underline, strikeout]',
 		'ret':''
 	},
 	'desc':'Adds a closed text to current path.',
 	'args':new Array(
+			{
+				'name':'x, y',
+				'desc':'position (number)'
+			},
 			{
 				'name':'text',
 				'desc':'any text (string)'
@@ -2132,19 +2136,83 @@ Entry({
 Title2("Image conversion");
 Entry({
 	'func':{
-		'name':'g2du.create_sub_image',
-		'args':'image, format, x0, y0, x1, y1',
+		'name':'g2du.create_converted_image',
+		'args':'image, format',
 		'ret':'image'
 	},
-	'desc':'Creates a subimage with new colorspace of given image.',
+	'desc':'Creates a colorspace-converted version of the given image.',
+	'args':new Array(
+		{
+			'name':'image',
+			'desc':'image object'
+		},
+		{
+			'name':'format',
+			'desc':'"RGBA", "RGB", "ALPHA" or "BINARY"'
+		}
+	),
+	'ret':new Array(
+		{
+			'name':'image',
+			'desc':'image object'
+		}
+	)
+});
+Entry({
+	'func':{
+		'name':'g2du.create_inverted_image',
+		'args':'image',
+		'ret':'image'
+	},
+	'desc':'Creates a color-inverted version of the given image.',
+	'args':new Array(
+			{
+				'name':'image',
+				'desc':'image object'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'image',
+				'desc':'image object'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'g2du.create_scaled_image',
+		'args':'image, w, h',
+		'ret':'image'
+	},
+	'desc':'Creates a scaled version of the given image.',
 	'args':new Array(
 			{
 				'name':'image',
 				'desc':'image object'
 			},
 			{
-				'name':'format',
-				'desc':'"RGBA", "RGB", "ALPHA" or "BINARY"'
+				'name':'w, h',
+				'desc':'image dimension (number)'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'image',
+				'desc':'image object'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'g2du.create_sub_image',
+		'args':'image, x0, y0, x1, y1',
+		'ret':'image'
+	},
+	'desc':'Creates a cropped version of the given image.',
+	'args':new Array(
+			{
+				'name':'image',
+				'desc':'image object'
 			},
 			{
 				'name':'x0, y0, x1, y1',
@@ -2189,7 +2257,7 @@ Entry({
 	'args':new Array(
 			{
 				'name':'r',
-				'desc':'kernel radius (number, integer)'
+				'desc':'kernel radius (number)'
 			}
 	),
 	'ret':new Array(
@@ -2209,7 +2277,7 @@ Entry({
 	'args':new Array(
 			{
 				'name':'r',
-				'desc':'kernel radius (number, integer)'
+				'desc':'kernel radius (number)'
 			}
 	),
 	'ret':new Array(
@@ -2229,7 +2297,7 @@ Entry({
 	'args':new Array(
 			{
 				'name':'r',
-				'desc':'kernel radius (number, integer)'
+				'desc':'kernel radius (number)'
 			},
 			{
 				'name':'angle',
@@ -2253,7 +2321,7 @@ Entry({
 	'args':new Array(
 			{
 				'name':'r',
-				'desc':'kernel radius (number, integer)'
+				'desc':'kernel radius (number)'
 			}
 	),
 	'ret':new Array(
@@ -2273,7 +2341,7 @@ Entry({
 	'args':new Array(
 			{
 				'name':'r',
-				'desc':'kernel radius (number, integer)'
+				'desc':'kernel radius (number)'
 			}
 	),
 	'ret':new Array(
@@ -2356,25 +2424,25 @@ Entry({
 /*
 Entry({
 	'func':{
-		'name':"",
-		'args':"",
-		'ret':""
+		'name':'',
+		'args':'',
+		'ret':''
 	},
 	'desc':"",
 	'args':new Array(
 		{
-			'name':"",
-			'desc':""
+			'name':'',
+			'desc':''
 		},
 		{
-			'name':"",
-			'desc':""
+			'name':'',
+			'desc':''
 		}
 	),
 	'ret':new Array(
 		{
-			'name':"",
-			'desc':""
+			'name':'',
+			'desc':''
 		}
 	)
 });

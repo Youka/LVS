@@ -37,25 +37,84 @@ g2du = {
 	brown = g2d.create_color(0.5, 0.25, 0.125),
 	sapphire = g2d.create_color(0.125, 0.25, 0.5),
 	transparent = g2d.create_color(0, 0, 0, 0),
-	-- Create sub-image (with color conversion)
-	create_sub_image = function(image, color_type, x0, y0, x1, y1)
+	-- Create color-converted image
+	create_converted_image = function(image, color_type)
 		-- Check parameters type
-		if getmetatable(image) ~= "g2d image" or type(color_type) ~= "string" or
-			type(x0) ~= "number" or type(y0) ~= "number" or type(x1) ~= "number" or type(y1) ~= "number" then
-			error("g2d image, string and 4 numbers expected", 2)
+		if getmetatable(image) ~= "g2d image" or type(color_type) ~= "string" then
+			error("g2d image and string expected", 2)
 		end
 		-- Check color type
 		if color_type ~= "RGBA" and color_type ~= "RGB" and color_type ~= "ALPHA" and color_type ~= "BINARY" then
 			error("valid color type expected", 2)
 		end
+		-- Create new image
+		local new_image = g2d.create_image(color_type, image:get_width(), image:get_height())
+		-- Draw old image on new one
+		local ctx = new_image:get_context()
+		ctx:set_composition("SOURCE")
+		ctx:set_source(g2d.create_pattern(image))
+		ctx:paint()
+		-- Return new image
+		return new_image
+	end,
+	-- Create color-inverted image
+	create_inverted_image = function(image)
+		-- Check parameter type
+		if getmetatable(image) ~= "g2d image" then
+			error("g2d image expected", 2)
+		end
+		-- Create new image
+		local new_image = g2d.create_image(image:get_format(), image:get_width(), image:get_height())
+		-- Draw old image on new one
+		local ctx = new_image:get_context()
+		ctx:set_composition("SOURCE")
+		ctx:set_source(g2d.create_pattern(image))
+		ctx:paint()
+		ctx:set_composition("DIFFERENCE")
+		ctx:set_source(g2d.create_color(1,1,1,1))
+		ctx:paint()
+		-- Return new image
+		return new_image
+	end,
+	-- Create scaled image
+	create_scaled_image = function(image, w, h)
+		-- Check parameters type
+		if getmetatable(image) ~= "g2d image" or type(w) ~= "number" or type(h) ~= "number" then
+			error("g2d image, number and number expected", 2)
+		end
+		-- Check image dimension
+		w, h = math.floor(w), math.floor(h)
+		if w <= 0 or h <= 0 then
+			error("invalid image dimension", 2)
+		end
+		-- Create new image
+		local new_image = g2d.create_image(image:get_format(), w, h)
+		-- Draw old image on new one
+		local ctx = new_image:get_context()
+		local src = g2d.create_pattern(image)
+		src:set_matrix(g2d.create_matrix(w / image:get_width(), 0, 0, h / image:get_height(), 0, 0))
+		ctx:set_composition("SOURCE")
+		ctx:set_source(src)
+		ctx:paint()
+		-- Return new image
+		return new_image
+	end,
+	-- Create sub-image
+	create_sub_image = function(image, x0, y0, x1, y1)
+		-- Check parameters type
+		if getmetatable(image) ~= "g2d image" or type(x0) ~= "number" or type(y0) ~= "number" or type(x1) ~= "number" or type(y1) ~= "number" then
+			error("g2d image and 4 numbers expected", 2)
+		end
 		-- Check image area
+		x0, y0, x1, y1 = math.floor(x0), math.floor(y0), math.ceil(x1), math.ceil(y1)
 		if x0 < 0 or y0 < 0 or x1 > image:get_width() or y1 > image:get_height() or x0 >= x1 or y0 >= y1 then
 			error("invalid image area", 2)
 		end
 		-- Create new image
-		local new_image = g2d.create_image(color_type, x1 - x0, y1 - y0)
+		local new_image = g2d.create_image(image:get_format(), x1 - x0, y1 - y0)
 		-- Draw old image on new one
 		local ctx = new_image:get_context()
+		ctx:set_composition("SOURCE")
 		ctx:set_matrix(g2d.create_matrix(1,0,0,1,-x0,-y0))
 		ctx:set_source(g2d.create_pattern(image))
 		ctx:paint()
@@ -131,9 +190,11 @@ g2du = {
 	end,
 	-- Create box blur kernel
 	create_box_blur_kernel = function(strength)
-		if type(strength) ~= "number" or strength < 1 or math.floor(strength) ~= strength then
+		-- Check parameter
+		if type(strength) ~= "number" or strength < 1 then
 			error("valid number expected", 2)
 		end
+		strength = math.floor(strength)
 		-- Create kernel table
 		local kernel_wide = 1 + 2*strength
 		local kernel_size = kernel_wide * kernel_wide
@@ -149,10 +210,11 @@ g2du = {
 	end,
 	-- Create motion blur kernel
 	create_motion_blur_kernel = function(strength, angle)
-		if type(strength) ~= "number" or strength < 1 or math.floor(strength) ~= strength or
-			type(angle) ~= "number" then
-			error("valid numbers expected", 2)
+		-- Check parameters
+		if type(strength) ~= "number" or strength < 1 or type(angle) ~= "number" then
+			error("valid 2 numbers expected", 2)
 		end
+		strength = math.floor(strength)
 		-- Create kernel table
 		local kernel_wide = 1 + 2*strength
 		local kernel_size = kernel_wide * kernel_wide
@@ -179,9 +241,11 @@ g2du = {
 	end,
 	-- Create gaussian blur kernel
 	create_gaussian_blur_kernel = function(strength)
-		if type(strength) ~= "number" or strength < 1 or math.floor(strength) ~= strength then
+		-- Check parameter
+		if type(strength) ~= "number" or strength < 1 then
 			error("valid number expected", 2)
 		end
+		strength = math.floor(strength)
 		-- Create kernel table
 		local kernel_wide = 1 + 2*strength
 		local kernel_size = kernel_wide * kernel_wide
@@ -205,9 +269,11 @@ g2du = {
 	end,
 	-- Create sharpen kernel
 	create_sharpen_kernel = function(strength)
-		if type(strength) ~= "number" or strength < 1 or math.floor(strength) ~= strength then
+		-- Check parameter
+		if type(strength) ~= "number" or strength < 1 then
 			error("valid number expected", 2)
 		end
+		strength = math.floor(strength)
 		-- Create kernel table
 		local kernel_wide = 1 + 2*strength
 		local kernel_size = kernel_wide * kernel_wide
@@ -227,9 +293,11 @@ g2du = {
 	end,
 	-- Create edge detection kernel
 	create_edge_detect_kernel = function(strength)
-		if type(strength) ~= "number" or strength < 1 or math.floor(strength) ~= strength then
+		-- Check parameter
+		if type(strength) ~= "number" or strength < 1 then
 			error("valid number expected", 2)
 		end
+		strength = math.floor(strength)
 		-- Create kernel table
 		local kernel_wide = 1 + 2*strength
 		local kernel_size = kernel_wide * kernel_wide

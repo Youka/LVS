@@ -1,3 +1,15 @@
+1.0.2
+--------------------
+* changed:
+	- ctx:path_add_text with position argument
+	- g2du kernel generators don't need integers anymore
+	- g2du.create_sub_image without color argument
+* added:
+	- g2du.create_converted_image
+	- g2du.create_inverted_image
+	- g2du.create_scaled_image
+	- ass.parse_drawing
+
 1.0.1
 --------------------
 * optimization:

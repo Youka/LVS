@@ -9,8 +9,8 @@ function GetFrame(frame, frame_i)
 	mat:scale(0.5,0.5)
 	mat:translate(-VIDEO_WIDTH/2,-VIDEO_HEIGHT/2)
 	-- Create a frame source
-	local frame_src = g2d.create_pattern(g2du.create_sub_image(frame, "RGB", 0, 0, VIDEO_WIDTH, VIDEO_HEIGHT))
-	-- Set context matrix and source and paint
+	local frame_src = g2d.create_pattern(g2du.create_converted_image(frame, "RGB"))
+	-- Set context matrix & source and paint
 	ctx:set_matrix(mat)
 	ctx:set_source(frame_src)
 	ctx:paint()

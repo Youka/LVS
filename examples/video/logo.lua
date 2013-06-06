@@ -10,9 +10,7 @@ do	-- (separate block to garbage-collect drawing objects)
 	-- Create motion blur kernel
 	local blur_kernel = g2du.create_motion_blur_kernel(8,45)
 	-- Define text path
-	logo_ctx:set_matrix(g2d.create_matrix():translate(6,23))
-	logo_ctx:path_add_text("LVS", "Comic Sans MS", 100, true, false, false, false)
-	logo_ctx:set_matrix(g2du.identity)
+	logo_ctx:path_add_text(6, 23, "LVS", "Comic Sans MS", 100, true, false, false, false)
 	-- Set composition
 	logo_ctx:set_composition("ADD")
 	-- Draw 3 times

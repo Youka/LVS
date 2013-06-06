@@ -477,5 +477,103 @@ ass = {
 			error("table expected", 2)
 		end
 		return color.r, color.g, color.b, color.a
+	end,
+	-- ASS drawing to g2d context
+	parse_drawing = function(ctx, drawing)
+		-- Check parameters
+		if getmetatable(ctx) ~= "g2d context" or type(drawing) ~= "string" then
+			error("g2d context and string expected", 2)
+		end
+		-- Iterate through segments
+		local state, x0, y0, x1, y1, x2, y2 = 0
+		for token in drawing:gmatch("%S+") do
+			-- Set state
+			if token == "m" then
+				state = 0
+			elseif token == "l" then
+				state = 2
+			elseif token == "b" then
+				state = 4
+			elseif token == "c" then
+				ctx:path_close()
+				state = 0
+			-- Move point
+			elseif state == 0 then
+				x0 = tonumber(token)
+				if type(x0) == "number" then
+					state = 1
+				else
+					error("invalid move point", 2)
+				end
+			elseif state == 1 then
+				y0 = tonumber(token)
+				if type(y0) == "number" then
+					ctx:path_move_to(x0, y0)
+					state = 0
+				else
+					error("invalid move point", 2)
+				end
+			-- Line point
+			elseif state == 2 then
+				x0 = tonumber(token)
+				if type(x0) == "number" then
+					state = 3
+				else
+					error("invalid line point", 2)
+				end
+			elseif state == 3 then
+				y0 = tonumber(token)
+				if type(y0) == "number" then
+					ctx:path_line_to(x0, y0)
+					state = 2
+				else
+					error("invalid line point", 2)
+				end
+			-- Curve points
+			elseif state == 4 then
+				x0 = tonumber(token)
+				if type(x0) == "number" then
+					state = 5
+				else
+					error("invalid curve point", 2)
+				end
+			elseif state == 5 then
+				y0 = tonumber(token)
+				if type(y0) == "number" then
+					state = 6
+				else
+					error("invalid curve point", 2)
+				end
+			elseif state == 6 then
+				x1 = tonumber(token)
+				if type(x1) == "number" then
+					state = 7
+				else
+					error("invalid curve point", 2)
+				end
+			elseif state == 7 then
+				y1 = tonumber(token)
+				if type(y1) == "number" then
+					state = 8
+				else
+					error("invalid curve point", 2)
+				end
+			elseif state == 8 then
+				x2 = tonumber(token)
+				if type(x2) == "number" then
+					state = 9
+				else
+					error("invalid curve point", 2)
+				end
+			elseif state == 9 then
+				y2 = tonumber(token)
+				if type(y2) == "number" then
+					ctx:path_curve_to(x0, y0, x1, y1, x2, y2)
+					state = 4
+				else
+					error("invalid curve point", 2)
+				end
+			end
+		end
 	end
 }

@@ -1246,20 +1246,25 @@ LUA_FUNC_1ARG(context_path_add_arc, 6)
 		cairo_arc_negative(ctx, cx, cy, radius, angle1, angle2);
 LUA_FUNC_END
 
-LUA_FUNC_2ARG(context_path_add_text, 4, 8)
-	// Get parameters
+LUA_FUNC_2ARG(context_path_add_text, 6, 10)
+	// Get needed parameters
 	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
-	const char *text = luaL_checkstring(L, 2);
-	const char *face = luaL_checkstring(L, 3);
-	int size = luaL_checknumber(L, 4);
-	bool bold = luaL_optboolean(L, 5, false);
-	bool italic = luaL_optboolean(L, 6, false);
-	bool underline = luaL_optboolean(L, 7, false);
-	bool strikeout = luaL_optboolean(L, 8, false);
+	double x = luaL_checknumber(L, 2);
+	double y = luaL_checknumber(L, 3);
+	const char *text = luaL_checkstring(L, 4);
+	const char *face = luaL_checkstring(L, 5);
+	int size = luaL_checknumber(L, 6);
+	// Get optional parameters
+	bool bold = luaL_optboolean(L, 7, false);
+	bool italic = luaL_optboolean(L, 8, false);
+	bool underline = luaL_optboolean(L, 9, false);
+	bool strikeout = luaL_optboolean(L, 10, false);
 	// Set text path
+	cairo_translate(ctx, x, y);
 	wchar_t *textw = utf8_to_utf16(text), *facew = utf8_to_utf16(face);
 	cairo_win32_text_path(ctx, textw, facew, size, bold, italic, underline, strikeout);
 	delete[] textw; delete[] facew;
+	cairo_translate(ctx, -x, -y);
 LUA_FUNC_END
 
 LUA_FUNC_1ARG(context_path_close, 1)
