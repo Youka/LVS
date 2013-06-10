@@ -916,13 +916,27 @@ Entry({
 		'args':'kernel',
 		'ret':'image'
 	},
-	'desc':'Applies given convolution filter kernel to image.',
+	'desc':'Applies given convolution filter kernel to the image.',
 	'args':new Array(
 			{
 				'name':'kernel',
 				'desc':'convolution kernel with fields <i>width</i>, <i>height</i> and kernel elements (table)'
 			}
 	),
+	'ret':new Array(
+			{
+				'name':'image',
+				'desc':'image object from input'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'image:invert',
+		'args':'',
+		'ret':'image'
+	},
+	'desc':'Color-inverts the image.',
 	'ret':new Array(
 			{
 				'name':'image',
@@ -2156,26 +2170,6 @@ Entry({
 			'name':'image',
 			'desc':'image object'
 		}
-	)
-});
-Entry({
-	'func':{
-		'name':'g2du.create_inverted_image',
-		'args':'image',
-		'ret':'image'
-	},
-	'desc':'Creates a color-inverted version of the given image.',
-	'args':new Array(
-			{
-				'name':'image',
-				'desc':'image object'
-			}
-	),
-	'ret':new Array(
-			{
-				'name':'image',
-				'desc':'image object'
-			}
 	)
 });
 Entry({

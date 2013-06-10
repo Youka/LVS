@@ -57,25 +57,6 @@ g2du = {
 		-- Return new image
 		return new_image
 	end,
-	-- Create color-inverted image
-	create_inverted_image = function(image)
-		-- Check parameter type
-		if getmetatable(image) ~= "g2d image" then
-			error("g2d image expected", 2)
-		end
-		-- Create new image
-		local new_image = g2d.create_image(image:get_format(), image:get_width(), image:get_height())
-		-- Draw old image on new one
-		local ctx = new_image:get_context()
-		ctx:set_composition("SOURCE")
-		ctx:set_source(g2d.create_pattern(image))
-		ctx:paint()
-		ctx:set_composition("DIFFERENCE")
-		ctx:set_source(g2d.create_color(1,1,1,1))
-		ctx:paint()
-		-- Return new image
-		return new_image
-	end,
 	-- Create scaled image
 	create_scaled_image = function(image, w, h)
 		-- Check parameters type

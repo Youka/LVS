@@ -6,6 +6,10 @@
 	- fixed rare text path bug
 * changed:
 	- print to "log.txt"
+	- g2du.create_inverted_image to image:invert
+* added:
+	- image:color_transform !!!TODO!!!
+	- utils.load_wav !!!TODO!!!
 
 1.0.2
 --------------------

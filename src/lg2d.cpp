@@ -698,6 +698,28 @@ LUA_FUNC_1ARG(image_convolute, 2)
 	return 1;
 LUA_FUNC_END
 
+LUA_FUNC_1ARG(image_invert, 1)
+	// Get parameter
+	cairo_surface_t *surface = *reinterpret_cast<cairo_surface_t**>(luaL_checkuserdata(L, 1, G2D_IMAGE));
+	// Create context
+	cairo_t *ctx = cairo_create(surface);
+	cairo_status_t status = cairo_status(ctx);
+	if(status != CAIRO_STATUS_SUCCESS){
+		cairo_destroy(ctx);
+		luaL_error2(L, cairo_status_to_string(status));
+	}
+	// Invert
+	cairo_set_operator(ctx, CAIRO_OPERATOR_DIFFERENCE);
+	cairo_set_source_rgba(ctx, 1, 1, 1, 1);
+	cairo_paint(ctx);
+	// Destroy context
+	cairo_destroy(ctx);
+	// Return image
+	lua_pushvalue(L, 1);
+	return 1;
+LUA_FUNC_END
+
+
 // MATRIX OBJECT
 LUA_FUNC_1ARG(matrix_get_data, 1)
 	cairo_matrix_t *matrix = reinterpret_cast<cairo_matrix_t*>(luaL_checkuserdata(L, 1, G2D_MATRIX));
@@ -1445,6 +1467,7 @@ int luaopen_g2d(lua_State *L){
 	lua_pushcfunction(L, l_image_set_data); lua_setfield(L, -2, "set_data");
 	lua_pushcfunction(L, l_image_get_context); lua_setfield(L, -2, "get_context");
 	lua_pushcfunction(L, l_image_convolute); lua_setfield(L, -2, "convolute");
+	lua_pushcfunction(L, l_image_invert); lua_setfield(L, -2, "invert");
 	lua_pop(L, 1);
 	// Define matrix object methods
 	luaL_newmetatable(L, G2D_MATRIX);
