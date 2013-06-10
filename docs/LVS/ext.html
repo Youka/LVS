@@ -146,6 +146,21 @@ function Entry(data){
 <div id="index" class="index"></div>
 <script>
 // Create page content
+Title1("Base");
+Entry({
+	'func':{
+		'name':"print",
+		'args':"...",
+		'ret':""
+	},
+	'desc':"Appends data to file \"log.txt\".",
+	'args':new Array(
+		{
+			'name':"...",
+			'desc':"any values"
+		}
+	)
+});
 Title1("Math");
 Entry({
 	'func':{
