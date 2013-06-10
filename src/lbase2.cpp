@@ -1,78 +1,47 @@
 #include "llibs.hpp"
-#include <cstdlib>
-#include <cstring>
+#include <fstream>
+#include <iomanip>
+using namespace std;
 
 LUA_FUNC_NARG(print, 0)
-	// Number of arguments
-	int n = lua_gettop(L);
+	// Open log file handle
+	ofstream log("log.txt", ios_base::app);
+	if(!log.is_open())
+		return 0;
 	// Iterate through arguments
+	int n = lua_gettop(L);
 	for(int i = 1; i <= n; i++)
-		// Write to standard output stream by argument type
+		// Write to standard log file by argument type
 		switch(lua_type(L, i)){
-			case LUA_TNONE:
-				fwrite("None\n", 1, 5, stdout);
-				break;
-			case LUA_TNIL:
-				fwrite("Nil\n", 1, 4, stdout);
-				break;
-			case LUA_TBOOLEAN:
-				if(lua_toboolean(L,i))
-					fwrite("True\n", 1, 5, stdout);
-				else
-					fwrite("False\n", 1, 6, stdout);
-				break;
-			case LUA_TNUMBER:{
-				char buf[32];
-				_snprintf(buf, sizeof(buf), "%f", lua_tonumber(L, i));
-				fwrite(buf, 1, strlen(buf), stdout);
-				fputc('\n', stdout);
-				break;
-			 }
+			case LUA_TNONE: log << "none\n"; break;
+			case LUA_TNIL: log << "nil\n"; break;
+			case LUA_TBOOLEAN: log << (lua_toboolean(L,i) ? "true\n" : "false\n"); break;
+			case LUA_TNUMBER: log << lua_tonumber(L, i) << '\n'; break;
 			case LUA_TSTRING:{
 				size_t len;
 				const char *str = lua_tolstring(L, i, &len);
-				fwrite(str, 1, len, stdout);
-				fputc('\n', stdout);
-				break;
-			}
+				log.write(str, len) << '\n';
+			}break;
 			case LUA_TLIGHTUSERDATA:
 			case LUA_TTABLE:
 			case LUA_TFUNCTION:
 			case LUA_TUSERDATA:
-			case LUA_TTHREAD:{
-#ifdef _WIN64
-				unsigned __int64 addr = reinterpret_cast<unsigned __int64>(lua_topointer(L, i));
-				char buf[21];
-				_ui64toa(addr, buf, 10);
-#else
-				unsigned __int32 addr = reinterpret_cast<unsigned __int32>(lua_topointer(L, i));
-				char buf[11];
-				ultoa(addr, buf, 10);
-#endif
+			case LUA_TTHREAD:
 				switch(lua_type(L, i)){
-					case LUA_TLIGHTUSERDATA:
-						fwrite("Lightuserdata: ", 1, 15, stdout);
-						break;
-					case LUA_TTABLE:
-						fwrite("Table: ", 1, 7, stdout);
-						break;
-					case LUA_TFUNCTION:
-						fwrite("Function: ", 1, 10, stdout);
-						break;
-					case LUA_TUSERDATA:
-						fwrite("Userdata: ", 1, 10, stdout);
-						break;
-					case LUA_TTHREAD:
-						fwrite("Thread: ", 1, 8, stdout);
-						break;
+					case LUA_TLIGHTUSERDATA: log << "lightuserdata: "; break;
+					case LUA_TTABLE: log << "table: "; break;
+					case LUA_TFUNCTION: log << "function: "; break;
+					case LUA_TUSERDATA: log << "userdata: "; break;
+					case LUA_TTHREAD: log << "thread: "; break;
 				}
-				fwrite(buf, 1, strlen(buf), stdout);
-				fputc('\n', stdout);
+#ifdef _WIN64
+				log << "0x" << setfill('0') << setw(16) << hex << reinterpret_cast<unsigned __int64>(lua_topointer(L, i));
+#else
+				log << "0x" << setfill('0') << setw(8) << hex << reinterpret_cast<unsigned __int32>(lua_topointer(L, i));
+#endif
+				log << '\n';
 				break;
-			}
 		}
-	// Flush output stream
-	fflush(stdout);
 LUA_FUNC_END
 
 LUA_FUNC_1ARG(table_create, 2)

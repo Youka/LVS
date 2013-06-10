@@ -316,8 +316,10 @@ class LVSVideoFilter : public CVideoTransformFilter, public ILVSVideoFilterConfi
 			hr = Out->GetPointer(&dst);
 			if(FAILED(hr))
 				return hr;
+			// Calculate pitch
+			const int pitch = this->image->has_alpha ? this->image->width << 2 : this->image->width * 3;
 			// Convert source frame to image
-			this->image->Load(src, 0, CairoImage::DSHOW);
+			this->image->Load(src, pitch, false);
 			// Filter image
 			try{
 				// Send image data through filter process
@@ -331,7 +333,7 @@ class LVSVideoFilter : public CVideoTransformFilter, public ILVSVideoFilterConfi
 				return E_FAIL;
 			}
 			// Convert image to destination frame
-			this->image->Save(dst, 0, CairoImage::DSHOW);
+			this->image->Save(dst, pitch, false);
 			// Frame successfully filtered
 			return S_OK;
 		}

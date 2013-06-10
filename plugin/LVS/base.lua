@@ -165,21 +165,13 @@ function string.ucharrange(s, i)
 		error("string and valid number expected", 2)
 	end
 	local byte = s:byte(i)
-	if not byte then
-		return 0
-	elseif byte < 192 then
-		return 1
-	elseif byte < 224 then
-		return 2
-	elseif byte < 240 then
-		return 3
-	elseif byte < 248 then
-		return 4
-	elseif byte < 252 then
-		return 5
-	else
-		return 6
-	end
+	return not byte and 0 or
+			byte < 192 and 1 or
+			byte < 224 and 2 or
+			byte < 240 and 3 or
+			byte < 248 and 4 or
+			byte < 252 and 5 or
+			6
 end
 
 function string.uchars(s)
@@ -247,14 +239,10 @@ function table.tostring(t)
 	local result, result_n = {tostring(t)}, 1
 	local function table_print(t, space)
 		for i, v in pairs(t) do
-			if type(i) == "string" then
-				i = string.format("%q", i)
-			end
-			if type(v) == "string" then
-				v = string.format("%q", v)
-			end
 			result_n = result_n + 1
-			result[result_n] = string.format("%s[%s] = %s", space, tostring(i), tostring(v))
+			result[result_n] = string.format("%s[%s] = %s", space,
+															type(i) == "string" and string.format("%q", i) or tostring(i),
+															type(v) == "string" and string.format("%q", v) or tostring(v))
 			if type(v) == "table" then
 				table_print(v, space .. "\t")
 			end

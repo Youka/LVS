@@ -1,3 +1,12 @@
+1.0.3
+--------------------
+* optimization:
+	- minor speed improvements
+	- g2du.create_scaled_image with better quality
+	- fixed rare text path bug
+* changed:
+	- print to "log.txt"
+
 1.0.2
 --------------------
 * changed:

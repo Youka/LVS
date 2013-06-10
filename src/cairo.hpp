@@ -123,14 +123,14 @@ static void cairo_win32_text_path(cairo_t *ctx, const wchar_t *text, const wchar
 				break;
 			case PT_LINETO:
 			case PT_LINETO | PT_CLOSEFIGURE:
-				if(!(points[point_i].x == last_point.x && points[point_i].y == last_point.y))
+				if(memcmp(points + point_i, &last_point, sizeof(POINT)))
 					cairo_line_to(ctx, static_cast<double>(points[point_i].x) / 64, static_cast<double>(points[point_i].y) / 64);
 				last_point = points[point_i];
 				point_i++;
 				break;
 			case PT_BEZIERTO:
 			case PT_BEZIERTO | PT_CLOSEFIGURE:
-				if(!(points[point_i].x == last_point.x && points[point_i].y == last_point.y))
+				if(!memcmp(points + point_i, &last_point, sizeof(POINT)))
 					points[point_i] = points[point_i+1];
 				cairo_curve_to(ctx,
 											static_cast<double>(points[point_i].x) / 64, static_cast<double>(points[point_i].y) / 64,

@@ -632,7 +632,7 @@ static DWORD WINAPI cairo_image_surface_convolution(void *userdata){
 					}
 				}
 				// Set accumulator to destination image pixel
-				thread_data->image_dst[y * thread_data->image_stride + x] = accum > 255 ? 255 : (accum < 0 ? 0 : accum);
+				thread_data->image_dst[y * thread_data->image_stride + x] = accum > 255.0f ? 255.0f : (accum < 0.0f ? 0.0f : accum);
 			}
 	}
 	return 0;

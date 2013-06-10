@@ -93,6 +93,7 @@ g2du = {
 		local ctx = new_image:get_context()
 		local src = g2d.create_pattern(image)
 		src:set_matrix(g2d.create_matrix(w / image:get_width(), 0, 0, h / image:get_height(), 0, 0))
+		src:set_filter("BEST")
 		ctx:set_composition("SOURCE")
 		ctx:set_source(src)
 		ctx:paint()
