@@ -1,9 +1,12 @@
 1.1.0 (coming soon)
 --------------------
+* removed:
+	- colorspace "BINARY"
 * added:
-	- image:color_transform
-	- g2du.create_grey_image
-	- utils.load_wav
+	- image:color_transform	!!!TODO!!!
+	- g2du.create_grey_image	!!!TODO!!!
+	- utils.load_wav	!!!TODO!!!
+	- examples: adv. karaoke, complex paths, outline, color transform	!!!TODO!!!
 
 1.0.3
 --------------------

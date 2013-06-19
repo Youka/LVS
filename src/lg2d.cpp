@@ -17,7 +17,6 @@ inline cairo_format_t cairo_format_from_string(const char *format_string){
 	if(strcmp(format_string, "RGBA") == 0) return CAIRO_FORMAT_ARGB32;
 	else if(strcmp(format_string, "RGB") == 0) return CAIRO_FORMAT_RGB24;
 	else if(strcmp(format_string, "ALPHA") == 0) return CAIRO_FORMAT_A8;
-	else if(strcmp(format_string, "BINARY") == 0) return CAIRO_FORMAT_A1;
 	else return CAIRO_FORMAT_INVALID;
 }
 
@@ -26,7 +25,6 @@ inline const char* cairo_format_to_string(cairo_format_t format){
 		case CAIRO_FORMAT_ARGB32: return "RGBA";
 		case CAIRO_FORMAT_RGB24: return "RGB";
 		case CAIRO_FORMAT_A8: return "ALPHA";
-		case CAIRO_FORMAT_A1: return "BINARY";
 		default: return "UNKNOWN";
 	}
 }
@@ -432,19 +430,6 @@ LUA_FUNC_1ARG(image_get_data, 5)
 			}
 			return 1;
 		}break;
-		case CAIRO_FORMAT_A1:{
-			lua_createtable(L, area_width * area_height, 0);
-			int table_index = 0;
-			unsigned char *row;
-			for(int y = y0; y < y1; y++){
-				row = image_data + y * image_stride;
-				for(int x = x0; x < x1; x++){
-					div_t quot_rem = div(x, 8);
-					lua_pushnumber(L, row[quot_rem.quot] >> quot_rem.rem & 0x1); lua_rawseti(L, -2, ++table_index);	// A
-				}
-			}
-			return 1;
-		}break;
 	}
 LUA_FUNC_END
 
@@ -511,24 +496,6 @@ LUA_FUNC_1ARG(image_set_data, 6)
 					*row++ = *new_data++;	// A
 			}
 		}break;
-		case CAIRO_FORMAT_A1:{
-			if(area_width * area_height != new_data_size)
-				luaL_error2(L, "wrong table size");
-			unsigned char *row, dst, mask, src;
-			for(int y = y0; y < y1; y++){
-				row = image_data + y * image_stride;
-				for(int x = x0; x < x1; x++){
-					div_t quot_rem = div(x, 8);
-					mask = 0x1 << quot_rem.rem;
-					src = *new_data++;
-					dst = row[quot_rem.quot] & mask;
-					if(src && !dst)
-						row[quot_rem.quot] |= mask;	// A
-					else if(!src && dst)
-						row[quot_rem.quot] &= ~mask;	// A
-				}
-			}
-		}break;
 	}
 	// Set image data as dirty
 	cairo_surface_mark_dirty_rectangle(surface, x0, y0, area_width, area_height);
@@ -549,6 +516,72 @@ LUA_FUNC_1ARG(image_get_context, 1)
 	cairo_set_line_cap(ctx, CAIRO_LINE_CAP_ROUND);
 	// Push context to Lua
 	*lua_createuserdata<cairo_t*>(L, G2D_CONTEXT) = ctx;
+	return 1;
+LUA_FUNC_END
+
+// Thread data for function below
+struct THREAD_DATA_COLOR_TRANSFORM{
+	// Images
+	int image_width, image_height, image_stride, image_first_row, image_last_row;
+	cairo_format_t image_format;
+	float *image_src;
+	unsigned char *image_dst;
+	// Matrix
+	float *matrix;
+};
+// Thread function for cairo image surface (ARGB32+RGB24+A8) color transformation
+static DWORD WINAPI cairo_image_surface_color_transform(void *userdata){
+	THREAD_DATA_COLOR_TRANSFORM *thread_data = reinterpret_cast<THREAD_DATA_COLOR_TRANSFORM*>(userdata);
+
+	// TODO
+
+	return 0;
+}
+LUA_FUNC_1ARG(image_color_transform, 2)
+	// Get parameters
+	cairo_surface_t *surface = *reinterpret_cast<cairo_surface_t**>(luaL_checkuserdata(L, 1, G2D_IMAGE));
+	size_t matrix_size;
+	float *matrix = luaL_checktable<float>(L, 2, &matrix_size);
+	std::auto_ptr<float> matrix_obj(matrix);
+	if(matrix_size != 16)
+		luaL_error2(L, "table size must be 16");
+	// Get image data
+	cairo_format_t image_format = cairo_image_surface_get_format(surface);
+	int image_width = cairo_image_surface_get_width(surface);
+	int image_height = cairo_image_surface_get_height(surface);
+	int image_stride = cairo_image_surface_get_stride(surface);
+	cairo_surface_flush(surface);
+	unsigned char *image_data = cairo_image_surface_get_data(surface);
+	// Image data copy (use copy as source, original as destination)
+	unsigned long image_data_size = image_height * image_stride;
+	float *image_data_copy = new float[image_data_size];
+	std::auto_ptr<float> image_data_copy_obj(image_data_copy);
+	for(unsigned long int i = 0; i < image_data_size; i++)
+		image_data_copy[i] = image_data[i];
+	// Threading data
+	static Threads<THREAD_DATA_COLOR_TRANSFORM> threads(cairo_image_surface_color_transform);
+	static const DWORD passes =  threads.size();
+	const int image_row_step = image_height / passes;
+	THREAD_DATA_COLOR_TRANSFORM *data;
+	for(DWORD i = 0; i < passes; i++){
+		// Set current thread data
+		data = threads.get(i);
+		data->image_width = image_width;
+		data->image_height = image_height;
+		data->image_stride = image_stride;
+		data->image_first_row = i * image_row_step;
+		data->image_last_row = i == passes - 1 ? image_height-1 : data->image_first_row + image_row_step-1;
+		data->image_format = image_format;
+		data->image_src = image_data_copy;
+		data->image_dst = image_data;
+		data->matrix = matrix;
+	}
+	// Apply convolution filter to image in multiple threads
+	threads.Run();
+	// Set image data as dirty
+	cairo_surface_mark_dirty(surface);
+	// Return image
+	lua_pushvalue(L, 1);
 	return 1;
 LUA_FUNC_END
 
@@ -665,6 +698,7 @@ LUA_FUNC_1ARG(image_convolute, 2)
 	// Image data copy (use copy as source, original as destination)
 	unsigned long image_data_size = image_height * image_stride;
 	float *image_data_copy = new float[image_data_size];
+	std::auto_ptr<float> image_data_copy_obj(image_data_copy);
 	for(unsigned long int i = 0; i < image_data_size; i++)
 		image_data_copy[i] = image_data[i];
 	// Threading data
@@ -689,8 +723,6 @@ LUA_FUNC_1ARG(image_convolute, 2)
 	}
 	// Apply convolution filter to image in multiple threads
 	threads.Run();
-	// Free image data copy
-	delete[] image_data_copy;
 	// Set image data as dirty
 	cairo_surface_mark_dirty(surface);
 	// Return image
@@ -953,14 +985,7 @@ LUA_FUNC_1ARG(source_get_image, 1)
 	cairo_status_t status = cairo_pattern_get_surface(pattern, &surface);
 	if(status != CAIRO_STATUS_SUCCESS)
 		luaL_error2(L, cairo_status_to_string(status));
-	// Create image copy
-	cairo_surface_t *new_surface = cairo_image_surface_create(cairo_image_surface_get_format(surface), cairo_image_surface_get_width(surface), cairo_image_surface_get_height(surface));
-	cairo_surface_flush(surface); cairo_surface_flush(new_surface);
-	unsigned char *surface_data = cairo_image_surface_get_data(surface), *new_surface_data = cairo_image_surface_get_data(new_surface);
-	memcpy(new_surface_data, surface_data, cairo_image_surface_get_height(surface) * cairo_image_surface_get_stride(surface));
-	cairo_surface_mark_dirty(new_surface);
-	// Push image to Lua
-	*lua_createuserdata<cairo_surface_t*>(L, G2D_IMAGE) = new_surface;
+	*lua_createuserdata<cairo_surface_t*>(L, G2D_IMAGE) = cairo_surface_reference(surface);
 	return 1;
 LUA_FUNC_END
 
@@ -1099,12 +1124,11 @@ LUA_FUNC_1ARG(context_get_dash, 1)
 		lua_pushnumber(L, 0);
 		lua_newtable(L);
 	}else{
-		double *dashes = new double[dash_n];
+		std::auto_ptr<double> dashes(new double[dash_n]);
 		double offset;
-		cairo_get_dash(ctx, dashes, &offset);
+		cairo_get_dash(ctx, dashes.get(), &offset);
 		lua_pushnumber(L, offset);
-		lua_pushtable(L, dashes, dash_n);
-		delete[] dashes;
+		lua_pushtable(L, dashes.get(), dash_n);
 	}
 	return 2;
 LUA_FUNC_END
@@ -1302,7 +1326,7 @@ LUA_FUNC_END
 LUA_FUNC_2ARG(context_path_transform, 2, 3)
 	// Get parameters
 	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
-	if(lua_istable(L, 2))
+	if(!lua_isfunction(L, 2))
 		luaL_typerror(L, 2, "function");
 	bool is_flat = luaL_optboolean(L, 3, false);
 	// Get path
@@ -1466,6 +1490,7 @@ int luaopen_g2d(lua_State *L){
 	lua_pushcfunction(L, l_image_get_data); lua_setfield(L, -2, "get_data");
 	lua_pushcfunction(L, l_image_set_data); lua_setfield(L, -2, "set_data");
 	lua_pushcfunction(L, l_image_get_context); lua_setfield(L, -2, "get_context");
+	lua_pushcfunction(L, l_image_color_transform); lua_setfield(L, -2, "color_transform");
 	lua_pushcfunction(L, l_image_convolute); lua_setfield(L, -2, "convolute");
 	lua_pushcfunction(L, l_image_invert); lua_setfield(L, -2, "invert");
 	lua_pop(L, 1);

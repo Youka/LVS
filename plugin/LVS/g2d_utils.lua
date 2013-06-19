@@ -44,7 +44,7 @@ g2du = {
 			error("g2d image and string expected", 2)
 		end
 		-- Check color type
-		if color_type ~= "RGBA" and color_type ~= "RGB" and color_type ~= "ALPHA" and color_type ~= "BINARY" then
+		if color_type ~= "RGBA" and color_type ~= "RGB" and color_type ~= "ALPHA" then
 			error("valid color type expected", 2)
 		end
 		-- Create new image
@@ -151,7 +151,7 @@ g2du = {
 				end
 			end
 			return pixels
-		else	-- "ALPHA" or "BINARY"
+		else	-- "ALPHA"
 			-- Count pixels number
 			local n = 0
 			for i=1, w*h do
