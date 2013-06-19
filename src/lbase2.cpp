@@ -6,11 +6,11 @@ using namespace std;
 LUA_FUNC_NARG(print, 0)
 	// Open log file handle
 	ofstream log("log.txt", ios_base::app);
-	if(!log.is_open())
+	if(!log)
 		return 0;
 	// Iterate through arguments
 	int n = lua_gettop(L);
-	for(int i = 1; i <= n; i++)
+	for(int i = 1; i <= n; ++i)
 		// Write to standard log file by argument type
 		switch(lua_type(L, i)){
 			case LUA_TNONE: log << "none\n"; break;

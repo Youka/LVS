@@ -20,15 +20,15 @@ struct CairoImage{
 		frame += pitch * (this->height-1);
 		// Load by colorspace
 		if(this->has_alpha || rgb32)
-			for(int y = 0; y < this->height; y++){
+			for(int y = 0; y < this->height; ++y){
 				::memcpy(image, frame, this->stride);
 				frame -= pitch;
 				image += this->stride;
 			}
 		else{
 			const int rowsize_pitch = this->width * 3 + pitch;
-			for(int y = 0; y < this->height; y++){
-				for(int x = 0; x < this->width; x++){
+			for(int y = 0; y < this->height; ++y){
+				for(int x = 0; x < this->width; ++x){
 					image[0] = frame[0];
 					image[1] = frame[1];
 					image[2] = frame[2];
@@ -46,15 +46,15 @@ struct CairoImage{
 		frame += pitch * (this->height-1);
 		// Save by colorspace
 		if(this->has_alpha || rgb32)
-			for(int y = 0; y < this->height; y++){
+			for(int y = 0; y < this->height; ++y){
 				::memcpy(frame, image, this->stride);
 				image += this->stride;
 				frame -= pitch;
 			}
 		else{
 			const int rowsize_pitch = this->width * 3 + pitch;
-			for(int y = 0; y < this->height; y++){
-				for(int x = 0; x < this->width; x++){
+			for(int y = 0; y < this->height; ++y){
+				for(int x = 0; x < this->width; ++x){
 					frame[0] = image[0];
 					frame[1] = image[1];
 					frame[2] = image[2];

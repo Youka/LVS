@@ -75,7 +75,7 @@ template <class T> static T *luaL_checktable(lua_State *L, int i, unsigned int *
 	*len = lua_rawlen(L,i);
 	if(*len > 0){
 		T *table = new T[*len];
-		for(int ii = 1; ii <= *len; ii++){
+		for(int ii = 1; ii <= *len; ++ii){
 			lua_rawgeti(L, i, ii);
 			if(!lua_isnumber(L,-1)){
 				delete[] table;
@@ -92,7 +92,7 @@ template <class T> static T *luaL_checktable(lua_State *L, int i, unsigned int *
 
 template <class T> static void lua_pushtable(lua_State *L, T *t, unsigned long int len){
 	lua_createtable(L, len, 0);
-	for (unsigned int i = 0; i < len; i++){
+	for (unsigned int i = 0; i < len; ++i){
 		lua_pushnumber(L, t[i]);
 		lua_rawseti(L, -2, i+1);
 	}

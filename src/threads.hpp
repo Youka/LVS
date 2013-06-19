@@ -43,11 +43,11 @@ class Threads{
 		// Run threads
 		void Run(){
 			// Create & run threads
-			for(DWORD i = 0; i < this->cpu_num - 1; i++)
+			for(DWORD i = 0; i < this->cpu_num - 1; ++i)
 				this->threads[i] = CreateThread(NULL, 0, this->routine, reinterpret_cast<LPVOID>(&this->data[i]), 0x0, NULL);
 			this->routine(reinterpret_cast<LPVOID>(&this->data[this->cpu_num - 1]));
 			// Wait for and close threads
-			for(DWORD i = 0; i < this->cpu_num - 1; i++){
+			for(DWORD i = 0; i < this->cpu_num - 1; ++i){
 				WaitForSingleObject(this->threads[i], INFINITE);
 				CloseHandle(this->threads[i]);
 			}
