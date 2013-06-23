@@ -909,22 +909,27 @@ Entry({
 			}
 	)
 });
-Title2("Context");
+Title2("Manipulation");
 Entry({
 	'func':{
-		'name':'image:get_context',
-		'args':'',
-		'ret':'context'
+		'name':'image:color_transform',
+		'args':'matrix',
+		'ret':'image'
 	},
-	'desc':'Creates an image drawing context.',
+	'desc':'Applies given color matrix to the image.',
+	'args':new Array(
+			{
+				'name':'matrix',
+				'desc':'4x4 color matrix (table)'
+			}
+	),
 	'ret':new Array(
 			{
-				'name':'context',
-				'desc':'context object'
+				'name':'image',
+				'desc':'image object from input'
 			}
 	)
 });
-Title2("Manipulation");
 Entry({
 	'func':{
 		'name':'image:convolute',
@@ -956,6 +961,21 @@ Entry({
 			{
 				'name':'image',
 				'desc':'image object from input'
+			}
+	)
+});
+Title2("Context");
+Entry({
+	'func':{
+		'name':'image:get_context',
+		'args':'',
+		'ret':'context'
+	},
+	'desc':'Creates an image drawing context.',
+	'ret':new Array(
+			{
+				'name':'context',
+				'desc':'context object'
 			}
 	)
 });
@@ -2021,147 +2041,6 @@ Entry({
 	)
 });
 Title1("G2DU library");
-Title2("Stock objects");
-Entry({
-	'var':'g2du.identity',
-	'desc':'Identity matrix.'
-});
-Entry({
-	'var':'g2du.flip_h',
-	'desc':'Horizontal flip matrix.'
-});
-Entry({
-	'var':'g2du.flip_v',
-	'desc':'Vertical flip matrix.'
-});
-Entry({
-	'var':'g2du.white',
-	'desc':'White color source.'
-});
-Entry({
-	'var':'g2du.black',
-	'desc':'Black color source.'
-});
-Entry({
-	'var':'g2du.grey',
-	'desc':'Grey color source.'
-});
-Entry({
-	'var':'g2du.dark_grey',
-	'desc':'Dark grey color source.'
-});
-Entry({
-	'var':'g2du.bright_grey',
-	'desc':'Bright grey color source.'
-});
-Entry({
-	'var':'g2du.red',
-	'desc':'Red color source.'
-});
-Entry({
-	'var':'g2du.dark_red',
-	'desc':'Dark red color source.'
-});
-Entry({
-	'var':'g2du.bright_red',
-	'desc':'Bright red color source.'
-});
-Entry({
-	'var':'g2du.green',
-	'desc':'Green color source.'
-});
-Entry({
-	'var':'g2du.dark_green',
-	'desc':'Dark green color source.'
-});
-Entry({
-	'var':'g2du.bright_green',
-	'desc':'Bright green color source.'
-});
-Entry({
-	'var':'g2du.blue',
-	'desc':'Blue color source.'
-});
-Entry({
-	'var':'g2du.dark_blue',
-	'desc':'Dark blue color source.'
-});
-Entry({
-	'var':'g2du.bright_blue',
-	'desc':'Bright blue color source.'
-});
-Entry({
-	'var':'g2du.yellow',
-	'desc':'Yellow color source.'
-});
-Entry({
-	'var':'g2du.dark_yellow',
-	'desc':'Dark yellow color source.'
-});
-Entry({
-	'var':'g2du.bright_yellow',
-	'desc':'Bright yellow color source.'
-});
-Entry({
-	'var':'g2du.aqua',
-	'desc':'Aqua color source.'
-});
-Entry({
-	'var':'g2du.dark_aqua',
-	'desc':'Dark aqua color source.'
-});
-Entry({
-	'var':'g2du.bright_aqua',
-	'desc':'Bright aqua color source.'
-});
-Entry({
-	'var':'g2du.purple',
-	'desc':'Purple color source.'
-});
-Entry({
-	'var':'g2du.dark_purple',
-	'desc':'Dark purple color source.'
-});
-Entry({
-	'var':'g2du.bright_purple',
-	'desc':'Bright purple color source.'
-});
-Entry({
-	'var':'g2du.orange',
-	'desc':'Orange color source.'
-});
-Entry({
-	'var':'g2du.lime',
-	'desc':'Lime color source.'
-});
-Entry({
-	'var':'g2du.spring',
-	'desc':'Spring color source.'
-});
-Entry({
-	'var':'g2du.azure',
-	'desc':'Azure color source.'
-});
-Entry({
-	'var':'g2du.pink',
-	'desc':'Pink color source.'
-});
-Entry({
-	'var':'g2du.violet',
-	'desc':'Violet color source.'
-});
-Entry({
-	'var':'g2du.brown',
-	'desc':'Brown color source.'
-});
-Entry({
-	'var':'g2du.sapphire',
-	'desc':'Sapphire color source.'
-});
-Entry({
-	'var':'g2du.transparent',
-	'desc':'Transparent color source.'
-});
 Title2("Image conversion");
 Entry({
 	'func':{
@@ -2255,7 +2134,56 @@ Entry({
 			}
 	)
 });
-Title2("Kernel generation");
+Title2("Color matrix generation");
+Entry({
+	'func':{
+		'name':'g2du.create_grey_matrix',
+		'args':'brightness',
+		'ret':'matrix'
+	},
+	'desc':'Generates a color matrix for greying.',
+	'args':new Array(
+			{
+				'name':'brightness',
+				'desc':'brightness of grey (number)'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'matrix',
+				'desc':'color matrix (table)'
+			}
+	)
+});
+Entry({
+	'func':{
+		'name':'g2du.create_colorrate_matrix',
+		'args':'r, g, b',
+		'ret':'matrix'
+	},
+	'desc':'Generates a color matrix for scaling color strengths.',
+	'args':new Array(
+			{
+				'name':'r',
+				'desc':'red strength (number)'
+			},
+			{
+				'name':'g',
+				'desc':'green strength (number)'
+			},
+			{
+				'name':'b',
+				'desc':'blue strength (number)'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'matrix',
+				'desc':'color matrix (table)'
+			}
+	)
+});
+Title2("Convolution kernel generation");
 Entry({
 	'func':{
 		'name':'g2du.create_box_blur_kernel',
@@ -2429,6 +2357,147 @@ Entry({
 				'desc':'path points filter (function, [x,y -> x,y])'
 			}
 	)
+});
+Title2("Stock objects");
+Entry({
+	'var':'g2du.identity',
+	'desc':'Identity matrix.'
+});
+Entry({
+	'var':'g2du.flip_h',
+	'desc':'Horizontal flip matrix.'
+});
+Entry({
+	'var':'g2du.flip_v',
+	'desc':'Vertical flip matrix.'
+});
+Entry({
+	'var':'g2du.white',
+	'desc':'White color source.'
+});
+Entry({
+	'var':'g2du.black',
+	'desc':'Black color source.'
+});
+Entry({
+	'var':'g2du.grey',
+	'desc':'Grey color source.'
+});
+Entry({
+	'var':'g2du.dark_grey',
+	'desc':'Dark grey color source.'
+});
+Entry({
+	'var':'g2du.bright_grey',
+	'desc':'Bright grey color source.'
+});
+Entry({
+	'var':'g2du.red',
+	'desc':'Red color source.'
+});
+Entry({
+	'var':'g2du.dark_red',
+	'desc':'Dark red color source.'
+});
+Entry({
+	'var':'g2du.bright_red',
+	'desc':'Bright red color source.'
+});
+Entry({
+	'var':'g2du.green',
+	'desc':'Green color source.'
+});
+Entry({
+	'var':'g2du.dark_green',
+	'desc':'Dark green color source.'
+});
+Entry({
+	'var':'g2du.bright_green',
+	'desc':'Bright green color source.'
+});
+Entry({
+	'var':'g2du.blue',
+	'desc':'Blue color source.'
+});
+Entry({
+	'var':'g2du.dark_blue',
+	'desc':'Dark blue color source.'
+});
+Entry({
+	'var':'g2du.bright_blue',
+	'desc':'Bright blue color source.'
+});
+Entry({
+	'var':'g2du.yellow',
+	'desc':'Yellow color source.'
+});
+Entry({
+	'var':'g2du.dark_yellow',
+	'desc':'Dark yellow color source.'
+});
+Entry({
+	'var':'g2du.bright_yellow',
+	'desc':'Bright yellow color source.'
+});
+Entry({
+	'var':'g2du.aqua',
+	'desc':'Aqua color source.'
+});
+Entry({
+	'var':'g2du.dark_aqua',
+	'desc':'Dark aqua color source.'
+});
+Entry({
+	'var':'g2du.bright_aqua',
+	'desc':'Bright aqua color source.'
+});
+Entry({
+	'var':'g2du.purple',
+	'desc':'Purple color source.'
+});
+Entry({
+	'var':'g2du.dark_purple',
+	'desc':'Dark purple color source.'
+});
+Entry({
+	'var':'g2du.bright_purple',
+	'desc':'Bright purple color source.'
+});
+Entry({
+	'var':'g2du.orange',
+	'desc':'Orange color source.'
+});
+Entry({
+	'var':'g2du.lime',
+	'desc':'Lime color source.'
+});
+Entry({
+	'var':'g2du.spring',
+	'desc':'Spring color source.'
+});
+Entry({
+	'var':'g2du.azure',
+	'desc':'Azure color source.'
+});
+Entry({
+	'var':'g2du.pink',
+	'desc':'Pink color source.'
+});
+Entry({
+	'var':'g2du.violet',
+	'desc':'Violet color source.'
+});
+Entry({
+	'var':'g2du.brown',
+	'desc':'Brown color source.'
+});
+Entry({
+	'var':'g2du.sapphire',
+	'desc':'Sapphire color source.'
+});
+Entry({
+	'var':'g2du.transparent',
+	'desc':'Transparent color source.'
 });
 /*
 Entry({

@@ -1,12 +1,16 @@
-1.1.0 (coming soon)
+1.1.0
 --------------------
+* added:
+	- image:color_transform
+	- g2du.create_grey_matrix
+	- g2du.create_colorrate_matrix
+	- examples: adv. karaoke, complex paths, color transform	!!!TODO!!!
+* changed:
+	- g2du kernel generators consider floating point parameters	!!!TODO!!!
 * removed:
 	- colorspace "BINARY"
-* added:
-	- image:color_transform	!!!TODO!!!
-	- g2du.create_grey_image	!!!TODO!!!
-	- utils.load_wav	!!!TODO!!!
-	- examples: adv. karaoke, complex paths, outline, color transform	!!!TODO!!!
+* optimization:
+	- image:convolute speed improvement
 
 1.0.3
 --------------------
@@ -34,7 +38,7 @@
 --------------------
 * optimization:
 	- support for VDub v12+ interface
-	- fixed DShow interface (hang by not gettable frame time)
+	- fixed DShow interface (hang by not gettable frame number)
 
 1.0.0
 --------------------

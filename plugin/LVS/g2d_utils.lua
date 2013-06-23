@@ -1,42 +1,5 @@
 -- G2D utility library
 g2du = {
-	-- Stock matrices
-	identity = g2d.create_matrix(),
-	flip_h = g2d.create_matrix(-1,0,0,1,0,0),
-	flip_v = g2d.create_matrix(1,0,0,-1,0,0),
-	-- Stock color sources
-	white = g2d.create_color(1, 1, 1),
-	black = g2d.create_color(0, 0, 0),
-	grey = g2d.create_color(0.5, 0.5, 0.5),
-	dark_grey = g2d.create_color(0.25, 0.25, 0.25),
-	bright_grey = g2d.create_color(0.75, 0.75, 0.75),
-	red = g2d.create_color(1, 0, 0),
-	dark_red = g2d.create_color(0.5, 0, 0),
-	bright_red = g2d.create_color(1, 0.5, 0.5),
-	green = g2d.create_color(0, 1, 0),
-	dark_green = g2d.create_color(0, 0.5, 0),
-	bright_green = g2d.create_color(0.5, 1, 0.5),
-	blue = g2d.create_color(0, 0, 1),
-	dark_blue = g2d.create_color(0, 0, 0.5),
-	bright_blue = g2d.create_color(0.5, 0.5, 1),
-	yellow = g2d.create_color(1, 1, 0),
-	dark_yellow = g2d.create_color(0.5, 0.5, 0),
-	bright_yellow = g2d.create_color(1, 1, 0.5),
-	aqua = g2d.create_color(0, 1, 1),
-	dark_aqua = g2d.create_color(0, 0.5, 0.5),
-	bright_aqua = g2d.create_color(0.5, 1, 1),
-	purple = g2d.create_color(1, 0, 1),
-	dark_purple = g2d.create_color(0.5, 0, 0.5),
-	bright_purple = g2d.create_color(1, 0.5, 1),
-	orange = g2d.create_color(1, 0.5, 0),
-	lime = g2d.create_color(0.5, 1, 0),
-	spring = g2d.create_color(0, 1, 0.5),
-	azure = g2d.create_color(0, 0.5, 1),
-	pink = g2d.create_color(1, 0, 0.5),
-	violet = g2d.create_color(0.5, 0, 1),
-	brown = g2d.create_color(0.5, 0.25, 0.125),
-	sapphire = g2d.create_color(0.125, 0.25, 0.5),
-	transparent = g2d.create_color(0, 0, 0, 0),
 	-- Create color-converted image
 	create_converted_image = function(image, color_type)
 		-- Check parameters type
@@ -170,23 +133,118 @@ g2du = {
 			return pixels
 		end
 	end,
+	-- Create greying color matrix
+	create_grey_matrix = function(brightness)
+		-- Check parameter
+		if type(brightness) ~= "number" or brightness < 0 then
+			error("valid number expected", 2)
+		end
+		-- Create matrix
+		local part = 1 / 3 * brightness
+		return {
+			part, part, part, 0,
+			part, part, part, 0,
+			part, part, part, 0,
+			0, 0, 0, 1
+		}
+	end,
+	-- Create color scaling matrix
+	create_colorrate_matrix = function(r, g, b)
+		-- Check parameter
+		if type(r) ~= "number" or r < 0 or
+			type(g) ~= "number" or g < 0 or
+			type(b) ~= "number" or b < 0 then
+			error("valid 3 numbers expected", 2)
+		end
+		-- Create matrix
+		return {
+			r, 0, 0, 0,
+			0, g, 0, 0,
+			0, 0, b, 0,
+			0, 0, 0, 1
+		}
+	end,
 	-- Create box blur kernel
 	create_box_blur_kernel = function(strength)
 		-- Check parameter
-		if type(strength) ~= "number" or strength < 1 then
+		if type(strength) ~= "number" or strength < 0 then
 			error("valid number expected", 2)
 		end
-		strength = math.floor(strength)
 		-- Create kernel table
-		local kernel_wide = 1 + 2*strength
-		local kernel_size = kernel_wide * kernel_wide
+		local strength_ceil = math.ceil(strength)
+		local kernel_wide = 1 + 2*strength_ceil
+		local kernel_size = kernel_wide ^ 2
 		local kernel = table.create(kernel_size, 2)
 		kernel.width = kernel_wide
 		kernel.height = kernel_wide
 		-- Fill kernel
-		local kernel_value = 1 / kernel_size
+		if strength == strength_ceil then
+			local kernel_value = 1 / kernel_size
+			for i=1, kernel_size do
+				kernel[i] = kernel_value
+			end
+		else
+			local strength_rest = strength % 1
+			local sum = (kernel_wide-2)^2 + (2*kernel_wide+2*(kernel_wide-2)) * strength_rest
+			local kernel_value_mid, kernel_value_border = 1 / sum, strength_rest / sum
+			local i = 0
+			for y=1, kernel_wide do
+				for x=1, kernel_wide do
+					i = i + 1
+					kernel[i] = (y == 1 or y == kernel_wide or x == 1 or x == kernel_wide) and kernel_value_border or kernel_value_mid
+				end
+			end
+		end
+		return kernel
+	end,
+	-- Create gaussian blur kernel
+	create_gaussian_blur_kernel = function(strength)
+		-- Check parameter
+		if type(strength) ~= "number" or strength < 0 then
+			error("valid number expected", 2)
+		end
+		-- Create kernel table
+		local strength_ceil = math.ceil(strength)
+		local kernel_wide = 1 + 2*strength_ceil
+		local kernel_size = kernel_wide ^ 2
+		local kernel = table.create(kernel_size, 2)
+		kernel.width = kernel_wide
+		kernel.height = kernel_wide
+		-- Fill kernel
+		local sigma_sqr2 = 2 * strength * strength
+		local sigma_sqr2pi = sigma_sqr2 * math.pi
+		local i, sum = 0, 0
+		if strength == strength_ceil then
+			for y=-strength_ceil, strength_ceil do
+				for x=-strength_ceil, strength_ceil do
+					i = i + 1
+					kernel[i] = math.exp(-(x*x+y*y) / sigma_sqr2) / sigma_sqr2pi
+					sum = sum + kernel[i]
+				end
+			end
+		else
+			local strength_rest = strength % 1
+			for y=-strength_ceil, strength_ceil do
+				if y == -strength_ceil then
+					y = y + 1 - strength_rest
+				elseif y == strength_ceil then
+					y = y - 1 + strength_rest
+				end
+				for x=-strength_ceil, strength_ceil do
+					if x == -strength_ceil then
+						x = x + 1 - strength_rest
+					elseif x == strength_ceil then
+						x = x + strength_rest
+					end
+					i = i + 1
+					kernel[i] = math.exp(-(x*x+y*y) / sigma_sqr2) / sigma_sqr2pi
+					sum = sum + kernel[i]
+				end
+			end
+		end
+		-- Normalize kernel
 		for i=1, kernel_size do
-			kernel[i] = kernel_value
+			kernel[i] = kernel[i] / sum
 		end
 		return kernel
 	end,
@@ -218,34 +276,6 @@ g2du = {
 			for x = -strength, strength do
 				kernel[1 + (-math.floor(x*m)+strength)*kernel_wide + x+strength] = kernel_value
 			end
-		end
-		return kernel
-	end,
-	-- Create gaussian blur kernel
-	create_gaussian_blur_kernel = function(strength)
-		-- Check parameter
-		if type(strength) ~= "number" or strength < 1 then
-			error("valid number expected", 2)
-		end
-		strength = math.floor(strength)
-		-- Create kernel table
-		local kernel_wide = 1 + 2*strength
-		local kernel_size = kernel_wide * kernel_wide
-		local kernel = table.create(kernel_size, 2)
-		kernel.width = kernel_wide
-		kernel.height = kernel_wide
-		-- Fill kernel
-		local sigma_sqr2 = 2 * strength * strength
-		local sigma_sqr2pi = sigma_sqr2 * math.pi
-		local x, y
-		local sum = 0
-		for i=1, kernel_size do
-			x, y = (i-1) % kernel_wide - strength, math.floor((i-1) / kernel_wide) - strength
-			kernel[i] = math.exp(-(x*x+y*y) / sigma_sqr2) / sigma_sqr2pi
-			sum = sum + kernel[i]
-		end
-		for i=1, kernel_size do
-			kernel[i] = kernel[i] / sum
 		end
 		return kernel
 	end,
@@ -397,5 +427,42 @@ g2du = {
 				ctx:path_close()
 			end
 		end
-	end
+	end,
+	-- Stock matrices
+	identity = g2d.create_matrix(),
+	flip_h = g2d.create_matrix(-1,0,0,1,0,0),
+	flip_v = g2d.create_matrix(1,0,0,-1,0,0),
+	-- Stock color sources
+	white = g2d.create_color(1, 1, 1),
+	black = g2d.create_color(0, 0, 0),
+	grey = g2d.create_color(0.5, 0.5, 0.5),
+	dark_grey = g2d.create_color(0.25, 0.25, 0.25),
+	bright_grey = g2d.create_color(0.75, 0.75, 0.75),
+	red = g2d.create_color(1, 0, 0),
+	dark_red = g2d.create_color(0.5, 0, 0),
+	bright_red = g2d.create_color(1, 0.5, 0.5),
+	green = g2d.create_color(0, 1, 0),
+	dark_green = g2d.create_color(0, 0.5, 0),
+	bright_green = g2d.create_color(0.5, 1, 0.5),
+	blue = g2d.create_color(0, 0, 1),
+	dark_blue = g2d.create_color(0, 0, 0.5),
+	bright_blue = g2d.create_color(0.5, 0.5, 1),
+	yellow = g2d.create_color(1, 1, 0),
+	dark_yellow = g2d.create_color(0.5, 0.5, 0),
+	bright_yellow = g2d.create_color(1, 1, 0.5),
+	aqua = g2d.create_color(0, 1, 1),
+	dark_aqua = g2d.create_color(0, 0.5, 0.5),
+	bright_aqua = g2d.create_color(0.5, 1, 1),
+	purple = g2d.create_color(1, 0, 1),
+	dark_purple = g2d.create_color(0.5, 0, 0.5),
+	bright_purple = g2d.create_color(1, 0.5, 1),
+	orange = g2d.create_color(1, 0.5, 0),
+	lime = g2d.create_color(0.5, 1, 0),
+	spring = g2d.create_color(0, 1, 0.5),
+	azure = g2d.create_color(0, 0.5, 1),
+	pink = g2d.create_color(1, 0, 0.5),
+	violet = g2d.create_color(0.5, 0, 1),
+	brown = g2d.create_color(0.5, 0.25, 0.125),
+	sapphire = g2d.create_color(0.125, 0.25, 0.5),
+	transparent = g2d.create_color(0, 0, 0, 0)
 }
