@@ -1,6 +1,3 @@
--- Particle objects storage
-local particles = {n = 0}
-
 -- Particle image source
 local particle_source
 do
@@ -26,9 +23,12 @@ local curve_points = {
 	{100,100}
 }
 
+-- Particle objects storage
+local particles = {n = 0}
+
 -- Particle objects update
 local function update(pct)
-	-- Move and age particle objects
+	-- Age and move particle objects
 	local actual_particles = {n = 0}
 	for _, particle in ipairs(particles) do
 		particle.life = particle.life - 1
@@ -40,9 +40,8 @@ local function update(pct)
 		end
 	end
 	particles = actual_particles
-	-- Calculate particles way point
-	local pos = math.bezier(pct, curve_points)
 	-- Add new particle objects
+	local pos = math.bezier(pct, curve_points)
 	for i=1, 20 do
 		particles.n = particles.n + 1
 		particles[particles.n] = {
@@ -59,7 +58,7 @@ local function draw(ctx)
 	-- Iterate through particle objects
 	for _, particle in ipairs(particles) do
 		-- Set particle position
-		ctx:set_matrix(g2d.create_matrix():translate(particle.cur_pos[1], particle.cur_pos[2]))
+		particle_source:set_matrix(g2d.create_matrix():translate(particle.cur_pos[1], particle.cur_pos[2]))
 		-- Set particle source
 		ctx:set_source(particle_source)
 		-- Paint fading particle
