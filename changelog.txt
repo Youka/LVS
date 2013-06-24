@@ -4,13 +4,17 @@
 	- image:color_transform
 	- g2du.create_grey_matrix
 	- g2du.create_colorrate_matrix
-	- examples: adv. karaoke, complex paths, color transform	!!!TODO!!!
+	- examples:
+		· color transform
+		· complex paths	!!!TODO!!!
+		· adv. karaoke	!!!TODO!!!
 * changed:
 	- g2du kernel generators consider floating point strength
 * removed:
 	- colorspace "BINARY"
 * optimization:
 	- image:convolute speed improvement
+	- RGB frame processing speed improvement
 
 1.0.3
 --------------------

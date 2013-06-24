@@ -26,16 +26,21 @@ struct CairoImage{
 				image += this->stride;
 			}
 		else{
-			const int rowsize_pitch = this->width * 3 + pitch;
+			const int rowsize_pitch = (this->width - 1) * 3 + pitch;
 			for(int y = 0; y < this->height; ++y){
-				for(int x = 0; x < this->width; ++x){
+				for(int x = 0; x < this->width - 1; ++x){
 					image[0] = frame[0];
 					image[1] = frame[1];
 					image[2] = frame[2];
+					image[3] = frame[3];	// 4-bytes copy is faster than 2-bytes copy + 1-byte copy
 					frame += 3;
 					image += 4;
 				}
+				image[0] = frame[0];
+				image[1] = frame[1];
+				image[2] = frame[2];
 				frame -= rowsize_pitch;
+				image += 4;
 			}
 		}
 	}
@@ -52,15 +57,20 @@ struct CairoImage{
 				frame -= pitch;
 			}
 		else{
-			const int rowsize_pitch = this->width * 3 + pitch;
+			const int rowsize_pitch = (this->width - 1) * 3 + pitch;
 			for(int y = 0; y < this->height; ++y){
-				for(int x = 0; x < this->width; ++x){
+				for(int x = 0; x < this->width - 1; ++x){
 					frame[0] = image[0];
 					frame[1] = image[1];
 					frame[2] = image[2];
+					frame[3] = image[3];	// 4-bytes copy is faster than 2-bytes copy + 1-byte copy
 					image += 4;
 					frame += 3;
 				}
+				frame[0] = image[0];
+				frame[1] = image[1];
+				frame[2] = image[2];
+				image += 4;
 				frame -= rowsize_pitch;
 			}
 		}

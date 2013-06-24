@@ -14,6 +14,7 @@ ColorBars(width = 720, height = 480, pixel_type = "YV12").AssumeFPS(fps).Trim(0,
 #VIDEO EXAMPLES
 #LVS("video\3d.lua")
 #LVS("video\animation.lua")
+#LVS("video\color_transform.lua")
 #LVS("video\composition.lua")
 #LVS("video\convolution.lua")
 #LVS("video\gradient.lua")

@@ -1,4 +1,4 @@
--- Helper for kernel functions
+-- Helper for kernel generation functions
 local function create_kernel_table(strength)
 	local kernel_wide = 1 + 2 * strength
 	local kernel_size = kernel_wide * kernel_wide

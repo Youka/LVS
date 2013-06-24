@@ -538,12 +538,12 @@ static DWORD WINAPI cairo_image_surface_color_transform(void *userdata){
 	__m128 mat_c3 = _mm_loadu_ps(thread_data->matrix + 12);
 	// Process pixels
 	register float *row_src; register unsigned char *row_dst;
-	float dst_buf[4];
+	__declspec(align(16)) float dst_buf[4];
 	for(register int y = thread_data->image_first_row; y <= thread_data->image_last_row; ++y){
 		row_src = thread_data->image_src + y * thread_data->image_stride;
 		row_dst = thread_data->image_dst + y * thread_data->image_stride;
 		for(register int x = 0; x < thread_data->image_width; ++x){
-			_mm_storeu_ps(
+			_mm_store_ps(
 				dst_buf,
 				_mm_max_ps(
 					_mm_min_ps(
@@ -632,7 +632,7 @@ static DWORD WINAPI cairo_image_surface_convolution(void *userdata){
 		// Storages for pixel processing
 		unsigned char *row_dst;
 		int image_x, image_y;
-		float dst_buf[4];
+		__declspec(align(16)) float dst_buf[4];
 		// Iterate through source image pixels
 		for(register int y = thread_data->image_first_row; y <= thread_data->image_last_row; ++y){
 			row_dst = thread_data->image_dst + y * thread_data->image_stride;
@@ -657,7 +657,7 @@ static DWORD WINAPI cairo_image_surface_convolution(void *userdata){
 					}
 				}
 				// Trim and set accumulator to destination image pixel
-				_mm_storeu_ps(
+				_mm_store_ps(
 					dst_buf,
 					_mm_max_ps(
 						_mm_setzero_ps(),
