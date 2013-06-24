@@ -1,3 +1,12 @@
+-- Helper for kernel functions
+local function create_kernel_table(strength)
+	local kernel_wide = 1 + 2 * strength
+	local kernel_size = kernel_wide * kernel_wide
+	local kernel = table.create(kernel_size, 2)
+	kernel.width = kernel_wide
+	kernel.height = kernel_wide
+	return kernel_wide, kernel_size, kernel
+end
 -- G2D utility library
 g2du = {
 	-- Create color-converted image
@@ -114,7 +123,7 @@ g2du = {
 				end
 			end
 			return pixels
-		else	-- "ALPHA"
+		elseif color_type == "ALPHA" then
 			-- Count pixels number
 			local n = 0
 			for i=1, w*h do
@@ -172,11 +181,7 @@ g2du = {
 		end
 		-- Create kernel table
 		local strength_ceil = math.ceil(strength)
-		local kernel_wide = 1 + 2*strength_ceil
-		local kernel_size = kernel_wide ^ 2
-		local kernel = table.create(kernel_size, 2)
-		kernel.width = kernel_wide
-		kernel.height = kernel_wide
+		local kernel_wide, kernel_size, kernel = create_kernel_table(strength_ceil)
 		-- Fill kernel
 		if strength == strength_ceil then
 			local kernel_value = 1 / kernel_size
@@ -205,18 +210,14 @@ g2du = {
 		end
 		-- Create kernel table
 		local strength_ceil = math.ceil(strength)
-		local kernel_wide = 1 + 2*strength_ceil
-		local kernel_size = kernel_wide ^ 2
-		local kernel = table.create(kernel_size, 2)
-		kernel.width = kernel_wide
-		kernel.height = kernel_wide
+		local kernel_wide, kernel_size, kernel = create_kernel_table(strength_ceil)
 		-- Fill kernel
 		local sigma_sqr2 = 2 * strength * strength
 		local sigma_sqr2pi = sigma_sqr2 * math.pi
 		local i, sum = 0, 0
 		if strength == strength_ceil then
-			for y=-strength_ceil, strength_ceil do
-				for x=-strength_ceil, strength_ceil do
+			for y=-strength, strength do
+				for x=-strength, strength do
 					i = i + 1
 					kernel[i] = math.exp(-(x*x+y*y) / sigma_sqr2) / sigma_sqr2pi
 					sum = sum + kernel[i]
@@ -234,7 +235,7 @@ g2du = {
 					if x == -strength_ceil then
 						x = x + 1 - strength_rest
 					elseif x == strength_ceil then
-						x = x + strength_rest
+						x = x - 1 + strength_rest
 					end
 					i = i + 1
 					kernel[i] = math.exp(-(x*x+y*y) / sigma_sqr2) / sigma_sqr2pi
@@ -251,30 +252,41 @@ g2du = {
 	-- Create motion blur kernel
 	create_motion_blur_kernel = function(strength, angle)
 		-- Check parameters
-		if type(strength) ~= "number" or strength < 1 or type(angle) ~= "number" then
+		if type(strength) ~= "number" or strength < 0 or type(angle) ~= "number" then
 			error("valid 2 numbers expected", 2)
 		end
-		strength = math.floor(strength)
 		-- Create kernel table
-		local kernel_wide = 1 + 2*strength
-		local kernel_size = kernel_wide * kernel_wide
-		local kernel = table.create(kernel_size, 2)
-		kernel.width = kernel_wide
-		kernel.height = kernel_wide
+		local strength_ceil = math.ceil(strength)
+		local kernel_wide, kernel_size, kernel = create_kernel_table(strength_ceil)
 		-- Fill kernel
 		for i=1, kernel_size do
 			kernel[i] = 0
 		end
-		local kernel_value = 1 / kernel_wide
 		local m = math.cos(math.rad(angle)) / math.sin(math.rad(angle))
 		m = m == 1/0 and math.huge or m - m % 0.001
-		if m > 1 or m < -1 then
-			for y = -strength, strength do
-				kernel[1 + (-y+strength)*kernel_wide + math.floor(y / m)+strength] = kernel_value
+		if strength == strength_ceil then
+			local kernel_value = 1 / kernel_wide
+			if m > 1 or m < -1 then
+				for y = -strength, strength do
+					kernel[1 + (-y+strength)*kernel_wide + strength+math.floor(y/m)] = kernel_value
+				end
+			else
+				for x = -strength, strength do
+					kernel[1 + (-math.floor(x*m)+strength)*kernel_wide + strength+x] = kernel_value
+				end
 			end
 		else
-			for x = -strength, strength do
-				kernel[1 + (-math.floor(x*m)+strength)*kernel_wide + x+strength] = kernel_value
+			local strength_rest = strength % 1
+			local sum = kernel_wide-2 + 2*strength_rest
+			local kernel_value_mid, kernel_value_border = 1 / sum, strength_rest / sum
+			if m > 1 or m < -1 then
+				for y = -strength_ceil, strength_ceil do
+					kernel[1 + (-y+strength_ceil)*kernel_wide + strength_ceil+math.floor(y/m)] = (y == -strength_ceil or y == strength_ceil) and kernel_value_border or kernel_value_mid
+				end
+			else
+				for x = -strength_ceil, strength_ceil do
+					kernel[1 + (-math.floor(x*m)+strength_ceil)*kernel_wide + strength_ceil+x] = (x == -strength_ceil or x == strength_ceil) and kernel_value_border or kernel_value_mid
+				end
 			end
 		end
 		return kernel
@@ -282,23 +294,36 @@ g2du = {
 	-- Create sharpen kernel
 	create_sharpen_kernel = function(strength)
 		-- Check parameter
-		if type(strength) ~= "number" or strength < 1 then
+		if type(strength) ~= "number" or strength < 0 then
 			error("valid number expected", 2)
 		end
-		strength = math.floor(strength)
 		-- Create kernel table
-		local kernel_wide = 1 + 2*strength
-		local kernel_size = kernel_wide * kernel_wide
-		local kernel = table.create(kernel_size, 2)
-		kernel.width = kernel_wide
-		kernel.height = kernel_wide
+		local strength_ceil = math.ceil(strength)
+		local kernel_wide, kernel_size, kernel = create_kernel_table(strength_ceil)
 		-- Fill kernel
 		local mid_i = math.ceil(kernel_size/2)
-		for i=1, kernel_size do
-			if i == mid_i then
-				kernel[i] = kernel_size
-			else
-				kernel[i] = -1
+		if strength == strength_ceil then
+			for i=1, kernel_size do
+				if i == mid_i then
+					kernel[i] = kernel_size
+				else
+					kernel[i] = -1
+				end
+			end
+		else
+			local strength_rest = strength % 1
+			local i = 0
+			for y=1, kernel_wide do
+				for x=1, kernel_wide do
+					i = i + 1
+					if i == mid_i then
+						kernel[i] = (kernel_wide-2)^2 + (2*kernel_wide+2*(kernel_wide-2)) * strength_rest
+					elseif y == 1 or y == kernel_wide or x == 1 or x == kernel_wide then
+						kernel[i] = -strength_rest
+					else
+						kernel[i] = -1
+					end
+				end
 			end
 		end
 		return kernel
@@ -306,23 +331,36 @@ g2du = {
 	-- Create edge detection kernel
 	create_edge_detect_kernel = function(strength)
 		-- Check parameter
-		if type(strength) ~= "number" or strength < 1 then
+		if type(strength) ~= "number" or strength < 0 then
 			error("valid number expected", 2)
 		end
-		strength = math.floor(strength)
 		-- Create kernel table
-		local kernel_wide = 1 + 2*strength
-		local kernel_size = kernel_wide * kernel_wide
-		local kernel = table.create(kernel_size, 2)
-		kernel.width = kernel_wide
-		kernel.height = kernel_wide
+		local strength_ceil = math.ceil(strength)
+		local kernel_wide, kernel_size, kernel = create_kernel_table(strength_ceil)
 		-- Fill kernel
 		local mid_i = math.ceil(kernel_size/2)
-		for i=1, kernel_size do
-			if i == mid_i then
-				kernel[i] = kernel_size-1
-			else
-				kernel[i] = -1
+		if strength == strength_ceil then
+			for i=1, kernel_size do
+				if i == mid_i then
+					kernel[i] = kernel_size-1
+				else
+					kernel[i] = -1
+				end
+			end
+		else
+			local strength_rest = strength % 1
+			local i = 0
+			for y=1, kernel_wide do
+				for x=1, kernel_wide do
+					i = i + 1
+					if i == mid_i then
+						kernel[i] = (kernel_wide-2)^2 - 1 + (2*kernel_wide+2*(kernel_wide-2)) * strength_rest
+					elseif y == 1 or y == kernel_wide or x == 1 or x == kernel_wide then
+						kernel[i] = -strength_rest
+					else
+						kernel[i] = -1
+					end
+				end
 			end
 		end
 		return kernel

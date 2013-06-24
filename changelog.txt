@@ -6,7 +6,7 @@
 	- g2du.create_colorrate_matrix
 	- examples: adv. karaoke, complex paths, color transform	!!!TODO!!!
 * changed:
-	- g2du kernel generators consider floating point parameters	!!!TODO!!!
+	- g2du kernel generators consider floating point strength
 * removed:
 	- colorspace "BINARY"
 * optimization:
