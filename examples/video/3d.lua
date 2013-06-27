@@ -8,10 +8,10 @@ function GetFrame(frame, frame_i)
 	g2du.rotate_xy(mat,frame_i, frame_i*2)
 	mat:scale(0.5,0.5)
 	mat:translate(-VIDEO_WIDTH/2,-VIDEO_HEIGHT/2)
-	-- Create a frame source
+	-- Create rotated frame source
 	local frame_src = g2d.create_pattern(g2du.create_converted_image(frame, "RGB"))
-	-- Set context matrix & source and paint
-	ctx:set_matrix(mat)
+	frame_src:set_matrix(mat)
+	-- Paint frame source
 	ctx:set_source(frame_src)
 	ctx:paint()
 end

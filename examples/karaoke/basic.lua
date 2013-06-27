@@ -20,11 +20,7 @@ local function roumaji_kanji(ctx, ms, line)
 	-- Iterate through sylables
 	for si, syl in ipairs(line.syls) do
 		-- Set color dependent on sylable activity
-		if ms >= syl.start_time and ms < syl.end_time then
-			ctx:set_source(g2du.red)
-		else
-			ctx:set_source(g2du.yellow)
-		end
+		ctx:set_source(ms >= syl.start_time and ms < syl.end_time and g2du.red or g2du.yellow)
 		-- Draw sylable text
 		ctx:path_add_text(syl.x, syl.y, syl.text, ass.unpack_font(line.styleref))
 		ctx:fill()

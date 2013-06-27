@@ -12,8 +12,8 @@
 * removed:
 	- colorspace "BINARY"
 * optimization:
-	- image:convolute speed improvement
 	- RGB frame processing speed improvement
+	- image:convolute speed improvement
 
 1.0.3
 --------------------

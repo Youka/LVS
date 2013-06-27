@@ -1,0 +1,44 @@
+﻿[Script Info]
+Title: Oreimo S2 - ED6
+ScriptType: v4.00+
+WrapStyle: 0
+PlayResX: 704
+PlayResY: 396
+ScaledBorderAndShadow: yes
+Video Zoom: 6
+Last Style Storage: Default
+Scroll Position: 0
+Active Line: 10
+Video Zoom Percent: 1
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Romaji,VAGRounded-Bold,32,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,3,0,8,15,15,15,1
+Style: Subtitle,VAGRounded-Bold,32,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,3,0,2,15,15,15,1
+Style: Romaji Insert,VAGRounded-Bold,32,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,3,0,7,15,15,15,1
+Style: Subtitle Insert,VAGRounded-Bold,32,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,3,0,7,15,15,15,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:03.00,0:00:09.75,Romaji Insert,,0,0,0,,{\k56}shi{\k39}ro{\k25} {\k48}kyo{\k24}u {\k19}no {\k22}fu{\k37}ku {\k36}wa{\k63} {\k45}yo{\k20}ro{\k26}ko{\k19}n{\k23}de {\k36}ku{\k35}re{\k35}ru{\k7} {\k24}ka{\k36}na
+Dialogue: 0,0:00:10.24,0:00:17.43,Romaji Insert,,0,0,0,,{\k48}ku{\k36}ro{\k34} {\k38}he{\k28}ya {\k24}no {\k17}na{\k39}ka {\k32}de{\k45} {\k15}u{\k28}zu{\k23}ku{\k33}ma{\k33}ru {\k33}chi{\k24}i{\k33}sa{\k22}na {\k22}ko{\k13}ne{\k99}ko
+Dialogue: 0,0:00:25.96,0:00:30.72,Romaji Insert,,0,0,0,,{\k22}a{\k37}a{\k42} {\k29}su{\k15}ko{\k31}shi {\k35}ha{\k33}ya{\k21}ku {\k24}ki{\k44}su{\k25}gi{\k33}ta {\k33}ka{\k52}na
+Dialogue: 0,0:00:33.10,0:00:40.31,Romaji Insert,,0,0,0,,{\k35}mo{\k31}u{\k48} {\k21}a{\k22}ta{\k23}ma {\k34}wa {\k32}a{\k23}na{\k34}ta{\k34}de {\k20}i{\k37}p{\k32}pa{\k60}i{\k119} {\k22}do{\k33}ki{\k34}do{\k27}ki
+Dialogue: 0,0:00:40.69,0:00:46.35,Romaji Insert,,0,0,0,,{\k45}a{\k32}a{\k36} {\k26}ko{\k31}n{\k33}na {\k47}ki{\k36}mo{\k32}chi {\k40}wa{\k49} {\k36}ha{\k31}ji{\k42}me{\k25}te{\k25}de
+Dialogue: 0,0:00:46.75,0:00:52.90,Romaji Insert,,0,0,0,,{\k24}mo{\k26}t{\k27}to{\k15} {\k19}mo{\k25}t{\k23}to{\k58} {\k14}shi{\k17}t{\k34}te{\k23}ho{\k48}shi{\k17}i {\k35}no {\k21}wa{\k22}ta{\k45}shi {\k33}no{\k11} {\k24}ko{\k54}to
+Dialogue: 0,0:00:53.47,0:00:54.80,Romaji,,0,0,0,,{\k23}a{\k22}na{\k12}ta {\k34}da{\k42}ke
+Dialogue: 0,0:00:54.96,0:01:01.59,Romaji,,0,0,0,,{\k52}shi{\k26}ro{\k42} {\k51}ni{\k17}a{\k21}u {\k12}de{\k33}sho{\k13}u {\k19}wa{\k77} {\k49}kyo{\k22}u {\k21}no {\k24}ta{\k22}me {\k36}no {\k31}to{\k45}ku{\k19}be{\k31}tsu
+Dialogue: 0,0:01:02.18,0:01:08.65,Romaji,,0,0,0,,{\k47}ku{\k35}ro{\k33} {\k45}a{\k22}na{\k22}ta {\k22}no {\k35}ko{\k34}e{\k43} {\k23}ma{\k20}t{\k25}te{\k32}ru {\k34}no {\k44}ho{\k24}me{\k22}te {\k12}ho{\k31}shi{\k13}ku{\k29}te
+Dialogue: 0,0:01:09.35,0:01:15.93,Romaji,,0,0,0,,{\k45}ho{\k36}ra{\k33} {\k32}ya{\k28}sa{\k21}shi{\k31}so{\k35}u {\k28}na{\k59} {\k56}so{\k22}no {\k22}ma{\k15}bu{\k33}shi{\k34}i {\k31}e{\k46}ga{\k20}o {\k31}de
+Dialogue: 0,0:01:16.52,0:01:23.43,Romaji,,0,0,0,,{\k46}mo{\k31}u{\k36} {\k45}ka{\k13}ku{\k31}shi {\k23}ki{\k23}re{\k22}na{\k38}i{\k52} {\k21}a{\k22}fu{\k37}re{\k21}da{\k29}su{\k26} {\k23}ko{\k21}no {\k24}ka{\k31}n{\k36}jo{\k40}u
+Dialogue: 0,0:00:03.00,0:00:09.75,Subtitle Insert,,0,0,0,,Weiß... Ich frage mich, ob mein Outfit dich heute glücklich macht.
+Dialogue: 0,0:00:10.24,0:00:17.43,Subtitle Insert,,0,0,0,,Schwarz... Das kleine Kätzchen rollt in meinem Raum herum.
+Dialogue: 0,0:00:25.96,0:00:30.72,Subtitle Insert,,0,0,0,,Ah, bin ich zu früh gekommen?
+Dialogue: 0,0:00:33.10,0:00:40.31,Subtitle Insert,,0,0,0,,Gerade ist mein Kopf voll von Gedanken an dich, sie lassen mein Herz schlagen.
+Dialogue: 0,0:00:40.69,0:00:46.35,Subtitle Insert,,0,0,0,,Ah, ich habe mich noch nie so gefühlt.
+Dialogue: 0,0:00:46.75,0:00:52.90,Subtitle Insert,,0,0,0,,Ich möchte, dass du mehr und mehr über mich weißt.
+Dialogue: 0,0:00:53.47,0:00:54.80,Subtitle,,0,0,0,,Du bist der Einzige.
+Dialogue: 0,0:00:54.96,0:01:01.59,Subtitle,,0,0,0,,Weiß... Ich hoffe, es steht mir, schließlich habe ich es speziell für dich angezogen.
+Dialogue: 0,0:01:02.18,0:01:08.65,Subtitle,,0,0,0,,Schwarz... Ich warte auf deine Stimme, in der Hoffnung, du gibst mir ein Kompliment.
+Dialogue: 0,0:01:09.35,0:01:15.93,Subtitle,,0,0,0,,Schau, dieses strahlende Lächeln, das so natürlich scheint.
+Dialogue: 0,0:01:16.52,0:01:23.43,Subtitle,,0,0,0,,Nun kann ich diese überwältigenden Gefühle nicht mehr verstecken.
