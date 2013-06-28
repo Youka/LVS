@@ -6,7 +6,7 @@
 	- g2du.create_colorrate_matrix
 	- examples:
 		· color transform
-		· adv. karaoke	!!!TODO!!!
+		· adv. karaoke
 * changed:
 	- g2du kernel generators consider floating point strength
 * removed:

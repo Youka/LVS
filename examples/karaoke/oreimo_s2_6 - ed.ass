@@ -2,8 +2,8 @@
 Title: Oreimo S2 - ED6
 ScriptType: v4.00+
 WrapStyle: 0
-PlayResX: 704
-PlayResY: 396
+PlayResX: 720
+PlayResY: 480
 ScaledBorderAndShadow: yes
 Video Zoom: 6
 Last Style Storage: Default
@@ -13,10 +13,10 @@ Video Zoom Percent: 1
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Romaji,VAGRounded-Bold,32,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,3,0,8,15,15,15,1
-Style: Subtitle,VAGRounded-Bold,32,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,3,0,2,15,15,15,1
-Style: Romaji Insert,VAGRounded-Bold,32,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,3,0,7,15,15,15,1
-Style: Subtitle Insert,VAGRounded-Bold,32,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,3,0,7,15,15,15,1
+Style: Romaji,VAGRounded-Bold,22,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,0,8,15,15,15,1
+Style: Subtitle,VAGRounded-Bold,22,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,0,2,15,15,15,1
+Style: Romaji Insert,VAGRounded-Bold,22,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,0,7,15,15,15,1
+Style: Subtitle Insert,VAGRounded-Bold,22,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,0,7,15,15,15,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
