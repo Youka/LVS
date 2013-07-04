@@ -1,4 +1,4 @@
--- Matrices for color transformations
+-- Matrices for color transformation
 local grey = g2du.create_grey_matrix(1)
 local red_domination = g2du.create_colorrate_matrix(2,0.5,0.5)
 local red_blue_swap = {

@@ -1,5 +1,5 @@
 -- ASS file loading
-ass.load("karaoke\\oreimo_s2_6 - ed.ass")
+ass.load("karaoke\\res\\oreimo_s2_6 - ed.ass")
 lines[6].outfade = 570
 lines[7].infade = lines[6].outfade
 lines[17].outfade = lines[6].outfade
@@ -8,7 +8,7 @@ lines[18].infade = lines[6].outfade
 -- Textures loading
 local paws
 do
-	local paw_white_image, paw_black_image = g2d.create_image_from_png("karaoke\\Pfote_weiß.png"), g2d.create_image_from_png("karaoke\\Pfote_schwarz.png")
+	local paw_white_image, paw_black_image = g2d.create_image_from_png("karaoke\\res\\Pfote_weiß.png"), g2d.create_image_from_png("karaoke\\res\\Pfote_schwarz.png")
 	paws = {
 		white = {src = g2d.create_pattern(paw_white_image), w = paw_white_image:get_width(), h = paw_white_image:get_height()},
 		black = {src = g2d.create_pattern(paw_black_image), w = paw_black_image:get_width(), h = paw_black_image:get_height()},

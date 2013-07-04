@@ -132,6 +132,10 @@
 			Name="Libraries"
 			>
 			<File
+				RelativePath=".\cairo.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\cairo.hpp"
 				>
 			</File>

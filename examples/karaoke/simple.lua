@@ -1,5 +1,5 @@
 -- Parse ASS file and fill global tables
-ass.load("karaoke\\chihaya_ed.ass")
+ass.load("karaoke\\res\\chihaya_ed.ass")
 
 -- Roumaji & kanji
 local function roumaji_kanji(ctx, ms, line)
