@@ -10,7 +10,7 @@ do
 	ctx:path_curve_to(11,11,11,11,1,11)
 	ctx:set_source(g2du.white)
 	ctx:fill()
-	particle_source = g2d.create_pattern(particle_image:convolute(g2du.create_gaussian_blur_kernel(1)))
+	particle_source = g2d.create_pattern(particle_image:convolute(g2du.create_gaussian_blur_kernel(1.5)))
 end
 
 -- Particles way

@@ -3,7 +3,6 @@
 #include "threads.hpp"	// For multithreaded image convolution
 #include <xmmintrin.h>	// For image convolution with SSE2
 #include "textconv.hpp"	// For library text functions
-#include <memory>	// For smart pointers
 #define M_PI       3.14159265358979323846	// From "math.h"
 
 // Objects names
@@ -178,11 +177,9 @@ cairo_status_t png_stream_reader(void *closure, unsigned char *data, unsigned in
 }
 LUA_FUNC_1ARG(create_image_from_png, 1)
 	// Get parameter
-	const char *filename = luaL_checkstring(L, 1);
+	std::wstring filename = utf8_to_utf16(luaL_checkstring(L, 1));
 	// Create image from png
-	wchar_t *filenamew = utf8_to_utf16(filename);
-	FILE *file = _wfopen(filenamew, L"rb");
-	delete[] filenamew;
+	FILE *file = _wfopen(filename.c_str(), L"rb");
 	if(!file)
 		luaL_error2(L, "file not found");
 	cairo_surface_t *surface = cairo_image_surface_create_from_png_stream(png_stream_reader, file);
@@ -207,11 +204,9 @@ cairo_status_t png_stream_writer(void *closure, const unsigned char *data, unsig
 LUA_FUNC_1ARG(create_png_from_image, 2)
 	// Get parameters
 	cairo_surface_t *surface = *reinterpret_cast<cairo_surface_t**>(luaL_checkuserdata(L, 1, G2D_IMAGE));
-	const char *filename = luaL_checkstring(L, 2);
+	std::wstring filename = utf8_to_utf16(luaL_checkstring(L, 2));
 	// Create png from image
-	wchar_t *filenamew = utf8_to_utf16(filename);
-	FILE *file = _wfopen(filenamew, L"wb");
-	delete[] filenamew;
+	FILE *file = _wfopen(filename.c_str(), L"wb");
 	if(!file)
 		luaL_error2(L, "couldn't create file");
 	cairo_status_t status = cairo_surface_write_to_png_stream(surface, png_stream_writer, file);
@@ -321,17 +316,15 @@ LUA_FUNC_END
 
 LUA_FUNC_2ARG(text_extents, 3, 7)
 	// Get parameters
-	const char *text = luaL_checkstring(L, 1);
-	const char *face = luaL_checkstring(L, 2);
+	std::wstring text = utf8_to_utf16(luaL_checkstring(L, 1));
+	std::wstring face = utf8_to_utf16(luaL_checkstring(L, 2));
 	int size = luaL_checknumber(L, 3);
 	bool bold = luaL_optboolean(L, 4, false);
 	bool italic = luaL_optboolean(L, 5, false);
 	bool underline = luaL_optboolean(L, 6, false);
 	bool strikeout = luaL_optboolean(L, 7, false);
 	// Get text extents
-	wchar_t *textw = utf8_to_utf16(text), *facew = utf8_to_utf16(face);
-	cairo_win32_text_extents_t extents = cairo_win32_text_extents(textw, facew, size, bold, italic, underline, strikeout);
-	delete[] textw; delete[] facew;
+	cairo_win32_text_extents_t extents = cairo_win32_text_extents(text.c_str(), face.c_str(), size, bold, italic, underline, strikeout);
 	// Push text extents to Lua
 	lua_pushnumber(L, extents.width);
 	lua_pushnumber(L, extents.height);
@@ -444,9 +437,9 @@ LUA_FUNC_1ARG(image_set_data, 6)
 		x1 <= x0 || y1 <= y0 ||
 		x1 > cairo_image_surface_get_width(surface) || y1 > cairo_image_surface_get_height(surface))
 		luaL_error2(L, "invalid area");
-	size_t new_data_size;
-	unsigned char *new_data = luaL_checktable<unsigned char>(L, 6, &new_data_size);
-	std::auto_ptr<unsigned char> new_data_obj(new_data);
+	std::vector<unsigned char> new_data_vec = luaL_checktable<unsigned char>(L, 6);
+	size_t new_data_size = new_data_vec.size();
+	unsigned char *new_data = new_data_size > 0 ? &new_data_vec[0] : 0;
 	// Get image data
 	cairo_format_t image_format = cairo_image_surface_get_format(surface);
 	int image_stride = cairo_image_surface_get_stride(surface);
@@ -575,10 +568,8 @@ static DWORD WINAPI cairo_image_surface_color_transform(void *userdata){
 LUA_FUNC_1ARG(image_color_transform, 2)
 	// Get parameters
 	cairo_surface_t *surface = *reinterpret_cast<cairo_surface_t**>(luaL_checkuserdata(L, 1, G2D_IMAGE));
-	size_t matrix_size;
-	float *matrix = luaL_checktable<float>(L, 2, &matrix_size);
-	std::auto_ptr<float> matrix_obj(matrix);
-	if(matrix_size != 16)
+	std::vector<float> matrix = luaL_checktable<float>(L, 2);
+	if(matrix.size() != 16)
 		luaL_error2(L, "table size must be 16");
 	// Get image data
 	cairo_format_t image_format = cairo_image_surface_get_format(surface);
@@ -591,8 +582,7 @@ LUA_FUNC_1ARG(image_color_transform, 2)
 	unsigned char *image_data = cairo_image_surface_get_data(surface);
 	// Image data copy (use copy as source, original as destination)
 	unsigned long image_data_size = image_height * image_stride;
-	std::auto_ptr<float> image_data_copy_obj(new float[image_data_size]);
-	float *image_data_copy = image_data_copy_obj.get();
+	std::vector<float> image_data_copy(image_data_size);
 	for(unsigned long int i = 0; i < image_data_size; ++i)
 		image_data_copy[i] = image_data[i];
 	// Threading data
@@ -601,7 +591,7 @@ LUA_FUNC_1ARG(image_color_transform, 2)
 	const int image_row_step = image_height / passes;
 	for(DWORD i = 0; i < passes; ++i){
 		// Set current thread data
-		THREAD_DATA_COLOR_TRANSFORM data = {image_width, image_height, image_stride, i * image_row_step, i == passes - 1 ? image_height-1 : i * image_row_step + image_row_step-1, image_data_copy, image_data, matrix};
+		THREAD_DATA_COLOR_TRANSFORM data = {image_width, image_height, image_stride, i * image_row_step, i == passes - 1 ? image_height-1 : i * image_row_step + image_row_step-1, &image_data_copy[0], image_data, &matrix[0]};
 		*threads.get(i) = data;
 	}
 	// Apply convolution filter to image in multiple threads
@@ -706,9 +696,7 @@ static DWORD WINAPI cairo_image_surface_convolution(void *userdata){
 LUA_FUNC_1ARG(image_convolute, 2)
 	// Get parameters
 	cairo_surface_t *surface = *reinterpret_cast<cairo_surface_t**>(luaL_checkuserdata(L, 1, G2D_IMAGE));
-	size_t filter_size;
-	float *convolution_filter = luaL_checktable<float>(L, 2, &filter_size);
-	std::auto_ptr<float> convolution_filter_obj(convolution_filter);
+	std::vector<float> convolution_filter = luaL_checktable<float>(L, 2);
 	lua_getfield(L, 2, "width"); if(!lua_isnumber(L, -1)) luaL_error2(L, "table needs a valid field 'width'");
 	int filter_width = lua_tonumber(L, -1);
 	lua_pop(L, 1);
@@ -717,7 +705,7 @@ LUA_FUNC_1ARG(image_convolute, 2)
 	lua_pop(L, 1);
 	if(filter_width < 1 || !filter_width&0x1 || filter_height < 1 || !filter_height&0x1)
 		luaL_error2(L, "table field(s) invalid");
-	else if(filter_width * filter_height != filter_size)
+	else if(filter_width * filter_height != convolution_filter.size())
 		luaL_error2(L, "table fields and elements number don't fit");
 	// Get image data
 	cairo_format_t image_format = cairo_image_surface_get_format(surface);
@@ -728,8 +716,7 @@ LUA_FUNC_1ARG(image_convolute, 2)
 	unsigned char *image_data = cairo_image_surface_get_data(surface);
 	// Image data copy (use copy as source, original as destination)
 	unsigned long image_data_size = image_height * image_stride;
-	std::auto_ptr<float> image_data_copy_obj(new float[image_data_size]);
-	float *image_data_copy = image_data_copy_obj.get();
+	std::vector<float> image_data_copy(image_data_size);
 	for(unsigned long int i = 0; i < image_data_size; ++i)
 		image_data_copy[i] = image_data[i];
 	// Threading data
@@ -738,7 +725,7 @@ LUA_FUNC_1ARG(image_convolute, 2)
 	const int image_row_step = image_height / passes;
 	for(DWORD i = 0; i < passes; ++i){
 		// Set current thread data
-		THREAD_DATA_CONVOLUTION data = {image_width, image_height, image_stride, i * image_row_step, i == passes - 1 ? image_height-1 : i * image_row_step + image_row_step-1, image_format, image_data_copy, image_data, filter_width, filter_height, convolution_filter};
+		THREAD_DATA_CONVOLUTION data = {image_width, image_height, image_stride, i * image_row_step, i == passes - 1 ? image_height-1 : i * image_row_step + image_row_step-1, image_format, &image_data_copy[0], image_data, filter_width, filter_height, &convolution_filter[0]};
 		*threads.get(i) = data;
 	}
 	// Apply convolution filter to image in multiple threads
@@ -1144,11 +1131,11 @@ LUA_FUNC_1ARG(context_get_dash, 1)
 		lua_pushnumber(L, 0);
 		lua_newtable(L);
 	}else{
-		std::auto_ptr<double> dashes(new double[dash_n]);
+		std::vector<double> dashes(dash_n);
 		double offset;
-		cairo_get_dash(ctx, dashes.get(), &offset);
+		cairo_get_dash(ctx, &dashes[0], &offset);
 		lua_pushnumber(L, offset);
-		lua_pushtable(L, dashes.get(), dash_n);
+		lua_pushtable(L, dashes);
 	}
 	return 2;
 LUA_FUNC_END
@@ -1156,11 +1143,8 @@ LUA_FUNC_END
 LUA_FUNC_1ARG(context_set_dash, 3)
 	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
 	double offset = luaL_checknumber(L, 2);
-	unsigned int dash_n;
-	double *dashes = luaL_checktable<double>(L, 3, &dash_n);
-	cairo_set_dash(ctx, dashes, dash_n, offset);
-	if(dashes)
-		delete[] dashes;
+	std::vector<double> dashes = luaL_checktable<double>(L, 3);
+	cairo_set_dash(ctx, dashes.size() > 0 ? &dashes[0] : 0, dashes.size(), offset);
 	cairo_status_t status = cairo_status(ctx);
 	if(status != CAIRO_STATUS_SUCCESS)
 		luaL_error2(L, cairo_status_to_string(status));
@@ -1317,8 +1301,8 @@ LUA_FUNC_2ARG(context_path_add_text, 6, 10)
 	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
 	double x = luaL_checknumber(L, 2);
 	double y = luaL_checknumber(L, 3);
-	const char *text = luaL_checkstring(L, 4);
-	const char *face = luaL_checkstring(L, 5);
+	std::wstring text = utf8_to_utf16(luaL_checkstring(L, 4));
+	std::wstring face = utf8_to_utf16(luaL_checkstring(L, 5));
 	int size = luaL_checknumber(L, 6);
 	// Get optional parameters
 	bool bold = luaL_optboolean(L, 7, false);
@@ -1327,9 +1311,7 @@ LUA_FUNC_2ARG(context_path_add_text, 6, 10)
 	bool strikeout = luaL_optboolean(L, 10, false);
 	// Set text path
 	cairo_translate(ctx, x, y);
-	wchar_t *textw = utf8_to_utf16(text), *facew = utf8_to_utf16(face);
-	cairo_win32_text_path(ctx, textw, facew, size, bold, italic, underline, strikeout);
-	delete[] textw; delete[] facew;
+	cairo_win32_text_path(ctx, text.c_str(), face.c_str(), size, bold, italic, underline, strikeout);
 	cairo_translate(ctx, -x, -y);
 LUA_FUNC_END
 

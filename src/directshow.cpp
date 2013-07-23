@@ -30,8 +30,8 @@ DEFINE_GUID(IID_ILVSVideoFilterConfiguration,
 
 // Filter configuration interface
 interface ILVSVideoFilterConfiguration : public IUnknown{
-	virtual char* GetFile() = 0;
-	virtual void SetFile(char*) = 0;
+	virtual std::string GetFile() = 0;
+	virtual void SetFile(std::string) = 0;
 };
 
 // Filter property page
@@ -50,11 +50,7 @@ class LVSVideoFilterPropertyPage : public CBasePropertyPage{
 					SetWindowLongPtrA(wnd, DWLP_USER, reinterpret_cast<LONG_PTR>(config));
 					// Set default filename
 					HWND edit = GetDlgItem(wnd, ID_CONFIG_FILENAME);
-					char *filename = config->GetFile();
-					wchar_t *filenamew = utf8_to_utf16(filename);
-					delete[] filename;
-					SendMessageW(edit, WM_SETTEXT, 0, reinterpret_cast<LPARAM>(filenamew));
-					delete[] filenamew;
+					SendMessageW(edit, WM_SETTEXT, 0, reinterpret_cast<LPARAM>(utf8_to_utf16(config->GetFile()).c_str()));
 					SendMessageW(edit, EM_SETSEL, 0, -1);
 				}break;
 				// Dialog action
@@ -89,13 +85,9 @@ class LVSVideoFilterPropertyPage : public CBasePropertyPage{
 							ILVSVideoFilterConfiguration *config = reinterpret_cast<ILVSVideoFilterConfiguration*>(GetWindowLongPtrA(wnd, DWLP_USER));
 							// Save filename
 							HWND edit = GetDlgItem(wnd, ID_CONFIG_FILENAME);
-							int text_len = static_cast<int>(SendMessageW(edit, WM_GETTEXTLENGTH, 0, 0));
-							wchar_t *text_buf = new wchar_t[text_len+1];
-							SendMessageW(edit, WM_GETTEXT, text_len+1, reinterpret_cast<LPARAM>(text_buf));
-							char *text_buf_utf8 = utf16_to_utf8(text_buf);
-							delete[] text_buf;
-							config->SetFile(text_buf_utf8);
-							delete[] text_buf_utf8;
+							std::wstring filename(static_cast<int>(SendMessageW(edit, WM_GETTEXTLENGTH, 0, 0)), L'\0');
+							SendMessageW(edit, WM_GETTEXT, filename.length(), reinterpret_cast<LPARAM>(filename.data()));
+							config->SetFile(utf16_to_utf8(filename));
 							// Close dialog
 							EndDialog(wnd, S_OK);
 						}break;
@@ -195,13 +187,9 @@ class LVSVideoFilter : public CVideoTransformFilter, public ILVSVideoFilterConfi
 		// Critical section for save configuration access from other interfaces
 		CCritSec  crit_section;
 		// Configuration
-		char *filename;
+		std::string filename;
 		// Constructor (see 'CreateInstance')
-		LVSVideoFilter(IUnknown *unknown) : CVideoTransformFilter(FILTER_NAMEW, unknown, CLSID_LVSVideoFilter), lvs(NULL), image(NULL){
-			// Initialize configuration with an empty string
-			this->filename = new char;
-			*this->filename = '\0';
-		}
+		LVSVideoFilter(IUnknown *unknown) : CVideoTransformFilter(FILTER_NAMEW, unknown, CLSID_LVSVideoFilter), lvs(NULL), image(NULL){}
 	public:
 		// Create class instance
 		static CUnknown* CALLBACK CreateInstance(LPUNKNOWN unknown, HRESULT *result){
@@ -218,9 +206,6 @@ class LVSVideoFilter : public CVideoTransformFilter, public ILVSVideoFilterConfi
 			// Free image buffer
 			if(this->image)
 				delete this->image;
-			// Free configuration
-			if(this->filename)
-				delete[] this->filename;
 		}
 		// Check validation of input media stream
 		HRESULT CheckInputType(const CMediaType *In){
@@ -326,9 +311,7 @@ class LVSVideoFilter : public CVideoTransformFilter, public ILVSVideoFilterConfi
 				this->lvs->RenderOnFrame(this->image, start-1);
 			}catch(std::exception e){
 				// Show UTF8 error message
-				wchar_t *werr = utf8_to_utf16(e.what());
-				MessageBoxW(0, werr, FILTER_NAMEW L" video error", MB_OK | MB_ICONWARNING);
-				delete[] werr;
+				MessageBoxW(0, utf8_to_utf16(e.what()).c_str(), FILTER_NAMEW L" video error", MB_OK | MB_ICONWARNING);
 				// Return error code
 				return E_FAIL;
 			}
@@ -352,18 +335,13 @@ class LVSVideoFilter : public CVideoTransformFilter, public ILVSVideoFilterConfi
 				this->image = NULL;
 			}
 			// Create filename buffer
-			char *filename = this->GetFile();
+			std::string filename = this->GetFile();
 			// Create LVS instance
 			try{
-				this->lvs = new LVS(filename, bmp->biWidth, bmp->biHeight, bmp->biBitCount == 32, fps, frames);
-				delete[] filename;
+				this->lvs = new LVS(filename.c_str(), bmp->biWidth, bmp->biHeight, bmp->biBitCount == 32, fps, frames);
 			}catch(std::exception e){
-				// Free filename buffer
-				delete[] filename;
 				// Show UTF8 error message
-				wchar_t *werr = utf8_to_utf16(e.what());
-				MessageBoxW(0, werr, FILTER_NAMEW L" initialization failed", MB_OK | MB_ICONWARNING);
-				delete[] werr;
+				MessageBoxW(0, utf8_to_utf16(e.what()).c_str(), FILTER_NAMEW L" initialization failed", MB_OK | MB_ICONWARNING);
 				// Return error code
 				return VFW_E_WRONG_STATE;
 			}
@@ -448,22 +426,17 @@ class LVSVideoFilter : public CVideoTransformFilter, public ILVSVideoFilterConfi
 			return S_OK;
 		}
 		// Filter configuration interface
-		char* GetFile(){
+		std::string GetFile(){
 			// Lock critical section for thread-safety
 			CAutoLock lock(&this->crit_section);
-			// Copy filename
-			char *filename = new char[strlen(this->filename)+1];
-			strcpy(filename, this->filename);
-			// Return copy
-			return filename;
+			// Return filename copy
+			return this->filename;
 		}
-		void SetFile(char *filename){
+		void SetFile(std::string filename){
 			// Lock critical section for thread-safety
 			CAutoLock lock(&this->crit_section);
 			// Copy parameter to filename
-			delete[] this->filename;
-			this->filename = new char[strlen(filename)+1];
-			strcpy(this->filename, filename);
+			this->filename = filename;
 		}
 };
 

@@ -52,9 +52,7 @@ class LVSFilteredClip : public GenericVideoFilter{
 				this->lvs->RenderOnFrame(this->image, n);
 			}catch(std::exception e){
 				// Show UTF8 error message
-				wchar_t *werr = utf8_to_utf16(e.what());
-				int choice = MessageBoxW(0, werr, FILTER_NAMEW L" video error", MB_OKCANCEL | MB_DEFBUTTON2 | MB_ICONWARNING);
-				delete[] werr;
+				int choice = MessageBoxW(0, utf8_to_utf16(e.what()).c_str(), FILTER_NAMEW L" video error", MB_OKCANCEL | MB_DEFBUTTON2 | MB_ICONWARNING);
 				// Throw exception upwards?
 				if(choice == IDCANCEL)
 					env->ThrowError(e.what());
@@ -74,9 +72,7 @@ class LVSFilteredClip : public GenericVideoFilter{
 				this->lvs->RenderOnSamples(reinterpret_cast<float*>(buf), count * this->vi.nchannels, start);
 			}catch(std::exception e){
 				// Show UTF8 error message
-				wchar_t *werr = utf8_to_utf16(e.what());
-				int choice = MessageBoxW(0, werr, FILTER_NAMEW L" audio error", MB_OKCANCEL | MB_DEFBUTTON2 | MB_ICONWARNING);
-				delete[] werr;
+				int choice = MessageBoxW(0, utf8_to_utf16(e.what()).c_str(), FILTER_NAMEW L" audio error", MB_OKCANCEL | MB_DEFBUTTON2 | MB_ICONWARNING);
 				// Throw exception upwards?
 				if(choice == IDCANCEL)
 					env->ThrowError(e.what());

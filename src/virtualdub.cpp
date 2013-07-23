@@ -23,7 +23,7 @@ namespace vdub{
 	struct LVSData{
 		LVS *lvs;
 		CairoImage *image;
-		char *filename;
+		std::string *filename;
 	};
 	// Filter initialization
 	int init_func(VDXFilterActivation *fdata, const VDXFilterFunctions *ffuncs){
@@ -31,7 +31,7 @@ namespace vdub{
 		// Initialize instance data
 		inst_data->lvs = NULL;
 		inst_data->image = NULL;
-		inst_data->filename = NULL;
+		inst_data->filename = new std::string;
 		// Success
 		return 0;
 	}
@@ -48,7 +48,7 @@ namespace vdub{
 			inst_data->image = NULL;
 		}
 		if(inst_data->filename){
-			delete[] inst_data->filename;
+			delete inst_data->filename;
 			inst_data->filename = NULL;
 		}
 	}
@@ -63,9 +63,7 @@ namespace vdub{
 			inst_data->lvs->RenderOnFrame(inst_data->image, fdata->src.mFrameNumber);
 		}catch(std::exception e){
 			// Show UTF8 error message
-			wchar_t *werr = utf8_to_utf16(e.what());
-			MessageBoxW(0, werr, FILTER_NAMEW L" video error", MB_OK | MB_ICONWARNING);
-			delete[] werr;
+			MessageBoxW(0, utf8_to_utf16(e.what()).c_str(), FILTER_NAMEW L" video error", MB_OK | MB_ICONWARNING);
 			// Throw exception to GUI
 			ffuncs->Except(e.what());
 			return 1;
@@ -90,13 +88,9 @@ namespace vdub{
 				LVSData *inst_data = reinterpret_cast<LVSData*>(lParam);
 				SetWindowLongPtrA(wnd, DWLP_USER, reinterpret_cast<LONG_PTR>(inst_data));
 				// Set default filename
-				if(inst_data->filename){
-					HWND edit = GetDlgItem(wnd, ID_CONFIG_FILENAME);
-					wchar_t *filenamew = utf8_to_utf16(inst_data->filename);
-					SendMessageW(edit, WM_SETTEXT, 0, reinterpret_cast<LPARAM>(filenamew));
-					delete[] filenamew;
-					SendMessageW(edit, EM_SETSEL, 0, -1);
-				}
+				HWND edit = GetDlgItem(wnd, ID_CONFIG_FILENAME);
+				SendMessageW(edit, WM_SETTEXT, 0, reinterpret_cast<LPARAM>(utf8_to_utf16(*inst_data->filename).c_str()));
+				SendMessageW(edit, EM_SETSEL, 0, -1);
 			}break;
 			// Dialog action
 			case WM_COMMAND:{
@@ -130,13 +124,9 @@ namespace vdub{
 						LVSData *inst_data = reinterpret_cast<LVSData*>(GetWindowLongPtrA(wnd, DWLP_USER));
 						// Save filename
 						HWND edit = GetDlgItem(wnd, ID_CONFIG_FILENAME);
-						int text_len = static_cast<int>(SendMessageW(edit, WM_GETTEXTLENGTH, 0, 0));
-						wchar_t *text_buf = new wchar_t[text_len+1];
-						SendMessageW(edit, WM_GETTEXT, text_len+1, reinterpret_cast<LPARAM>(text_buf));
-						if(inst_data->filename)
-							delete[] inst_data->filename;
-						inst_data->filename = utf16_to_utf8(text_buf);
-						delete[] text_buf;
+						std::wstring filename(static_cast<int>(SendMessageW(edit, WM_GETTEXTLENGTH, 0, 0)), L'\0');
+						SendMessageW(edit, WM_GETTEXT, filename.length(), reinterpret_cast<LPARAM>(filename.data()));
+						*inst_data->filename = utf16_to_utf8(filename);
 						// Close dialog
 						EndDialog(wnd, 0);
 					}break;
@@ -165,10 +155,7 @@ namespace vdub{
 	// Filter description
 	void create_description(LVSData *inst_data, char *buf, int maxlen = 128){
 		// Fill description buffer with loaded filename
-		if(inst_data->filename)
-			_snprintf(buf, maxlen, " Script:'%s'", inst_data->filename);
-		else
-			_snprintf(buf, maxlen, " Script:''");
+		_snprintf(buf, maxlen, " Script:'%s'", inst_data->filename->c_str());
 	}
 	void description_func(const VDXFilterActivation *fdata, const VDXFilterFunctions *ffuncs, char *buf){
 		create_description(reinterpret_cast<LVSData*>(fdata->filter_data), buf);
@@ -191,7 +178,7 @@ namespace vdub{
 		}
 		// Create LVS instance
 		try{
-			inst_data->lvs = new LVS(inst_data->filename, fdata->src.w, fdata->src.h, false, static_cast<double>(fdata->src.mFrameRateHi) / fdata->src.mFrameRateLo, fdata->src.mFrameCount);
+			inst_data->lvs = new LVS(inst_data->filename->c_str(), fdata->src.w, fdata->src.h, false, static_cast<double>(fdata->src.mFrameRateHi) / fdata->src.mFrameRateLo, fdata->src.mFrameCount);
 		}catch(std::exception e){
 			ffuncs->Except(FILTER_NAME" initialization failed: %s", e.what());
 			return 1;

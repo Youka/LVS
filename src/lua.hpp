@@ -5,6 +5,7 @@ Lua 5.2 extensions header
 */
 
 #include <lua.hpp>
+#include <vector>
 
 // Lua instance
 class Lua{
@@ -61,7 +62,8 @@ static void *luaL_checkuserdata(lua_State *L, int i, const char* type){
 	return ud;
 }
 
-template <class T> static T *lua_createuserdata(lua_State *L, const char* meta_name){
+template <class T>
+static T *lua_createuserdata(lua_State *L, const char* meta_name){
 		T *ud = reinterpret_cast<T*>(lua_newuserdata(L, sizeof(T)));
 		luaL_newmetatable(L, meta_name);
 		lua_setmetatable(L, -2);
@@ -69,30 +71,27 @@ template <class T> static T *lua_createuserdata(lua_State *L, const char* meta_n
 }
 
 // Lua table functions
-template <class T> static T *luaL_checktable(lua_State *L, int i, unsigned int *len){
+template <class T>
+static std::vector<T> luaL_checktable(lua_State *L, int i){
 	if(!lua_istable(L,i))
 		luaL_typerror(L,i,"table");
-	*len = lua_rawlen(L,i);
-	if(*len > 0){
-		T *table = new T[*len];
-		for(int ii = 1; ii <= *len; ++ii){
-			lua_rawgeti(L, i, ii);
-			if(!lua_isnumber(L,-1)){
-				delete[] table;
-				lua_pop(L,1);
-				luaL_argerror(L, i, "invalid table");
-			}
-			table[ii-1] = lua_tonumber(L, -1);
+	std::vector<T> table(lua_rawlen(L,i));
+	for(int ii = 1; ii <= table.size(); ++ii){
+		lua_rawgeti(L, i, ii);
+		if(!lua_isnumber(L,-1)){
 			lua_pop(L,1);
+			luaL_argerror(L, i, "invalid table");
 		}
-		return table;
-	}else
-		return 0;
+		table[ii-1] = lua_tonumber(L, -1);
+		lua_pop(L,1);
+	}
+	return table;
 }
 
-template <class T> static void lua_pushtable(lua_State *L, T *t, unsigned long int len){
-	lua_createtable(L, len, 0);
-	for (unsigned int i = 0; i < len; ++i){
+template <class T>
+static void lua_pushtable(lua_State *L, std::vector<T> t){
+	lua_createtable(L, t.size(), 0);
+	for (unsigned int i = 0; i < t.size(); ++i){
 		lua_pushnumber(L, t[i]);
 		lua_rawseti(L, -2, i+1);
 	}

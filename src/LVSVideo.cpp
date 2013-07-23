@@ -25,7 +25,7 @@ void LVSVideo::Render(CairoImage* image, int frame_number){
 	lua_getglobal(this->L, "GetFrame");
 	if(lua_isfunction(this->L, -1)){
 		// Push function arguments
-		*lua_createuserdata<cairo_surface_t*>(L, "g2d image") = cairo_image_surface_create_for_data(image->data, image->has_alpha ? CAIRO_FORMAT_ARGB32 : CAIRO_FORMAT_RGB24, image->width, image->height, image->stride);	// Image object of 'g2d' library
+		*lua_createuserdata<cairo_surface_t*>(L, "g2d image") = cairo_image_surface_create_for_data(&image->data[0], image->has_alpha ? CAIRO_FORMAT_ARGB32 : CAIRO_FORMAT_RGB24, image->width, image->height, image->stride);	// Image object of 'g2d' library
 		lua_pushnumber(this->L, frame_number);	// Frame number
 		// Call render function
 		if(lua_pcall(this->L, 2, 0, 0)){

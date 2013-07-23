@@ -48,17 +48,15 @@ void LVSMediaBase::LoadExternalLibs(){
 						dir_sep - buf + 6 + len <= buf_len){	// Can prepend path?
 						// Convert filename to UTF-8
 						wcscpy(dir_sep+5, file_data.cFileName);
-						char *filename = utf16_to_utf8(buf);
+						std::string filename = utf16_to_utf8(buf);
 						// Load Lua file
-						if(luaL_dofile(this->L, filename)){
-							delete[] filename;
+						if(luaL_dofile(this->L, filename.c_str())){
 							FindClose(finder);
 							std::exception e(lua_tostring(this->L, -1));
 							lua_pop(this->L, 1);
 							throw e;
 						}
 						// Free resources
-						delete[] filename;
 						lua_gc(this->L, LUA_GCCOLLECT, 0);
 					}
 				}while(FindNextFileW(finder, &file_data));

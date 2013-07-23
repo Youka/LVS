@@ -1,3 +1,15 @@
+1.1.1 (TODO)
+--------------------
+* added:
+	- g2d.register_font
+	- ctx:path_transfer
+	- matrix:multiply with matrix object parameter
+	- ctx:masked_paint with number (alpha) parameter
+* changed:
+	- g2du.create_colorrate_matrix with alpha argument
+* optimization:
+	- fixed g2du.create_gaussian_blur_kernel with non-integer strength
+
 1.1.0
 --------------------
 * added:

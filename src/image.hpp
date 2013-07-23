@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstring>
+#include <vector>
 
 struct CairoImage{
 	// Dimension
@@ -8,15 +9,13 @@ struct CairoImage{
 	// RGB or RGBA?
 	const bool has_alpha;
 	// Pixel data
-	unsigned char* const data;
+	std::vector<unsigned char> data;
 	// Constructor / initialize image information & data
-	CairoImage(int width, int height, bool has_alpha) : width(width), height(height), stride(width<<2), has_alpha(has_alpha), data(new unsigned char[stride*height]){}
-	// Destructor / free image data
-	~CairoImage(){delete[] this->data;}
+	CairoImage(int width, int height, bool has_alpha) : width(width), height(height), stride(width<<2), has_alpha(has_alpha), data(stride*height){}
 	// Load from frame
 	void Load(register unsigned char *frame, int pitch, bool rgb32){
 		// Prepare image pointers
-		register unsigned char *image = const_cast<unsigned char*>(this->data);
+		register unsigned char *image = const_cast<unsigned char*>(&this->data[0]);
 		frame += pitch * (this->height-1);
 		// Load by colorspace
 		if(this->has_alpha || rgb32)
@@ -47,7 +46,7 @@ struct CairoImage{
 	// Save to frame
 	void Save(register unsigned char *frame, int pitch, bool rgb32){
 		// Prepare image pointers
-		register unsigned char *image = const_cast<unsigned char*>(this->data);
+		register unsigned char *image = const_cast<unsigned char*>(&this->data[0]);
 		frame += pitch * (this->height-1);
 		// Save by colorspace
 		if(this->has_alpha || rgb32)

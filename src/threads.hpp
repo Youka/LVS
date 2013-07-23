@@ -1,5 +1,6 @@
 #pragma once
 #include <windows.h>
+#include <vector>
 
 // Multithreading class
 template<class T>
@@ -10,9 +11,9 @@ class Threads{
 		// Thread running routine
 		LPTHREAD_START_ROUTINE routine;
 		// Threads data
-		T *data;
+		std::vector<T> data;
 		// Thread handles
-		HANDLE *threads;
+		std::vector<HANDLE> threads;
 	public:
 		// Ctor (allocate threading data)
 		Threads(LPTHREAD_START_ROUTINE routine) : routine(routine){
@@ -20,17 +21,10 @@ class Threads{
 			SYSTEM_INFO system_info = {0};
 			GetSystemInfo(&system_info);
 			this->cpu_num = system_info.dwNumberOfProcessors;
-			// Allocate threads data
-			this->data = new T[this->cpu_num];
-			// Allocate thread handles
-			this->threads = new HANDLE[this->cpu_num-1];
-		}
-		// Dtor (free threading data)
-		~Threads(){
-			// Free thread handles
-			delete[] this->threads;
-			// Free threads data
-			delete[] this->data;
+			// Allocate threads data memory
+			this->data.reserve(this->cpu_num);
+			// Allocate thread handles memory
+			this->threads.reserve(this->cpu_num-1);
 		}
 		// Get CPUs/threads number
 		inline const DWORD size(){
