@@ -2,13 +2,9 @@
 // Include libraries loaders
 #include "llibs.hpp"
 // Include utilities
-#include <windows.h>
+#include "dir.hpp"
 #include "textconv.hpp"
 #include <exception>
-
-// DLL instance getter for VC compilers
-extern "C" IMAGE_DOS_HEADER __ImageBase;
-#define DLL_INSTANCE reinterpret_cast<HINSTANCE>(&__ImageBase)
 
 LVSMediaBase::LVSMediaBase(const char* data_string){
 	// Set global userdata string
@@ -27,40 +23,26 @@ void LVSMediaBase::LoadInternalLibs(){
 }
 
 void LVSMediaBase::LoadExternalLibs(){
-	// Get plugin filename
-	const int buf_len = 256;
-	wchar_t buf[buf_len];
-	if(GetModuleFileNameW(DLL_INSTANCE, buf, buf_len) > 0){
-		// Get plugin LVS folder
-		wchar_t *dir_sep = wcsrchr(buf, L'\\');
-		if(dir_sep && dir_sep - buf + 7 <= buf_len){
-			wcscpy(dir_sep+1, L"LVS\\*");
-			// Iterate through folder
-			HANDLE finder;
-			WIN32_FIND_DATAW file_data;
-			finder = FindFirstFileW(buf, &file_data);
-			if(finder != INVALID_HANDLE_VALUE){
-				do{
-					// Valid file?
-					size_t len = wcslen(file_data.cFileName);
-					if((file_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0 &&	// File?
-						len > 4 && wcscmp(file_data.cFileName+len-4, L".lua") == 0 &&	// Valid extension?
-						dir_sep - buf + 6 + len <= buf_len){	// Can prepend path?
-						// Convert filename to UTF-8
-						wcscpy(dir_sep+5, file_data.cFileName);
-						std::string filename = utf16_to_utf8(buf);
-						// Load Lua file
-						if(luaL_dofile(this->L, filename.c_str())){
-							FindClose(finder);
-							std::exception e(lua_tostring(this->L, -1));
-							lua_pop(this->L, 1);
-							throw e;
-						}
-						// Free resources
-						lua_gc(this->L, LUA_GCCOLLECT, 0);
-					}
-				}while(FindNextFileW(finder, &file_data));
-				FindClose(finder);
+	// Get plugin directory
+	std::wstring dir = GetCurrentDir();
+	if(dir.length() > 0){
+		// Change directory to subdirectory 'LVS'
+		dir.append(L"LVS\\");
+		// Get directory files
+		std::vector<std::wstring> files = GetDirFiles(dir);
+		// Iterate through files
+		for(size_t i = 0; i < files.size(); ++i){
+			std::wstring file = files[i];
+			// Lua file?
+			if(file.find(L".lua", file.length()-4) != std::wstring::npos){
+				// Load Lua file
+				if(luaL_dofile(this->L, utf16_to_utf8(dir + file).c_str())){
+					std::exception e(lua_tostring(this->L, -1));
+					lua_pop(this->L, 1);
+					throw e;
+				}
+				// Free resources
+				lua_gc(this->L, LUA_GCCOLLECT, 0);
 			}
 		}
 	}

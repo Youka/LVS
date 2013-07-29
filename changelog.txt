@@ -1,12 +1,14 @@
-1.1.1 (TODO)
+1.2.0 (TODO)
 --------------------
 * added:
 	- g2d.register_font
 	- ctx:path_transfer
-	- matrix:multiply with matrix object parameter
-	- ctx:masked_paint with number (alpha) parameter
+	- matrix:multiply with alternative matrix object parameter
+	- ctx:masked_paint with alternative number (alpha) parameter
+	- g2du.create_colorrate_matrix with optional alpha parameter
+	- image:get_data & image:set_data with rectangle parameters as optional
 * changed:
-	- g2du.create_colorrate_matrix with alpha argument
+	- g2d.create_image & g2du.create_scaled_image uprounds dimension parameters
 * optimization:
 	- fixed g2du.create_gaussian_blur_kernel with non-integer strength
 

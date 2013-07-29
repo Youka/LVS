@@ -22,9 +22,9 @@ class Threads{
 			GetSystemInfo(&system_info);
 			this->cpu_num = system_info.dwNumberOfProcessors;
 			// Allocate threads data memory
-			this->data.reserve(this->cpu_num);
+			this->data.resize(this->cpu_num);
 			// Allocate thread handles memory
-			this->threads.reserve(this->cpu_num-1);
+			this->threads.resize(this->cpu_num-1);
 		}
 		// Get CPUs/threads number
 		inline const DWORD size(){

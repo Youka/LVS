@@ -208,6 +208,14 @@
 			Name="Utilities"
 			>
 			<File
+				RelativePath=".\dir.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\dir.hpp"
+				>
+			</File>
+			<File
 				RelativePath=".\image.hpp"
 				>
 			</File>
