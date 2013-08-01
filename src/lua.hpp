@@ -57,7 +57,7 @@ static int luaL_optboolean(lua_State *L, int i, int d){
 
 // Lua userdata functions
 static void *luaL_checkuserdata(lua_State *L, int i, const char* type){
-	void *ud = luaL_checkudata(L, i, type);
+	void *ud = luaL_testudata(L, i, type);
 	luaL_argcheck(L, ud, i, "wrong userdata");
 	return ud;
 }

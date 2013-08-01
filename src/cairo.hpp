@@ -4,6 +4,9 @@
 #define CAIRO_WIN32_STATIC_BUILD
 #include <cairo/cairo.h>
 
+// Add windows font
+bool cairo_win32_register_font(const wchar_t *filename);
+
 // Windows text extents structure
 struct cairo_win32_text_extents_t{
 	double width, height, ascent, descent, internal_leading, external_leading;

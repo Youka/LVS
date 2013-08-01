@@ -36,7 +36,7 @@ g2du = {
 			error("g2d image, number and number expected", 2)
 		end
 		-- Check image dimension
-		w, h = math.floor(w), math.floor(h)
+		w, h = math.ceil(w), math.ceil(h)
 		if w <= 0 or h <= 0 then
 			error("invalid image dimension", 2)
 		end
@@ -158,19 +158,20 @@ g2du = {
 		}
 	end,
 	-- Create color scaling matrix
-	create_colorrate_matrix = function(r, g, b)
+	create_colorrate_matrix = function(r, g, b, a)
 		-- Check parameter
 		if type(r) ~= "number" or r < 0 or
 			type(g) ~= "number" or g < 0 or
-			type(b) ~= "number" or b < 0 then
-			error("valid 3 numbers expected", 2)
+			type(b) ~= "number" or b < 0 or
+            (type(a) ~= "number" and type(a) ~= "nil") or (type(a) ~= "number" and a < 0) then
+			error("valid 3 numbers and one optional expected", 2)
 		end
 		-- Create matrix
 		return {
 			r, 0, 0, 0,
 			0, g, 0, 0,
 			0, 0, b, 0,
-			0, 0, 0, 1
+			0, 0, 0, a or 1
 		}
 	end,
 	-- Create box blur kernel

@@ -2,6 +2,10 @@
 #include <windows.h>	// Windows API
 #include <vector>	// Memory management
 
+bool cairo_win32_register_font(const wchar_t *filename){
+	return AddFontResourceExW(filename, FR_PRIVATE, 0) > 0;
+}
+
 cairo_win32_text_extents_t cairo_win32_text_extents(const wchar_t *text, const wchar_t *face, int size,
 													bool bold, bool italic, bool underline, bool strikeout,
 													unsigned char charset){

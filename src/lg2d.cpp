@@ -1,9 +1,10 @@
 #include "llibs.hpp"
 #include "cairo.hpp"
-#include "threads.hpp"	// For multithreaded image convolution
-#include <xmmintrin.h>	// For image convolution with SSE2
-#include "textconv.hpp"	// For library text functions
-#define M_PI       3.14159265358979323846	// From "math.h"
+#include "textconv.hpp"
+#define _USE_MATH_DEFINES
+#include <cmath>
+#include "threads.hpp"	// Multithreading
+#include <xmmintrin.h>	// SSE2
 
 // Objects names
 #define G2D_IMAGE "g2d image"
@@ -154,8 +155,8 @@ inline const char* cairo_operator_to_string(cairo_operator_t op){
 LUA_FUNC_1ARG(create_image, 3)
 	// Get parameters
 	cairo_format_t format = cairo_format_from_string(luaL_checkstring(L, 1));
-	int width = luaL_checknumber(L, 2);
-	int height = luaL_checknumber(L, 3);
+	int width = ::ceil(luaL_checknumber(L, 2));
+	int height = ::ceil(luaL_checknumber(L, 3));
 	// Create image
 	cairo_surface_t *surface = cairo_image_surface_create(format, width, height);
 	cairo_status_t status = cairo_surface_status(surface);
@@ -335,6 +336,12 @@ LUA_FUNC_2ARG(text_extents, 3, 7)
 	return 6;
 LUA_FUNC_END
 
+LUA_FUNC_1ARG(register_font, 1)
+	std::wstring fontname = utf8_to_utf16(luaL_checkstring(L, 1));
+	lua_pushboolean(L, cairo_win32_register_font(fontname.c_str()));
+	return 1;
+LUA_FUNC_END
+
 // IMAGE OBJECT
 LUA_FUNC_1ARG(image_gc, 1)
 	cairo_surface_t *surface = *reinterpret_cast<cairo_surface_t**>(luaL_checkuserdata(L, 1, G2D_IMAGE));
@@ -359,17 +366,19 @@ LUA_FUNC_1ARG(image_get_format, 1)
 	return 1;
 LUA_FUNC_END
 
-LUA_FUNC_1ARG(image_get_data, 5)
+LUA_FUNC_2ARG(image_get_data, 1, 5)
 	// Get parameters
 	cairo_surface_t *surface = *reinterpret_cast<cairo_surface_t**>(luaL_checkuserdata(L, 1, G2D_IMAGE));
-	int x0 = luaL_checknumber(L, 2);
-	int y0 = luaL_checknumber(L, 3);
-	int x1 = luaL_checknumber(L, 4);
-	int y1 = luaL_checknumber(L, 5);
-	if(x0 < 0 || y0 < 0 ||
-		x1 <= x0 || y1 <= y0 ||
-		x1 > cairo_image_surface_get_width(surface) || y1 > cairo_image_surface_get_height(surface))
-		luaL_error2(L, "invalid area");
+	int x0, y0, x1, y1;
+	if(lua_gettop(L) == 1)
+		x0 = 0, y0 = 0, x1 = cairo_image_surface_get_width(surface), y1 = cairo_image_surface_get_height(surface);
+	else{
+		x0 = luaL_checknumber(L, 2), y0 = luaL_checknumber(L, 3), x1 = luaL_checknumber(L, 4), y1 = luaL_checknumber(L, 5);
+		if(x0 < 0 || y0 < 0 ||
+			x1 <= x0 || y1 <= y0 ||
+			x1 > cairo_image_surface_get_width(surface) || y1 > cairo_image_surface_get_height(surface))
+			luaL_error2(L, "invalid area");
+	}
 	// Get image data
 	cairo_format_t image_format = cairo_image_surface_get_format(surface);
 	int image_stride = cairo_image_surface_get_stride(surface);
@@ -426,18 +435,22 @@ LUA_FUNC_1ARG(image_get_data, 5)
 	}
 LUA_FUNC_END
 
-LUA_FUNC_1ARG(image_set_data, 6)
+LUA_FUNC_2ARG(image_set_data, 2, 6)
 	// Get parameters
 	cairo_surface_t *surface = *reinterpret_cast<cairo_surface_t**>(luaL_checkuserdata(L, 1, G2D_IMAGE));
-	int x0 = luaL_checknumber(L, 2);
-	int y0 = luaL_checknumber(L, 3);
-	int x1 = luaL_checknumber(L, 4);
-	int y1 = luaL_checknumber(L, 5);
-	if(x0 < 0 || y0 < 0 ||
-		x1 <= x0 || y1 <= y0 ||
-		x1 > cairo_image_surface_get_width(surface) || y1 > cairo_image_surface_get_height(surface))
-		luaL_error2(L, "invalid area");
-	std::vector<unsigned char> new_data_vec = luaL_checktable<unsigned char>(L, 6);
+	int x0, y0, x1, y1;
+	std::vector<unsigned char> new_data_vec;
+	if(lua_gettop(L) == 2){
+		x0 = 0, y0 = 0, x1 = cairo_image_surface_get_width(surface), y1 = cairo_image_surface_get_height(surface);
+		new_data_vec = luaL_checktable<unsigned char>(L, 2);
+	}else{
+		x0 = luaL_checknumber(L, 2), y0 = luaL_checknumber(L, 3), x1 = luaL_checknumber(L, 4), y1 = luaL_checknumber(L, 5);
+		if(x0 < 0 || y0 < 0 ||
+			x1 <= x0 || y1 <= y0 ||
+			x1 > cairo_image_surface_get_width(surface) || y1 > cairo_image_surface_get_height(surface))
+			luaL_error2(L, "invalid area");
+		new_data_vec = luaL_checktable<unsigned char>(L, 6);
+	}
 	size_t new_data_size = new_data_vec.size();
 	unsigned char *new_data = new_data_size > 0 ? &new_data_vec[0] : 0;
 	// Get image data
@@ -795,11 +808,17 @@ LUA_FUNC_1ARG(matrix_invert, 1)
 	return 1;
 LUA_FUNC_END
 
-LUA_FUNC_1ARG(matrix_multiply, 7)
+LUA_FUNC_2ARG(matrix_multiply, 2, 7)
 	cairo_matrix_t *matrix = reinterpret_cast<cairo_matrix_t*>(luaL_checkuserdata(L, 1, G2D_MATRIX));
-	cairo_matrix_t a = {luaL_checknumber(L, 2), luaL_checknumber(L, 3), luaL_checknumber(L, 4), luaL_checknumber(L, 5), luaL_checknumber(L, 6), luaL_checknumber(L, 7)};
-	cairo_matrix_t b = *matrix;
-	cairo_matrix_multiply(matrix, &a, &b);
+	if(lua_gettop(L) == 2){
+		cairo_matrix_t *a = reinterpret_cast<cairo_matrix_t*>(luaL_checkuserdata(L, 2, G2D_MATRIX));
+		cairo_matrix_t b = *matrix;
+		cairo_matrix_multiply(matrix, a, &b);
+	}else{
+		cairo_matrix_t a = {luaL_checknumber(L, 2), luaL_checknumber(L, 3), luaL_checknumber(L, 4), luaL_checknumber(L, 5), luaL_checknumber(L, 6), luaL_checknumber(L, 7)};
+		cairo_matrix_t b = *matrix;
+		cairo_matrix_multiply(matrix, &a, &b);
+	}
 	lua_pushvalue(L, 1);
 	return 1;
 LUA_FUNC_END
@@ -1325,6 +1344,22 @@ LUA_FUNC_1ARG(context_path_clear, 1)
 	cairo_new_path(ctx);
 LUA_FUNC_END
 
+LUA_FUNC_1ARG(context_path_transfer, 2)
+	// Get parameters
+	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
+	cairo_t *ctx2 = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 2, G2D_CONTEXT));
+	// Get path from source context
+	cairo_path_t *path = cairo_copy_path(ctx);
+	cairo_status_t status = path->status;
+	if(status != CAIRO_STATUS_SUCCESS){
+		cairo_path_destroy(path);
+		luaL_error2(L, cairo_status_to_string(status));
+	}
+	// Append path to destination context
+	cairo_append_path(ctx2, path);
+	cairo_path_destroy(path);
+LUA_FUNC_END
+
 LUA_FUNC_2ARG(context_path_transform, 2, 3)
 	// Get parameters
 	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
@@ -1455,9 +1490,18 @@ LUA_FUNC_1ARG(context_paint, 1)
 LUA_FUNC_END
 
 LUA_FUNC_1ARG(context_masked_paint, 2)
+	// Get context
 	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
-	cairo_pattern_t *pattern = *reinterpret_cast<cairo_pattern_t**>(luaL_checkuserdata(L, 2, G2D_SOURCE));
-	cairo_mask(ctx, pattern);
+	// Check for parameter
+	if(lua_type(L, 2) == LUA_TNUMBER)
+		cairo_paint_with_alpha(ctx, lua_tonumber(L, 2));
+	else{
+		cairo_pattern_t *pattern = *reinterpret_cast<cairo_pattern_t**>(luaL_testudata(L, 2, G2D_SOURCE));
+		if(pattern)
+			cairo_mask(ctx, pattern);
+		else
+			luaL_error2(L, "number or g2d source expected");
+	}
 LUA_FUNC_END
 
 // Register
@@ -1476,6 +1520,7 @@ int luaopen_g2d(lua_State *L){
 		"create_mgradient", l_create_mgradient,
 		"create_pattern", l_create_pattern,
 		"text_extents", l_text_extents,
+		"register_font", l_register_font,
 		0, 0
 	};
 	luaL_setfuncs(L, g2d_lib, 0);
@@ -1571,6 +1616,7 @@ int luaopen_g2d(lua_State *L){
 	lua_pushcfunction(L, l_context_path_add_text); lua_setfield(L, -2, "path_add_text");
 	lua_pushcfunction(L, l_context_path_close); lua_setfield(L, -2, "path_close");
 	lua_pushcfunction(L, l_context_path_clear); lua_setfield(L, -2, "path_clear");
+	lua_pushcfunction(L, l_context_path_transfer); lua_setfield(L, -2, "path_transfer");
 	lua_pushcfunction(L, l_context_path_transform); lua_setfield(L, -2, "path_transform");
 	lua_pushcfunction(L, l_context_path_bounding); lua_setfield(L, -2, "path_bounding");
 	lua_pushcfunction(L, l_context_fill); lua_setfield(L, -2, "fill");
