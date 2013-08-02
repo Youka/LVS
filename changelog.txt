@@ -1,17 +1,17 @@
 1.2.0
 --------------------
 * added:
-	- g2d.register_font	!implented!
-	- context:path_transfer	!implented!
-	- matrix:multiply with alternative matrix object parameter	!implented!
-	- context:masked_paint with alternative number (alpha) parameter	!implented!
-	- image:get_data & image:set_data with rectangle parameters as optional	!implented!
-	- g2du.create_colorrate_matrix with optional alpha parameter	!implented!
+	- g2d.register_font
+	- context:path_transfer
+	- matrix:multiply with alternative matrix object parameter
+	- context:masked_paint with alternative number (alpha) parameter
+	- image:get_data & image:set_data with rectangle parameters as optional
+	- g2du.create_colorrate_matrix with optional alpha parameter
 * changed:
-	- g2d.create_image & g2du.create_scaled_image uprounds dimension parameters	!implented!
+	- g2d.create_image & g2du.create_scaled_image uprounds dimension parameters
 * optimization:
-	- improved image:convolute speed	!implented!
-	- fixed g2du.create_gaussian_blur_kernel with non-integer strength	!implented!
+	- improved image:convolute speed
+	- fixed g2du.create_gaussian_blur_kernel with non-integer strength
 
 1.1.0
 --------------------

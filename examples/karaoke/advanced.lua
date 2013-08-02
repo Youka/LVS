@@ -5,6 +5,9 @@ lines[7].infade = lines[6].outfade
 lines[17].outfade = lines[6].outfade
 lines[18].infade = lines[6].outfade
 
+-- Font loading (needed for ASS text)
+g2d.register_font("karaoke\\res\\VAGROUND.TTF")
+
 -- Textures loading
 local paws
 do
@@ -37,7 +40,7 @@ local function draw_text(ctx, ms, line)
 		fill_color, border_color, paw = g2du.white, g2du.black, paws.black
 	end
 	-- Text image
-	local text = g2d.create_image("RGBA", math.ceil(border * 2 + line.width), math.ceil(border * 2 + line.height))
+	local text = g2d.create_image("RGBA", border * 2 + line.width, border * 2 + line.height)
 	local tctx = text:get_context()
 	tctx:path_add_text(border, border, line.text, ass.unpack_font(line.styleref))
 	tctx:set_line_width(border * 2)

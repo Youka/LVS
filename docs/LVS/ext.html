@@ -114,6 +114,12 @@ function Entry(data){
 		if(data.func.args)
 			document.write("<span style='color: red;'>"+data.func.args+"</span>");
 		document.write(")</a></p>");
+		if(data.func.args2){
+			document.write("<p class='definition'><a name='"+data.func.name+"'>");
+			if(data.func.ret)
+				document.write("<span style='color: green;'>"+data.func.ret+"</span> = ");
+			document.write(data.func.name+"(<span style='color: red;'>"+data.func.args2+"</span>)</a></p>");
+		}
 		// Write function description
 		document.write("<p>"+data.desc+"</p>");
 		// Write function arguments & return values description
@@ -797,6 +803,26 @@ Entry({
 Title2("Utilities");
 Entry({
 	'func':{
+		'name':'g2d.register_font',
+		'args':'file',
+		'ret':'success'
+	},
+	'desc':'Registers one font to current process.',
+	'args':new Array(
+			{
+				'name':'file',
+				'desc':'path to a windows compatible font file (string)'
+			}
+	),
+	'ret':new Array(
+			{
+				'name':'success',
+				'desc':'font collection changed? (boolean)'
+			}
+	)
+});
+Entry({
+	'func':{
 		'name':'g2d.text_extents',
 		'args':'text, face, size[, bold, italic, underline, strikeout]',
 		'ret':'width, height, ascent, descent, internal_leading, external_leading'
@@ -879,14 +905,14 @@ Title2("Pixels data");
 Entry({
 	'func':{
 		'name':'image:get_data',
-		'args':'x0, y0, x1, y1',
+		'args':'[x0, y0, x1, y1]',
 		'ret':'pixels'
 	},
-	'desc':'Returns image data of given area.',
+	'desc':'Returns image data.',
 	'args':new Array(
 			{
 				'name':'x0, y0, x1, y1',
-				'desc':'image area (number)'
+				'desc':'image area (number, optional)'
 			}
 	),
 	'ret':new Array(
@@ -899,14 +925,14 @@ Entry({
 Entry({
 	'func':{
 		'name':'image:set_data',
-		'args':'x0, y0, x1, y1, pixels',
+		'args':'[x0, y0, x1, y1, ]pixels',
 		'ret':''
 	},
-	'desc':'Sets image data to given area.',
+	'desc':'Sets image data.',
 	'args':new Array(
 			{
 				'name':'x0, y0, x1, y1',
-				'desc':'image area (number)'
+				'desc':'image area (number, optional)'
 			},
 			{
 				'name':'pixels',
@@ -1046,11 +1072,16 @@ Entry({
 Entry({
 	'func':{
 		'name':'matrix:multiply',
-		'args':'xx, yx, xy, yy, x0, y0',
+		'args':'matrix',
+		'args2':'xx, yx, xy, yy, x0, y0',
 		'ret':'matrix'
 	},
 	'desc':'Multiplies matrix with given matrix.',
 	'args':new Array(
+			{
+				'name':'matrix',
+				'desc':'matrix object'
+			},
 			{
 				'name':'xx, yx, xy, yy, x0, y0',
 				'desc':'matrix fields (number)'
@@ -1872,6 +1903,20 @@ Entry({
 });
 Entry({
 	'func':{
+		'name':'context:path_transfer',
+		'args':'ctx',
+		'ret':''
+	},
+	'desc':'Appends path to another context.',
+	'args':new Array(
+			{
+				'name':'ctx',
+				'desc':'destination context object'
+			}
+	)
+});
+Entry({
+	'func':{
 		'name':'context:path_transform',
 		'args':'filter[, flatten]',
 		'ret':''
@@ -1884,7 +1929,7 @@ Entry({
 			},
 			{
 				'name':'flatten',
-				'desc':'curves flattened before? (boolean)'
+				'desc':'curves flattened before? (boolean, optional)'
 			}
 	)
 });
@@ -1923,7 +1968,7 @@ Entry({
 	'args':new Array(
 		{
 			'name':'mask',
-			'desc':'source object'
+			'desc':'source object or alpha strength (number)'
 		}
 	)
 });
@@ -2163,7 +2208,7 @@ Entry({
 Entry({
 	'func':{
 		'name':'g2du.create_colorrate_matrix',
-		'args':'r, g, b',
+		'args':'r, g, b[, a]',
 		'ret':'matrix'
 	},
 	'desc':'Generates a color matrix for scaling color strengths.',
@@ -2179,6 +2224,10 @@ Entry({
 			{
 				'name':'b',
 				'desc':'blue strength (number)'
+			},
+			{
+				'name':'a',
+				'desc':'alpha strength (number, optional)'
 			}
 	),
 	'ret':new Array(

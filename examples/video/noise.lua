@@ -1,7 +1,7 @@
 -- Process frames
 function GetFrame(frame, frame_i)
 	-- Get frame pixels
-	local data = frame:get_data(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT)
+	local data = frame:get_data()
 	-- Iterate through frame pixels
 	local data_i = 1
 	local channels = VIDEO_HAS_ALPHA and 4 or 3
@@ -18,5 +18,5 @@ function GetFrame(frame, frame_i)
 		end
 	end
 	-- Set new frame pixels
-	frame:set_data(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT, data)
+	frame:set_data(data)
 end
