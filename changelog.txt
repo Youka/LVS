@@ -2,16 +2,16 @@
 --------------------
 * added:
 	- g2d.register_font	!implented!
-	- ctx:path_transfer	!implented!
+	- context:path_transfer	!implented!
 	- matrix:multiply with alternative matrix object parameter	!implented!
-	- ctx:masked_paint with alternative number (alpha) parameter	!implented!
+	- context:masked_paint with alternative number (alpha) parameter	!implented!
 	- image:get_data & image:set_data with rectangle parameters as optional	!implented!
 	- g2du.create_colorrate_matrix with optional alpha parameter	!implented!
 * changed:
 	- g2d.create_image & g2du.create_scaled_image uprounds dimension parameters	!implented!
 * optimization:
-	- improved image:convolute speed
-	- fixed g2du.create_gaussian_blur_kernel with non-integer strength
+	- improved image:convolute speed	!implented!
+	- fixed g2du.create_gaussian_blur_kernel with non-integer strength	!implented!
 
 1.1.0
 --------------------
@@ -43,7 +43,7 @@
 1.0.2
 --------------------
 * changed:
-	- ctx:path_add_text with position argument
+	- context:path_add_text with position argument
 	- g2du kernel generators don't need integers anymore
 	- g2du.create_sub_image without color argument
 * added:
@@ -67,12 +67,12 @@
 		· g2d.create_source_radial_gradient to g2d.create_rgradient
 		· g2d.create_source_mesh_gradient to g2d.create_mgradient
 		· g2d.create_source_image to g2d.create_pattern
-		· ctx:path_fill to ctx:fill
-		· ctx:path_stroke to ctx:stroke
-		· ctx:path_fill_bounding to ctx:fill_bounding
-		· ctx:path_stroke_bounding to ctx:stroke_bounding
-		· ctx:path_fill_contains to ctx:fill_contains
-		· ctx:path_stroke_contains to ctx:stroke_contains
+		· context:path_fill to context:fill
+		· context:path_stroke to context:stroke
+		· context:path_fill_bounding to context:fill_bounding
+		· context:path_stroke_bounding to context:stroke_bounding
+		· context:path_fill_contains to context:fill_contains
+		· context:path_stroke_contains to context:stroke_contains
 	- g2d.create_context to image:get_context
 	- g2d.image_convolution to image:convolute
 	- math.degree accepts 2D vectors

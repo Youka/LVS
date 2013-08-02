@@ -163,7 +163,7 @@ g2du = {
 		if type(r) ~= "number" or r < 0 or
 			type(g) ~= "number" or g < 0 or
 			type(b) ~= "number" or b < 0 or
-            (type(a) ~= "number" and type(a) ~= "nil") or (type(a) ~= "number" and a < 0) then
+            (type(a) ~= "number" and type(a) ~= "nil") or (type(a) == "number" and a < 0) then
 			error("valid 3 numbers and one optional expected", 2)
 		end
 		-- Create matrix
@@ -227,19 +227,14 @@ g2du = {
 		else
 			local strength_rest = strength % 1
 			for y=-strength_ceil, strength_ceil do
-				if y == -strength_ceil then
-					y = y + 1 - strength_rest
-				elseif y == strength_ceil then
-					y = y - 1 + strength_rest
-				end
 				for x=-strength_ceil, strength_ceil do
-					if x == -strength_ceil then
-						x = x + 1 - strength_rest
-					elseif x == strength_ceil then
-						x = x - 1 + strength_rest
-					end
 					i = i + 1
-					kernel[i] = math.exp(-(x*x+y*y) / sigma_sqr2) / sigma_sqr2pi
+                    if y == -strength_ceil or y == strength_ceil or
+                        x == -strength_ceil or x == strength_ceil then
+                        kernel[i] = math.exp(-(x*x+y*y) / sigma_sqr2) / sigma_sqr2pi * strength_rest
+                    else
+                        kernel[i] = math.exp(-(x*x+y*y) / sigma_sqr2) / sigma_sqr2pi
+                    end
 					sum = sum + kernel[i]
 				end
 			end

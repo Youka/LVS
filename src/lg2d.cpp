@@ -315,6 +315,12 @@ LUA_FUNC_1ARG(create_pattern, 1)
 	return 1;
 LUA_FUNC_END
 
+LUA_FUNC_1ARG(register_font, 1)
+	std::wstring fontname = utf8_to_utf16(luaL_checkstring(L, 1));
+	lua_pushboolean(L, cairo_win32_register_font(fontname.c_str()));
+	return 1;
+LUA_FUNC_END
+
 LUA_FUNC_2ARG(text_extents, 3, 7)
 	// Get parameters
 	std::wstring text = utf8_to_utf16(luaL_checkstring(L, 1));
@@ -334,12 +340,6 @@ LUA_FUNC_2ARG(text_extents, 3, 7)
 	lua_pushnumber(L, extents.internal_leading);
 	lua_pushnumber(L, extents.external_leading);
 	return 6;
-LUA_FUNC_END
-
-LUA_FUNC_1ARG(register_font, 1)
-	std::wstring fontname = utf8_to_utf16(luaL_checkstring(L, 1));
-	lua_pushboolean(L, cairo_win32_register_font(fontname.c_str()));
-	return 1;
 LUA_FUNC_END
 
 // IMAGE OBJECT
@@ -528,7 +528,7 @@ LUA_FUNC_END
 // Thread data for function below
 struct THREAD_DATA_COLOR_TRANSFORM{
 	// Images
-	int image_width, image_height, image_stride, image_first_row, image_last_row;
+	int image_width, image_height, image_stride, image_voffset, image_vstride;
 	float *image_src;
 	unsigned char *image_dst;
 	// Matrix
@@ -545,7 +545,7 @@ static DWORD WINAPI cairo_image_surface_color_transform(void *userdata){
 	// Process pixels
 	register float *row_src; register unsigned char *row_dst;
 	__declspec(align(16)) float dst_buf[4];
-	for(register int y = thread_data->image_first_row; y <= thread_data->image_last_row; ++y){
+	for(register int y = thread_data->image_voffset; y < thread_data->image_height; y += thread_data->image_vstride){
 		row_src = thread_data->image_src + y * thread_data->image_stride;
 		row_dst = thread_data->image_dst + y * thread_data->image_stride;
 		for(register int x = 0; x < thread_data->image_width; ++x){
@@ -601,10 +601,9 @@ LUA_FUNC_1ARG(image_color_transform, 2)
 	// Threading data
 	static Threads<THREAD_DATA_COLOR_TRANSFORM> threads(cairo_image_surface_color_transform);
 	static const DWORD passes =  threads.size();
-	const int image_row_step = image_height / passes;
 	for(DWORD i = 0; i < passes; ++i){
 		// Set current thread data
-		THREAD_DATA_COLOR_TRANSFORM data = {image_width, image_height, image_stride, i * image_row_step, i == passes - 1 ? image_height-1 : i * image_row_step + image_row_step-1, &image_data_copy[0], image_data, &matrix[0]};
+		THREAD_DATA_COLOR_TRANSFORM data = {image_width, image_height, image_stride, i, passes, &image_data_copy[0], image_data, &matrix[0]};
 		*threads.get(i) = data;
 	}
 	// Apply convolution filter to image in multiple threads
@@ -619,7 +618,7 @@ LUA_FUNC_END
 // Thread data for function below
 struct THREAD_DATA_CONVOLUTION{
 	// Images
-	int image_width, image_height, image_stride, image_first_row, image_last_row;
+	int image_width, image_height, image_stride, image_voffset, image_vstride;
 	cairo_format_t image_format;
 	float *image_src;
 	unsigned char *image_dst;
@@ -637,7 +636,7 @@ static DWORD WINAPI cairo_image_surface_convolution(void *userdata){
 		int image_x, image_y;
 		__declspec(align(16)) float dst_buf[4];
 		// Iterate through source image pixels
-		for(register int y = thread_data->image_first_row; y <= thread_data->image_last_row; ++y){
+		for(register int y = thread_data->image_voffset; y < thread_data->image_height; y += thread_data->image_vstride){
 			row_dst = thread_data->image_dst + y * thread_data->image_stride;
 			for(register int x = 0; x < thread_data->image_width; ++x){
 				// Accumulate pixels by filter rule
@@ -683,7 +682,7 @@ static DWORD WINAPI cairo_image_surface_convolution(void *userdata){
 		float accum;
 		int image_x, image_y;
 		// Iterate through source image pixels
-		for(register int y = thread_data->image_first_row; y <= thread_data->image_last_row; ++y){
+		for(register int y = thread_data->image_voffset; y < thread_data->image_height; y += thread_data->image_vstride){
 			row_dst = thread_data->image_dst + y * thread_data->image_stride;
 			for(register int x = 0; x < thread_data->image_width; ++x){
 				// Accumulate pixels by filter rule
@@ -735,10 +734,9 @@ LUA_FUNC_1ARG(image_convolute, 2)
 	// Threading data
 	static Threads<THREAD_DATA_CONVOLUTION> threads(cairo_image_surface_convolution);
 	static const DWORD passes =  threads.size();
-	const int image_row_step = image_height / passes;
 	for(DWORD i = 0; i < passes; ++i){
 		// Set current thread data
-		THREAD_DATA_CONVOLUTION data = {image_width, image_height, image_stride, i * image_row_step, i == passes - 1 ? image_height-1 : i * image_row_step + image_row_step-1, image_format, &image_data_copy[0], image_data, filter_width, filter_height, &convolution_filter[0]};
+		THREAD_DATA_CONVOLUTION data = {image_width, image_height, image_stride, i, passes, image_format, &image_data_copy[0], image_data, filter_width, filter_height, &convolution_filter[0]};
 		*threads.get(i) = data;
 	}
 	// Apply convolution filter to image in multiple threads
@@ -1519,8 +1517,8 @@ int luaopen_g2d(lua_State *L){
 		"create_rgradient", l_create_rgradient,
 		"create_mgradient", l_create_mgradient,
 		"create_pattern", l_create_pattern,
-		"text_extents", l_text_extents,
 		"register_font", l_register_font,
+		"text_extents", l_text_extents,
 		0, 0
 	};
 	luaL_setfuncs(L, g2d_lib, 0);
