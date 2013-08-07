@@ -124,7 +124,7 @@ namespace vdub{
 						LVSData *inst_data = reinterpret_cast<LVSData*>(GetWindowLongPtrA(wnd, DWLP_USER));
 						// Save filename
 						HWND edit = GetDlgItem(wnd, ID_CONFIG_FILENAME);
-						std::wstring filename(static_cast<int>(SendMessageW(edit, WM_GETTEXTLENGTH, 0, 0)), L'\0');
+						std::wstring filename(static_cast<int>(SendMessageW(edit, WM_GETTEXTLENGTH, 0, 0))+1, L'\0');
 						SendMessageW(edit, WM_GETTEXT, filename.length(), reinterpret_cast<LPARAM>(filename.data()));
 						*inst_data->filename = utf16_to_utf8(filename);
 						// Close dialog
