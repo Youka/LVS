@@ -1,5 +1,10 @@
 -- ASS file loading
 ass.load("karaoke\\res\\oreimo_s2_6 - ed.ass")
+-- Fix fade times for effects
+for _, line in ipairs(lines) do
+	line.infade = line.infade * 2
+	line.outfade = line.outfade * 2
+end
 lines[6].outfade = 570
 lines[7].infade = lines[6].outfade
 lines[17].outfade = lines[6].outfade

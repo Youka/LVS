@@ -419,9 +419,10 @@ ass = {
 			local line_styles = {}
 			for li, line in ipairs(lines) do
 				if not line_styles[line.style] then
-					line_styles[line.style] = {{start_time = line.start_time, end_time = line.end_time, i = line.i}}
+					line_styles[line.style] = {n = 1, {start_time = line.start_time, end_time = line.end_time, i = line.i}}
 				else
-					line_styles[line.style][#line_styles[line.style]+1] = {start_time = line.start_time, end_time = line.end_time, i = line.i}
+					line_styles[line.style].n = line_styles[line.style].n + 1
+					line_styles[line.style][line_styles[line.style].n] = {start_time = line.start_time, end_time = line.end_time, i = line.i}
 				end
 			end
 			-- Sort lines by time
@@ -434,8 +435,8 @@ ass = {
 			-- Insert calculated in- & outfade times
 			for si, style in pairs(line_styles) do
 				for li, line in ipairs(style) do
-					lines[line.i].infade = (li == 1) and first_last_dur or line.start_time - style[li-1].end_time
-					lines[line.i].outfade = (li == #style) and first_last_dur or style[li+1].start_time - line.end_time
+					lines[line.i].infade = (li == 1) and first_last_dur or (line.start_time - style[li-1].end_time) / 2
+					lines[line.i].outfade = (li == #style) and first_last_dur or (style[li+1].start_time - line.end_time) / 2
 				end
 			end
 		end

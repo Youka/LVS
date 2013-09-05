@@ -153,7 +153,7 @@ function Entry(data){
 
 <body>
 <!-- Index -->
-<span style="position: fixed; right: 20px; top: 20px; font-style: italic; font-weight: bold; opacity: 0.8;">Index  &#9658;</span>
+<span style="position: fixed; right: 20px; top: 20px; font-style: italic; font-weight: bold; opacity: 0.9;">Index  &#9658;</span>
 <div id="index" class="index"></div>
 <script>
 // Create page content
@@ -1961,14 +1961,19 @@ Entry({
 Entry({
 	'func':{
 		'name':'context:masked_paint',
-		'args':'mask',
+		'args':'alpha',
+		'args2':'mask',
 		'ret':''
 	},
 	'desc':'Paints source with alpha mask.',
 	'args':new Array(
 		{
+			'name':'alpha',
+			'desc':'alpha strength (number)'
+		},
+		{
 			'name':'mask',
-			'desc':'source object or alpha strength (number)'
+			'desc':'source object'
 		}
 	)
 });
@@ -2416,14 +2421,6 @@ Title2("Stock objects");
 Entry({
 	'var':'g2du.identity',
 	'desc':'Identity matrix.'
-});
-Entry({
-	'var':'g2du.flip_h',
-	'desc':'<span style="display: inline-block; transform:scale(-1,1); -ms-transform:scale(-1,1); -webkit-transform:scale(-1,1);">Horizontal flip matrix.</span>'
-});
-Entry({
-	'var':'g2du.flip_v',
-	'desc':'<span style="display: inline-block; transform:scale(1,-1); -ms-transform:scale(1,-1); -webkit-transform:scale(1,-1);">Vertical flip matrix.</span>'
 });
 Entry({
 	'var':'g2du.white',

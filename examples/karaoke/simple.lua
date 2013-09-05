@@ -5,8 +5,8 @@ ass.load("karaoke\\res\\chihaya_ed.ass")
 local function roumaji_kanji(ctx, ms, line)
 	-- Get line color
 	local color = {ass.unpack_color(line.styleref.color1)}
-	color[4] = ms < line.start_time and math.inrange(line.start_time - line.infade/2, line.start_time, ms) or
-				ms > line.end_time and 1 - math.inrange(line.end_time, line.end_time + line.outfade/2, ms) or
+	color[4] = ms < line.start_time and math.inrange(line.start_time - line.infade, line.start_time, ms) or
+				ms > line.end_time and 1 - math.inrange(line.end_time, line.end_time + line.outfade, ms) or
 				1
 	-- Draw inactive sylables
 	for si, syl in ipairs(line.styleref.alignment < 7 and line.chars or line.syls) do	-- Use characters in case of kanjis
@@ -39,8 +39,8 @@ end
 local function subtitle(ctx, ms, line)
 	-- Get line color
 	local color = {ass.unpack_color(line.styleref.color1)}
-	color[4] = ms < line.start_time and math.inrange(line.start_time - line.infade/2, line.start_time, ms) or
-				ms > line.end_time and 1 - math.inrange(line.end_time, line.end_time + line.outfade/2, ms) or
+	color[4] = ms < line.start_time and math.inrange(line.start_time - line.infade, line.start_time, ms) or
+				ms > line.end_time and 1 - math.inrange(line.end_time, line.end_time + line.outfade, ms) or
 				1
 	-- Draw line text
 	ctx:path_add_text(line.x, line.y, line.text, ass.unpack_font(line.styleref))
@@ -57,7 +57,7 @@ function GetFrame(frame, frame_i)
 	local ms = frame_i / VIDEO_FPS * 1000
 	-- Look for frame-related ASS lines
 	for _, line in ipairs(lines) do
-		if ms >= line.start_time - line.infade/2 and ms < line.end_time + line.outfade/2 then
+		if ms >= line.start_time - line.infade and ms < line.end_time + line.outfade then
 			-- Draw ASS line
 			if line.styleref.alignment > 3 then
 				roumaji_kanji(ctx, ms, line)

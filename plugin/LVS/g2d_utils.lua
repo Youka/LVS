@@ -83,7 +83,7 @@ g2du = {
 		-- Get image data
 		local w, h = image:get_width(),image:get_height()
 		local color_type = image:get_format()
-		local data = image:get_data(0,0,w,h)
+		local data = image:get_data()
 		-- Extract pixels by color type
 		if color_type == "RGBA" then
 			-- Count pixels number
@@ -464,8 +464,6 @@ g2du = {
 	end,
 	-- Stock matrices
 	identity = g2d.create_matrix(),
-	flip_h = g2d.create_matrix(-1,0,0,1,0,0),
-	flip_v = g2d.create_matrix(1,0,0,-1,0,0),
 	-- Stock color sources
 	white = g2d.create_color(1, 1, 1),
 	black = g2d.create_color(0, 0, 0),
