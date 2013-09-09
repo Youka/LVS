@@ -2,8 +2,13 @@
 #include <fstream>
 #include <iomanip>
 #include <vector>
+#define _USE_MATH_DEFINES
 #include <cmath>
+
 using namespace std;
+
+#define RAD_TO_DEG(x) (x / M_PI * 180.0)
+#define DEG_TO_RAD(x) (x / 180.0 * M_PI)
 
 LUA_FUNC_NARG(print, 0)
 	// Open log file handle
@@ -101,28 +106,94 @@ LUA_FUNC_1ARG(math_bezier, 2)
 LUA_FUNC_END
 
 LUA_FUNC_1ARG(math_degree, 2)
-	// Check arguments
-	if(!lua_istable(L, 1) || !lua_istable(L, 2))
-		luaL_error2(L, "two tables expected");
+	// Get arguments
+	vector<double> vec1 = luaL_checktable<double>(L, 1), vec2 = luaL_checktable<double>(L, 2);
+	// Calculate degree
+	double degree;
+	if(vec1.size() == 2 && vec2.size() == 2){
+		degree = RAD_TO_DEG(
+			acos(
+				(vec1[0] * vec2[0] + vec1[1] * vec2[1]) /
+				(sqrt(vec1[0] * vec1[0] + vec1[1] * vec1[1]) * sqrt(vec2[0] * vec2[0] + vec2[1] * vec2[1]))
+			)
+		);
+	}else if(vec1.size() == 3 && vec2.size() == 3){
+		degree = RAD_TO_DEG(
+			acos(
+				(vec1[0] * vec2[0] + vec1[1] * vec2[1] + vec1[2] * vec2[2]) /
+				(sqrt(vec1[0] * vec1[0] + vec1[1] * vec1[1] + vec1[2] * vec1[2]) * sqrt(vec2[0] * vec2[0] + vec2[1] * vec2[1] + vec2[2] * vec2[2]))
+			)
+		);
+	}else
+		luaL_error2(L, "invalid table size or contents");
+	// Return result
+	lua_pushnumber(L, (vec1[0] * vec2[1] - vec1[1] * vec2[0]) < 0 ? -degree : degree);
+	return 1;
+LUA_FUNC_END
 
-	// TODO
+LUA_FUNC_2ARG(math_distance, 2, 3)
+	double w = luaL_checknumber(L, 1), h = luaL_checknumber(L, 2);
+	if(lua_gettop(L) == 3){
+		double d = luaL_checknumber(L, 3);
+		lua_pushnumber(L, sqrt(w*w + h*h + d*d));
+	}else
+		lua_pushnumber(L, sqrt(w*w + h*h));
+	return 1;
+LUA_FUNC_END
 
+LUA_FUNC_1ARG(math_ellipse, 5)
+	double ra = DEG_TO_RAD(luaL_checknumber(L, 5));
+	lua_pushnumber(L, luaL_checknumber(L, 1) + luaL_checknumber(L, 3) / 2 * sin(ra));
+	lua_pushnumber(L, luaL_checknumber(L, 2) + luaL_checknumber(L, 4) / 2 * cos(ra));
+	return 2;
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(math_inrange, 3)
+	double a = luaL_checknumber(L, 1), c = luaL_checknumber(L, 2), b = luaL_checknumber(L, 3);
+	if(b < c && b >= a){
+		lua_pushnumber(L, (b-a) / (c-a));
+		return 1;
+	}
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(math_interpolate, 3)
+	double a = luaL_checknumber(L, 1);
+	lua_pushnumber(L, a + (luaL_checknumber(L, 2) - a) * luaL_checknumber(L, 3));
+	return 1;
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(math_ortho, 2)
+	vector<double> vec1 = luaL_checktable<double>(L, 1), vec2 = luaL_checktable<double>(L, 2);
+	if(vec1.size() != 3 || vec2.size() != 3)
+		luaL_error2(L, "two 3D vectors expected");
+	lua_createtable(L, 3, 0);
+	lua_pushnumber(L, vec1[1] * vec2[2] - vec1[2] * vec2[1]	); lua_rawseti(L, -2, 1);
+	lua_pushnumber(L, vec1[2] * vec2[0] - vec1[0] * vec2[2]	); lua_rawseti(L, -2, 2);
+	lua_pushnumber(L, vec1[0] * vec2[1] - vec1[1] * vec2[0]	); lua_rawseti(L, -2, 3);
+	return 1;
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(math_randomsteps, 3)
+	double start = luaL_checknumber(L, 1), end = luaL_checknumber(L, 2), step = luaL_checknumber(L, 3);
+	if(start > end || step <= 0)
+		luaL_error2(L, "valid numbers expected");
+	lua_pushnumber(L, start + rand() % int((end - start) / step + 1.0) * step);
+	return 1;
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(math_round, 1)
+	lua_pushnumber(L, floor(luaL_checknumber(L, 1) + 0.5));
+	return 1;
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(math_trim, 3)
+	double n = luaL_checknumber(L, 1), start = luaL_checknumber(L, 2), end = luaL_checknumber(L, 3);
+	lua_pushnumber(L, n < start ? start : (n > end ? end : n));
+	return 1;
 LUA_FUNC_END
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+// TODO
 
 
 LUA_FUNC_1ARG(table_create, 2)
@@ -139,9 +210,15 @@ int luaopen_base2(lua_State *L){
 	LUA_REGISTER_FUNC(print)
 	// Register math functions
 	LUA_REGISTER_LIB_FUNC(math, bezier)
-
-	// TODO
-
+	LUA_REGISTER_LIB_FUNC(math, degree)
+	LUA_REGISTER_LIB_FUNC(math, distance)
+	LUA_REGISTER_LIB_FUNC(math, ellipse)
+	LUA_REGISTER_LIB_FUNC(math, inrange)
+	LUA_REGISTER_LIB_FUNC(math, interpolate)
+	LUA_REGISTER_LIB_FUNC(math, ortho)
+	LUA_REGISTER_LIB_FUNC(math, randomsteps)
+	LUA_REGISTER_LIB_FUNC(math, round)
+	LUA_REGISTER_LIB_FUNC(math, trim)
 	// Register string functions
 
 	// TODO
