@@ -36,7 +36,7 @@ static void luaL_error2(lua_State *L, const char *msg = 0){
 		luaL_error(L, msg);
 }
 
-static void luaL_typerror(lua_State *L, int narg, const char *expected){
+static void luaL_typeerror(lua_State *L, int narg, const char *expected){
 	const char *msg = lua_pushfstring(L, "%s expected, got %s", expected, luaL_typename(L, narg));
 	luaL_argerror(L, narg, msg);
 }
@@ -44,7 +44,7 @@ static void luaL_typerror(lua_State *L, int narg, const char *expected){
 // Lua boolean functions
 static int luaL_checkboolean(lua_State *L, int i){
 	if(!lua_isboolean(L,i))
-		luaL_typerror(L,i,"boolean");
+		luaL_typeerror(L,i,"boolean");
 	return lua_toboolean(L,i);
 }
 
@@ -74,7 +74,7 @@ static T *lua_createuserdata(lua_State *L, const char* meta_name){
 template <class T>
 static std::vector<T> luaL_checktable(lua_State *L, int i){
 	if(!lua_istable(L,i))
-		luaL_typerror(L,i,"table");
+		luaL_typeerror(L,i,"table");
 	std::vector<T> table(lua_rawlen(L,i));
 	for(int ii = 1; ii <= table.size(); ++ii){
 		lua_rawgeti(L, i, ii);

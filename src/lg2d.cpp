@@ -1362,7 +1362,7 @@ LUA_FUNC_2ARG(context_path_transform, 2, 3)
 	// Get parameters
 	cairo_t *ctx = *reinterpret_cast<cairo_t**>(luaL_checkuserdata(L, 1, G2D_CONTEXT));
 	if(!lua_isfunction(L, 2))
-		luaL_typerror(L, 2, "function");
+		luaL_typeerror(L, 2, "function");
 	bool is_flat = luaL_optboolean(L, 3, false);
 	// Get path
 	cairo_path_t *path = is_flat ? cairo_copy_path_flat(ctx) : cairo_copy_path(ctx);

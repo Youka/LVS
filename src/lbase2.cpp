@@ -192,6 +192,77 @@ LUA_FUNC_1ARG(math_trim, 3)
 	return 1;
 LUA_FUNC_END
 
+/*
+UTF16 -> UTF8
+----------------------------------
+U-00000000 -> U-0000007F: 		0xxxxxxx
+U-00000080 -> U-000007FF: 		110xxxxx 10xxxxxx
+U-00000800 -> U-0000FFFF: 		1110xxxx 10xxxxxx 10xxxxxx
+U-00010000 -> U-001FFFFF: 		11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+U-00200000 -> U-03FFFFFF: 		111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
+U-04000000 -> U-7FFFFFFF: 		1111110x 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
+*/
+inline unsigned char uchar_width(unsigned char c){
+	if(c < 192)
+		return 1;
+	else if(c < 224)
+		return 2;
+	else if(c < 240)
+		return 3;
+	else if(c < 248)
+		return 4;
+	else if(c < 252)
+		return 5;
+	else
+		return 6;
+}
+LUA_FUNC_1ARG(string_ucharrange, 2)
+	const char *text = luaL_checkstring(L, 1);
+	int i = luaL_checknumber(L, 2);
+	if(i < 1 || i > strlen(text))
+		luaL_error2(L, "invalid character index");
+	lua_pushnumber(L, uchar_width(text[i-1]));
+	return 1;
+LUA_FUNC_END
+
+int uchar_iterator(lua_State *L){
+	// Get upvalues
+	const char *text = lua_tostring(L, lua_upvalueindex(1));
+	unsigned int text_len = lua_tonumber(L, lua_upvalueindex(2));
+	unsigned int text_pos = lua_tonumber(L, lua_upvalueindex(3));
+	unsigned int char_index = lua_tonumber(L, lua_upvalueindex(4));
+	// Check iterator abortion
+	if(text_pos >= text_len)
+		return 0;
+	// Update upvalues
+	unsigned int text_pos_new = text_pos + uchar_width(text[text_pos]);
+	lua_pushnumber(L, text_pos_new);
+	lua_replace(L, lua_upvalueindex(3));
+	lua_pushnumber(L, ++char_index);
+	lua_replace(L, lua_upvalueindex(4));
+	// Return result
+	lua_pushnumber(L, char_index);
+	MIN
+	lua_pushlstring(L, text + text_pos, text_pos_new >= text_len ? text_len - text_pos : text_pos_new - text_pos);
+	return 2;
+}
+LUA_FUNC_1ARG(string_uchars, 1)
+	lua_pushnumber(L, strlen(luaL_checkstring(L, 1)));	// string + its length
+	lua_pushnumber(L, 0);	// string byte position
+	lua_pushnumber(L, 0);	// string character index (Lua version)
+	lua_pushcclosure(L, uchar_iterator, 4);
+	return 1;
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(string_ulen, 1)
+	const char *text = luaL_checkstring(L, 1);
+	unsigned int n = 0;
+	for(const char *text_end = text + strlen(text); text < text_end; text += uchar_width(*text))
+		++n;
+	lua_pushnumber(L, n);
+	return 1;
+LUA_FUNC_END
+
 
 // TODO
 
@@ -220,9 +291,9 @@ int luaopen_base2(lua_State *L){
 	LUA_REGISTER_LIB_FUNC(math, round)
 	LUA_REGISTER_LIB_FUNC(math, trim)
 	// Register string functions
-
-	// TODO
-
+	LUA_REGISTER_LIB_FUNC(string, ucharrange)
+	LUA_REGISTER_LIB_FUNC(string, uchars)
+	LUA_REGISTER_LIB_FUNC(string, ulen)
 	// Register table functions
 
 	// TODO
