@@ -242,7 +242,6 @@ int uchar_iterator(lua_State *L){
 	lua_replace(L, lua_upvalueindex(4));
 	// Return result
 	lua_pushnumber(L, char_index);
-	MIN
 	lua_pushlstring(L, text + text_pos, text_pos_new >= text_len ? text_len - text_pos : text_pos_new - text_pos);
 	return 2;
 }
@@ -263,9 +262,18 @@ LUA_FUNC_1ARG(string_ulen, 1)
 	return 1;
 LUA_FUNC_END
 
+LUA_FUNC_2ARG(table_copy, 1, 2)
+	// Get arguments
+	if(!lua_istable(L,1))
+		luaL_typeerror(L, 1, "table");
+	int depth = luaL_optnumber(L, 2, 10);
+	// Create new table
+	lua_newtable(L);
 
-// TODO
+	#pragma message ("WARNING: Implementation missing!")
 
+	return 1;
+LUA_FUNC_END
 
 LUA_FUNC_1ARG(table_create, 2)
 	double arraysize = luaL_checknumber(L, 1), mapsize = luaL_checknumber(L, 2);
@@ -274,6 +282,31 @@ LUA_FUNC_1ARG(table_create, 2)
 		return 1;
 	}else
 		luaL_error2(L, "sizes have to be bigger-equal zero");
+LUA_FUNC_END
+
+int distro_func(lua_State *L){
+	// Update upvalue
+	unsigned int i = lua_tonumber(L, lua_upvalueindex(2));
+	lua_pushnumber(L, i >= lua_rawlen(L, lua_upvalueindex(1)) ? 1 : i+1);
+	lua_replace(L, lua_upvalueindex(2));
+	// Return result
+	lua_rawgeti(L, lua_upvalueindex(1), i);
+	return 1;
+}
+LUA_FUNC_1ARG(table_distributor, 1)
+	if(!lua_istable(L,1))
+		luaL_typeerror(L, 1, "table");
+	if(lua_rawlen(L, 1) < 1)
+		luaL_error2(L, "table size must be larger zero");
+	lua_pushnumber(L, 1);	// table index
+	lua_pushcclosure(L, distro_func, 2);
+	return 1;
+LUA_FUNC_END
+
+LUA_FUNC_1ARG(table_tostring, 1)
+
+	#pragma message ("WARNING: Implementation missing!")
+
 LUA_FUNC_END
 
 int luaopen_base2(lua_State *L){
@@ -295,10 +328,10 @@ int luaopen_base2(lua_State *L){
 	LUA_REGISTER_LIB_FUNC(string, uchars)
 	LUA_REGISTER_LIB_FUNC(string, ulen)
 	// Register table functions
-
-	// TODO
-
+	LUA_REGISTER_LIB_FUNC(table, copy)
 	LUA_REGISTER_LIB_FUNC(table, create)
+	LUA_REGISTER_LIB_FUNC(table, distributor)
+	LUA_REGISTER_LIB_FUNC(table, tostring)
 	// Nothing pushed to Lua state
 	return 0;
 }
