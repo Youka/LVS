@@ -34,7 +34,7 @@ void LVSMediaBase::LoadExternalLibs(){
 		for(size_t i = 0; i < files.size(); ++i){
 			std::wstring file = files[i];
 			// Lua file?
-			if(file.find(L".lua", file.length()-4) != std::wstring::npos){
+			if(file.compare(file.length()-4, 4, L".lua") == 0){
 				// Load Lua file
 				if(luaL_dofile(this->L, utf16_to_utf8(dir + file).c_str())){
 					std::exception e(lua_tostring(this->L, -1));

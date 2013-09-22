@@ -6,7 +6,7 @@
 #include "threads.hpp"	// Multithreading
 #include <xmmintrin.h>	// SSE2
 
-// Objects names
+// Object names
 #define G2D_IMAGE "g2d image"
 #define G2D_MATRIX "g2d matrix"
 #define G2D_SOURCE "g2d source"

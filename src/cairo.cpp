@@ -25,7 +25,7 @@ cairo_win32_text_extents_t cairo_win32_text_extents(const wchar_t *text, const w
 	lf.lfFaceName[31] = L'\0';	// Make sure the fontname string ends with terminating zero
 	wcsncpy(lf.lfFaceName, face, 31);	// Copy until 31 characters of wished font face name to logfont
 	HFONT font = CreateFontIndirect(&lf);
-	SelectObject(dc, font);
+	HGDIOBJ old_font = SelectObject(dc, font);
 	// Get font metrics
 	TEXTMETRICW metrics = {0};
 	GetTextMetricsW(dc, &metrics);
@@ -45,6 +45,7 @@ cairo_win32_text_extents_t cairo_win32_text_extents(const wchar_t *text, const w
 		max_width = max(max_width, sz.cx);
 	}while(end);
 	// Free windows objects
+	SelectObject(dc, old_font);
 	DeleteObject(font);
 	DeleteDC(dc);
 	// Return text extents (64-fold downscaled)
@@ -75,7 +76,7 @@ void cairo_win32_text_path(cairo_t *ctx, const wchar_t *text, const wchar_t *fac
 	lf.lfFaceName[31] = L'\0';	// Make sure the fontname string ends with terminating zero
 	wcsncpy(lf.lfFaceName, face, 31);	// Copy until 31 characters of wished font face name to logfont
 	HFONT font = CreateFontIndirect(&lf);
-	SelectObject(dc, font);
+	HGDIOBJ old_font = SelectObject(dc, font);
 	// Draw text path to context
 	BeginPath(dc);
 	TEXTMETRICW metrics = {0};
@@ -131,6 +132,7 @@ void cairo_win32_text_path(cairo_t *ctx, const wchar_t *text, const wchar_t *fac
 		cairo_close_path(ctx);
 	}
 	// Free windows objects
+	SelectObject(dc, old_font);
 	DeleteObject(font);
 	DeleteDC(dc);
 }

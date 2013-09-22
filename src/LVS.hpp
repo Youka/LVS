@@ -14,7 +14,7 @@ class LVS{
 		// Get video + audio + data string
 		LVS(const char* video_file, int width, int height, bool has_alpha, double fps, int frames,
 				const char* audio_file, int channels, int sample_rate, __int64 samples,
-				const char* data_string);
+				const char* data_string = 0);
 		// Get only video
 		LVS(const char* video_file, int width, int height, bool has_alpha, double fps, int frames);
 		// Free video & audio process

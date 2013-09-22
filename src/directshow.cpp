@@ -3,14 +3,14 @@
 #include <CGuid.h>
 // Include windows streams
 #include <streams.h>
-// Include LVS
-#include "LVS.hpp"
 // Include GUI
 #include "config_dialog.hpp"
+// Include LVS
+#include "LVS.hpp"
 // Include utilities
+#include "image.hpp"
 #include "fileinfo.hpp"
 #include "textconv.hpp"
-#include "image.hpp"
 #include <exception>
 
 // DLL instance getter for VC compilers

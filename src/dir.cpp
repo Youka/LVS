@@ -1,24 +1,22 @@
 #include "dir.hpp"
 #include <windows.h>
-#include <cstring>
 
 // DLL instance getter for VC compilers
 extern "C" IMAGE_DOS_HEADER __ImageBase;
 #define DLL_INSTANCE reinterpret_cast<HINSTANCE>(&__ImageBase)
 
 std::wstring GetCurrentDir(){
-	// Directory storage
-	std::wstring dir;
 	// Get DLL path
-	wchar_t buf[MAX_PATH];
-	if(GetModuleFileNameW(DLL_INSTANCE, buf, MAX_PATH) > 0){
+	std::wstring dir(MAX_PATH, L'\0');
+	if(GetModuleFileNameW(DLL_INSTANCE, const_cast<LPWCH>(dir.data()), dir.size()) > 0){
 		// Cut path to directory
-		const wchar_t *pos = wcsrchr(buf, L'\\');
-		if(pos)
-			dir.assign(buf, pos+1 - buf);
+		std::wstring::size_type hit = dir.rfind(L'\\');
+		if(hit != std::wstring::npos)
+			// Success
+			return dir.substr(0, hit + 1);
 	}
-	// Return result
-	return dir;
+	// Fail
+	return L"";
 }
 
 std::vector<std::wstring> GetDirFiles(std::wstring &dir){

@@ -4,6 +4,7 @@
 #include <vector>
 #define _USE_MATH_DEFINES
 #include <cmath>
+#include <sstream>
 
 using namespace std;
 
@@ -268,9 +269,10 @@ void table_copy_deep(lua_State *L, unsigned int depth){
 	// Iterate through old table
 	lua_pushnil(L);
 	while(lua_next(L, -3)){
-		// Copy elements from old to new table
+		// Prepare next iteration pass
 		lua_pushvalue(L, -2);
 		lua_insert(L, -2);
+		// Copy elements from old to new table
 		if(lua_istable(L,-1) && depth > 1)
 			table_copy_deep(L, depth-1);
 		lua_rawset(L, -4);
@@ -294,7 +296,7 @@ LUA_FUNC_2ARG(table_copy, 1, 2)
 LUA_FUNC_END
 
 LUA_FUNC_1ARG(table_create, 2)
-	double arraysize = luaL_checknumber(L, 1), mapsize = luaL_checknumber(L, 2);
+	int arraysize = luaL_checknumber(L, 1), mapsize = luaL_checknumber(L, 2);
 	if(arraysize >= 0 && mapsize >= 0){
 		lua_createtable(L, arraysize, mapsize);
 		return 1;
@@ -321,10 +323,32 @@ LUA_FUNC_1ARG(table_distributor, 1)
 	return 1;
 LUA_FUNC_END
 
+void table_tostring_process(lua_State *L, stringstream &stream, string prespace){
+	// Iterate through table
+	lua_pushnil(L);
+	while(lua_next(L, -2)){
+		// Add entry to buffer
+		stream << prespace << '[' << '] = ';	// "%s[%s] = %s"
+
+		#pragma message("WARNING: Implementation missing!")
+
+		// Process tables recursively
+		if(lua_istable(L, -1))
+			table_tostring_process(L, stream, prespace + '\t');
+		// Prepare next iteration pass
+		lua_pop(L, 1);
+	}
+	// Remove table
+	lua_remove(L, -1);
+}
 LUA_FUNC_1ARG(table_tostring, 1)
-
-	#pragma message ("WARNING: Implementation missing!")
-
+	if(!lua_istable(L,1))
+		luaL_typeerror(L, 1, "table");
+	stringstream stream;
+	table_tostring_process(L, stream, "\t");
+	string buf = stream.str();
+	lua_pushlstring(L, buf.data(), buf.size());
+	return 1;
 LUA_FUNC_END
 
 int luaopen_base2(lua_State *L){

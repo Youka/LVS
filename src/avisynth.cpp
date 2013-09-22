@@ -4,9 +4,9 @@
 // Include LVS
 #include "LVS.hpp"
 // Include utilities
+#include "image.hpp"
 #include "fileinfo.hpp"
 #include "textconv.hpp"
-#include "image.hpp"
 #include <exception>
 
 // Clip with frames & samples filter
@@ -44,8 +44,10 @@ class LVSFilteredClip : public GenericVideoFilter{
 			// Get current frame from child clip & add writing support
 			PVideoFrame frame = this->child->GetFrame(n, env);
 			env->MakeWritable(&frame);
+			BYTE *pwrite = frame->GetWritePtr();
+			int pitch = frame->GetPitch();
 			// Convert frame to image
-			this->image->Load(frame->GetWritePtr(), frame->GetPitch(), false);
+			this->image->Load(pwrite, pitch, false);
 			// Filter image
 			try{
 				// Send image data through filter process
@@ -58,7 +60,7 @@ class LVSFilteredClip : public GenericVideoFilter{
 					env->ThrowError(e.what());
 			}
 			// Convert image to frame
-			this->image->Save(frame->GetWritePtr(), frame->GetPitch(), false);
+			this->image->Save(pwrite, pitch, false);
 			// Return filtered frame
 			return frame;
 		}

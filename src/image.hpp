@@ -1,7 +1,7 @@
 #pragma once
 
-#include <cstring>
 #include <vector>
+#include <algorithm>
 
 struct CairoImage{
 	// Dimension
@@ -20,7 +20,7 @@ struct CairoImage{
 		// Load by colorspace
 		if(this->has_alpha || rgb32)
 			for(int y = 0; y < this->height; ++y){
-				::memcpy(image, frame, this->stride);
+				std::copy(frame, frame + this->stride, image);
 				frame -= pitch;
 				image += this->stride;
 			}
@@ -51,7 +51,7 @@ struct CairoImage{
 		// Save by colorspace
 		if(this->has_alpha || rgb32)
 			for(int y = 0; y < this->height; ++y){
-				::memcpy(frame, image, this->stride);
+				std::copy(image, image + this->stride, frame);
 				image += this->stride;
 				frame -= pitch;
 			}
