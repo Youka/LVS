@@ -262,16 +262,34 @@ LUA_FUNC_1ARG(string_ulen, 1)
 	return 1;
 LUA_FUNC_END
 
+void table_copy_deep(lua_State *L, unsigned int depth){
+	// New table
+	lua_newtable(L);
+	// Iterate through old table
+	lua_pushnil(L);
+	while(lua_next(L, -3)){
+		// Copy elements from old to new table
+		lua_pushvalue(L, -2);
+		lua_insert(L, -2);
+		if(lua_istable(L,-1) && depth > 1)
+			table_copy_deep(L, depth-1);
+		lua_rawset(L, -4);
+	}
+	// Remove old table
+	lua_remove(L, -2);
+}
 LUA_FUNC_2ARG(table_copy, 1, 2)
-	// Get arguments
 	if(!lua_istable(L,1))
 		luaL_typeerror(L, 1, "table");
-	int depth = luaL_optnumber(L, 2, 10);
-	// Create new table
-	lua_newtable(L);
-
-	#pragma message ("WARNING: Implementation missing!")
-
+	if(lua_gettop(L) == 1)
+		table_copy_deep(L, 10);
+	else{
+		int depth = luaL_checknumber(L, 2);
+		if(depth < 1)
+			luaL_error2(L, "depth must be larger than zero");
+		lua_pop(L, 1);
+		table_copy_deep(L, depth);
+	}
 	return 1;
 LUA_FUNC_END
 

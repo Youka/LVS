@@ -506,7 +506,7 @@ Title1("Table");
 Entry({
 	'func':{
 		'name':'table.copy',
-		'args':'t1',
+		'args':'t1[, depth]',
 		'ret':'t2'
 	},
 	'desc':'Creates a deep table copy.',
@@ -514,6 +514,10 @@ Entry({
 			{
 				'name':'t1',
 				'desc':'any table'
+			},
+			{
+				'name':'depth',
+				'desc':'copy depth (number, optional)'
 			}
 	),
 	'ret':new Array(

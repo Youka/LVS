@@ -1,13 +1,16 @@
 1.2.1
 -------------------
+* added:
+	- table.copy with optional second argument for copy depth *DONE*
 * changed:
 	- ASS: line.infade & line.outfade halfed (now their sum fills the time between lines) *DONE*
-	- table.copy with optional second argument for copy depth
 	- table.distributor returns function now *DONE*
 	- "base.lua" functions (math, string, table) now intern
 * removed:
 	- g2du.flip_h *DONE*
 	- g2du.flip_v *DONE*
+* optimization:
+	- fixed DShow interface in MPC
 
 1.2.0
 --------------------

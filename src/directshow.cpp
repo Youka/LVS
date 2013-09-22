@@ -142,7 +142,7 @@ class LVSVideoFilterPropertyPage : public CBasePropertyPage{
 		// On property page activation
 		HRESULT STDMETHODCALLTYPE Activate(HWND wnd, LPCRECT prect, BOOL modal){
 			// Show configuration dialog and return result
-			return DialogBoxParamW(DLL_INSTANCE, MAKEINTRESOURCE(this->m_DialogId), reinterpret_cast<HWND>(wnd), ConfigEventHandler, reinterpret_cast<LPARAM>(this->config));
+			return DialogBoxParamW(DLL_INSTANCE, MAKEINTRESOURCE(this->m_DialogId), wnd, ConfigEventHandler, reinterpret_cast<LPARAM>(this->config));
 		}
 		// On property page deactivation
 		HRESULT STDMETHODCALLTYPE Deactivate(){

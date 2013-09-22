@@ -1,18 +1,3 @@
-function table.copy(old_t)
-	if type(old_t) ~= "table" then
-		error("table expected", 2)
-	end
-	local new_t = {}
-	for index, value in pairs(old_t) do
-		if type(value) == "table" then
-		    new_t[index] = table.copy(value)
-		else
-            new_t[index] = value
-		end
-	end
-	return new_t
-end
-
 function table.tostring(t)
 	if type(t) ~= "table" then
 		error("table expected", 2)
