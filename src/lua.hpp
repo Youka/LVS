@@ -6,6 +6,8 @@ Lua 5.2 extensions header
 
 #include <lua.hpp>
 #include <vector>
+#include <ostream>
+#include <iomanip>
 
 // Lua instance
 class Lua{
@@ -53,6 +55,46 @@ static int luaL_optboolean(lua_State *L, int i, int d){
 		return d;
 	else
 		return luaL_checkboolean(L, i);
+}
+
+// Lua string functions
+static std::ostream& lua_stringtostream(lua_State *L, int i, std::ostream &out){
+	switch(lua_type(L, i)){
+		case LUA_TNONE: out << "none"; break;
+		case LUA_TNIL: out << "nil"; break;
+		case LUA_TBOOLEAN: out << (lua_toboolean(L, i) ? "true" : "false"); break;
+		case LUA_TNUMBER: out << lua_tonumber(L, i); break;
+		case LUA_TSTRING:{
+			size_t len;
+			const char *str = lua_tolstring(L, i, &len);
+			out.write(str, len);
+		}break;
+		case LUA_TLIGHTUSERDATA:
+		case LUA_TTABLE:
+		case LUA_TFUNCTION:
+		case LUA_TUSERDATA:
+		case LUA_TTHREAD:{
+			switch(lua_type(L, i)){
+				case LUA_TLIGHTUSERDATA: out << "lightuserdata: "; break;
+				case LUA_TTABLE: out << "table: "; break;
+				case LUA_TFUNCTION: out << "function: "; break;
+				case LUA_TUSERDATA: out << "userdata: "; break;
+				case LUA_TTHREAD: out << "thread: "; break;
+			}
+			char fill = out.fill();
+			std::streamsize width = out.width();
+			std::ostream::fmtflags flags = out.flags();
+#if _WIN64 || __x86_64__ || __ppc64__
+			out << "0x" << std::setfill('0') << std::setw(16) << std::hex << reinterpret_cast<unsigned __int64>(lua_topointer(L, i));
+#else
+			out << "0x" << std::setfill('0') << std::setw(8) << std::hex << reinterpret_cast<unsigned __int32>(lua_topointer(L, i));
+#endif
+			out.fill(fill);
+			out.width(width);
+			out.flags(flags);
+		}break;
+	}
+	return out;
 }
 
 // Lua userdata functions

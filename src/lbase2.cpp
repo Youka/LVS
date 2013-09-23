@@ -1,6 +1,5 @@
 #include "llibs.hpp"
 #include <fstream>
-#include <iomanip>
 #include <vector>
 #define _USE_MATH_DEFINES
 #include <cmath>
@@ -19,37 +18,8 @@ LUA_FUNC_NARG(print, 0)
 	// Iterate through arguments
 	int n = lua_gettop(L);
 	for(int i = 1; i <= n; ++i)
-		// Write to standard log file by argument type
-		switch(lua_type(L, i)){
-			case LUA_TNONE: log << "none\n"; break;
-			case LUA_TNIL: log << "nil\n"; break;
-			case LUA_TBOOLEAN: log << (lua_toboolean(L,i) ? "true\n" : "false\n"); break;
-			case LUA_TNUMBER: log << lua_tonumber(L, i) << '\n'; break;
-			case LUA_TSTRING:{
-				size_t len;
-				const char *str = lua_tolstring(L, i, &len);
-				log.write(str, len) << '\n';
-			}break;
-			case LUA_TLIGHTUSERDATA:
-			case LUA_TTABLE:
-			case LUA_TFUNCTION:
-			case LUA_TUSERDATA:
-			case LUA_TTHREAD:
-				switch(lua_type(L, i)){
-					case LUA_TLIGHTUSERDATA: log << "lightuserdata: "; break;
-					case LUA_TTABLE: log << "table: "; break;
-					case LUA_TFUNCTION: log << "function: "; break;
-					case LUA_TUSERDATA: log << "userdata: "; break;
-					case LUA_TTHREAD: log << "thread: "; break;
-				}
-#ifdef _WIN64
-				log << "0x" << setfill('0') << setw(16) << hex << reinterpret_cast<unsigned __int64>(lua_topointer(L, i));
-#else
-				log << "0x" << setfill('0') << setw(8) << hex << reinterpret_cast<unsigned __int32>(lua_topointer(L, i));
-#endif
-				log << '\n';
-				break;
-		}
+		// Write argument as string to standard log file
+		lua_stringtostream(L, i, log) << '\n';
 LUA_FUNC_END
 
 struct Point3d{
@@ -323,30 +293,36 @@ LUA_FUNC_1ARG(table_distributor, 1)
 	return 1;
 LUA_FUNC_END
 
-void table_tostring_process(lua_State *L, stringstream &stream, string prespace){
+void table_tostring_process(lua_State *L, ostringstream &stream, string prespace){
 	// Iterate through table
 	lua_pushnil(L);
 	while(lua_next(L, -2)){
 		// Add entry to buffer
-		stream << prespace << '[' << '] = ';	// "%s[%s] = %s"
-
-		#pragma message("WARNING: Implementation missing!")
-
+		stream << prespace << '[';
+		if(lua_type(L, -2) == LUA_TSTRING)
+			lua_stringtostream(L, -2, stream << '"') << '"';
+		else
+			lua_stringtostream(L, -2, stream);
+		stream << "] = ";
+		if(lua_type(L, -1) == LUA_TSTRING)
+			lua_stringtostream(L, -1, stream << '"') << "\"\n";
+		else
+			lua_stringtostream(L, -1, stream) << '\n';
 		// Process tables recursively
 		if(lua_istable(L, -1))
 			table_tostring_process(L, stream, prespace + '\t');
 		// Prepare next iteration pass
 		lua_pop(L, 1);
 	}
-	// Remove table
-	lua_remove(L, -1);
 }
 LUA_FUNC_1ARG(table_tostring, 1)
 	if(!lua_istable(L,1))
 		luaL_typeerror(L, 1, "table");
-	stringstream stream;
+	ostringstream stream;
 	table_tostring_process(L, stream, "\t");
 	string buf = stream.str();
+	if(buf.size() > 0)
+		buf.erase(buf.size()-1, 1);	// Remove last newline
 	lua_pushlstring(L, buf.data(), buf.size());
 	return 1;
 LUA_FUNC_END
