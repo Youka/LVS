@@ -150,7 +150,7 @@ namespace vdub{
 	}
 	int config_func(VDXFilterActivation *fdata, const VDXFilterFunctions *ffuncs, VDXHWND wnd){
 		// Show configuration dialog and return result
-		return DialogBoxParamW(DLL_INSTANCE, MAKEINTRESOURCE(ID_CONFIG_DIALOG), reinterpret_cast<HWND>(wnd), config_event_handler, reinterpret_cast<LPARAM>(fdata->filter_data));
+		return DialogBoxParamW(DLL_INSTANCE, MAKEINTRESOURCE(ID_VDUB_CONFIG_DIALOG), reinterpret_cast<HWND>(wnd), config_event_handler, reinterpret_cast<LPARAM>(fdata->filter_data));
 	}
 	// Filter description
 	void create_description(LVSData *inst_data, char *buf, int maxlen = 128){

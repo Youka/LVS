@@ -39,78 +39,8 @@ class LVSVideoFilterPropertyPage : public CBasePropertyPage{
 	private:
 		// Data interface of filter
 		ILVSVideoFilterConfiguration *config;
-		// Configuration dialog event handling
-		static INT_PTR CALLBACK ConfigEventHandler(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam){
-			// Evaluate event
-			switch(msg){
-				// Dialog initialization
-				case WM_INITDIALOG:{
-					// Store userdata to window
-					ILVSVideoFilterConfiguration *config = reinterpret_cast<ILVSVideoFilterConfiguration*>(lParam);
-					SetWindowLongPtrA(wnd, DWLP_USER, reinterpret_cast<LONG_PTR>(config));
-					// Set default filename
-					HWND edit = GetDlgItem(wnd, ID_CONFIG_FILENAME);
-					SendMessageW(edit, WM_SETTEXT, 0, reinterpret_cast<LPARAM>(utf8_to_utf16(config->GetFile()).c_str()));
-					SendMessageW(edit, EM_SETSEL, 0, -1);
-				}break;
-				// Dialog action
-				case WM_COMMAND:{
-					// Evaluate action command
-					switch(wParam){
-						// '...' button
-						case ID_CONFIG_CHOOSE_FILE:{
-							// Prepare file dialog properties
-							wchar_t file[256]; file[0] = '\0';
-							OPENFILENAMEW ofn;
-							memset(&ofn, 0, sizeof(ofn));
-							ofn.lStructSize = sizeof(OPENFILENAMEW);
-							ofn.hwndOwner = wnd;
-							ofn.hInstance = DLL_INSTANCE;
-							ofn.lpstrFilter = L"Lua file (*.lua)\0*.lua\0\0";
-							ofn.nFilterIndex = 1;
-							ofn.lpstrFile = file;
-							ofn.nMaxFile = sizeof(file);
-							ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-							// Show file dialog
-							if(GetOpenFileNameW(&ofn)){
-								// Save filename input to dialog
-								HWND edit = GetDlgItem(wnd, ID_CONFIG_FILENAME);
-								SendMessageW(edit, WM_SETTEXT, 0, reinterpret_cast<LPARAM>(ofn.lpstrFile));
-								SendMessageW(edit, EM_SETSEL, 0, -1);
-							}
-						}break;
-						// 'OK' button
-						case IDOK:{
-							// Get stored userdata from window
-							ILVSVideoFilterConfiguration *config = reinterpret_cast<ILVSVideoFilterConfiguration*>(GetWindowLongPtrA(wnd, DWLP_USER));
-							// Save filename
-							HWND edit = GetDlgItem(wnd, ID_CONFIG_FILENAME);
-							std::wstring filename(static_cast<int>(SendMessageW(edit, WM_GETTEXTLENGTH, 0, 0))+1, L'\0');
-							SendMessageW(edit, WM_GETTEXT, filename.length(), reinterpret_cast<LPARAM>(filename.data()));
-							config->SetFile(utf16_to_utf8(filename));
-							// Close dialog
-							EndDialog(wnd, S_OK);
-						}break;
-						// 'Cancel' button
-						case IDCANCEL:
-							// Close dialog
-							EndDialog(wnd, E_UNEXPECTED);
-							break;
-					}
-				}break;
-				// Dialog closure ('X' button)
-				case WM_CLOSE:{
-					EndDialog(wnd, E_UNEXPECTED);
-			   }break;
-				// Message not handled (default behaviour follows)
-				default:
-					return FALSE;
-			}
-			// Message handled
-			return TRUE;
-		}
 		// Constructor (see 'CreateInstance')
-		LVSVideoFilterPropertyPage(IUnknown *unknown) : CBasePropertyPage(FILTER_PROP_NAMEW, unknown, ID_CONFIG_DIALOG, ID_CONFIG_TITLE), config(NULL){}
+		LVSVideoFilterPropertyPage(IUnknown *unknown) : CBasePropertyPage(FILTER_PROP_NAMEW, unknown, ID_DSHOW_CONFIG_DIALOG, ID_DSHOW_CONFIG_TITLE), config(NULL){}
 	public:
 		// Create class instance
 		static CUnknown* CALLBACK CreateInstance(LPUNKNOWN unknown, HRESULT *result){
@@ -140,14 +70,62 @@ class LVSVideoFilterPropertyPage : public CBasePropertyPage{
 			return S_OK;
 		}
 		// On property page activation
-		HRESULT STDMETHODCALLTYPE Activate(HWND wnd, LPCRECT prect, BOOL modal){
-			// Show configuration dialog and return result
-			return DialogBoxParamW(DLL_INSTANCE, MAKEINTRESOURCE(this->m_DialogId), wnd, ConfigEventHandler, reinterpret_cast<LPARAM>(this->config));
-		}
-		// On property page deactivation
-		HRESULT STDMETHODCALLTYPE Deactivate(){
-			// Wayne
+		HRESULT OnActivate(){
+			// Set default filename
+			HWND edit = GetDlgItem(this->m_Dlg, ID_CONFIG_FILENAME);
+			SendMessageW(edit, WM_SETTEXT, 0, reinterpret_cast<LPARAM>(utf8_to_utf16(this->config->GetFile()).c_str()));
+			SendMessageW(edit, EM_SETSEL, 0, -1);
 			return S_OK;
+		}
+		// On property page apply
+		HRESULT OnApplyChanges(){
+			// Save filename
+			HWND edit = GetDlgItem(this->m_Dlg, ID_CONFIG_FILENAME);
+			std::wstring filename(static_cast<int>(SendMessageW(edit, WM_GETTEXTLENGTH, 0, 0))+1, L'\0');
+			SendMessageW(edit, WM_GETTEXT, filename.size(), reinterpret_cast<LPARAM>(filename.data()));
+			this->config->SetFile(utf16_to_utf8(filename));
+			return S_OK;
+		}
+		// On property page event messages
+		INT_PTR OnReceiveMessage(HWND wnd,UINT msg,WPARAM wParam,LPARAM lParam){
+			// Evaluate event
+			switch(msg){
+				// Evaluate action command
+				case WM_COMMAND:{
+					// Evaluate action command
+					switch(wParam){
+						// '...' button
+						case ID_CONFIG_CHOOSE_FILE:{
+							// Prepare file dialog properties
+							wchar_t file[256]; file[0] = '\0';
+							OPENFILENAMEW ofn;
+							memset(&ofn, 0, sizeof(ofn));
+							ofn.lStructSize = sizeof(OPENFILENAMEW);
+							ofn.hwndOwner = wnd;
+							ofn.hInstance = GetModuleHandle(NULL);
+							ofn.lpstrFilter = L"Lua file (*.lua)\0*.lua\0\0";
+							ofn.nFilterIndex = 1;
+							ofn.lpstrFile = file;
+							ofn.nMaxFile = sizeof(file);
+							ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+							// Show file dialog
+							if(GetOpenFileNameW(&ofn)){
+								// Save filename input to dialog
+								HWND edit = GetDlgItem(wnd, ID_CONFIG_FILENAME);
+								SendMessageW(edit, WM_SETTEXT, 0, reinterpret_cast<LPARAM>(ofn.lpstrFile));
+								SendMessageW(edit, EM_SETSEL, 0, -1);
+								// Signal dialog to have a change
+								this->m_bDirty = true;
+								if(this->m_pPageSite)
+									this->m_pPageSite->OnStatusChange(PROPPAGESTATUS_DIRTY);
+								return 1;
+							}
+						}break;
+					}
+				}break;
+			}
+			// Handle default messages
+			return CBasePropertyPage::OnReceiveMessage(wnd, msg,wParam,lParam);
 		}
 		// On property page information request
 		HRESULT STDMETHODCALLTYPE GetPageInfo(__out LPPROPPAGEINFO info){
@@ -177,7 +155,7 @@ class LVSVideoFilterPropertyPage : public CBasePropertyPage{
 		}
 };
 
-// Filter
+// Filter + configuration + property page support
 class LVSVideoFilter : public CVideoTransformFilter, public ILVSVideoFilterConfiguration, public ISpecifyPropertyPages{
 	private:
 		// LVS instance for filtering process
@@ -293,7 +271,8 @@ class LVSVideoFilter : public CVideoTransformFilter, public ILVSVideoFilterConfi
 				hr = In->GetTime(&start, &end);
 				if(FAILED(hr))
 					return hr;
-			}
+			}else
+				start--;	// Fix first frame to index 0
 			// Get frame pointers
 			hr = In->GetPointer(&src);
 			if(FAILED(hr))
@@ -308,7 +287,7 @@ class LVSVideoFilter : public CVideoTransformFilter, public ILVSVideoFilterConfi
 			// Filter image
 			try{
 				// Send image data through filter process
-				this->lvs->RenderOnFrame(this->image, start-1);
+				this->lvs->RenderOnFrame(this->image, start);
 			}catch(std::exception e){
 				// Show UTF8 error message
 				MessageBoxW(0, utf8_to_utf16(e.what()).c_str(), FILTER_NAMEW L" video error", MB_OK | MB_ICONWARNING);
@@ -457,36 +436,36 @@ const AMOVIESETUP_MEDIATYPE sudPinTypes[] =
 
 const AMOVIESETUP_PIN sudpPins[] =
 {
-    { L"Input",             // Pin string name
-      FALSE,                // Is it rendered
-      FALSE,                // Is it an output
-      FALSE,                // Are we allowed none
-      FALSE,                // And allowed many
-      &CLSID_NULL,          // Connects to filter
-      NULL,                 // Connects to pin
-      2,                    // Number of media types
-      sudPinTypes          // Media types
-    },
-    { L"Output",            // Pin string name
-      FALSE,                // Is it rendered
-      TRUE,                 // Is it an output
-      FALSE,                // Are we allowed none
-      FALSE,                // And allowed many
-      &CLSID_NULL,          // Connects to filter
-      NULL,                 // Connects to pin
-      2,                    // Number of media types
-      sudPinTypes          // Media types
-    }
+	{ L"Input",             // Pin string name
+		FALSE,                // Is it rendered
+		FALSE,                // Is it an output
+		FALSE,                // Are we allowed none
+		FALSE,                // And allowed many
+		&CLSID_NULL,          // Connects to filter
+		NULL,                 // Connects to pin
+		2,                    // Number of media types
+		sudPinTypes          // Media types
+	},
+	{ L"Output",            // Pin string name
+		FALSE,                // Is it rendered
+		TRUE,                 // Is it an output
+		FALSE,                // Are we allowed none
+		FALSE,                // And allowed many
+		&CLSID_NULL,          // Connects to filter
+		NULL,                 // Connects to pin
+		2,                    // Number of media types
+		sudPinTypes          // Media types
+	}
 };
 
 // Filter setup
 const AMOVIESETUP_FILTER sudFilter =
 {
-    &CLSID_LVSVideoFilter,         // Filter CLSID
-    FILTER_NAMEW,       // Filter name
-    MERIT_DO_NOT_USE,       // Filter merit
-    2,                      // Number of pins
-    sudpPins                // Pin information
+	&CLSID_LVSVideoFilter,         // Filter CLSID
+	FILTER_NAMEW,       // Filter name
+	MERIT_PREFERRED,       // Filter merit
+	2,                      // Number of pins
+	sudpPins                // Pin information
 };
 
 // Filter definition as COM objects
@@ -515,4 +494,12 @@ STDAPI DllRegisterServer(){
 // Unregister filter from server
 STDAPI DllUnregisterServer(){
     return AMovieDllRegisterServer2( FALSE );
+}
+
+// Further DLL initializations for DirectShow
+extern "C" BOOL WINAPI DllEntryPoint(HINSTANCE, ULONG, LPVOID);
+
+// DLL entry point
+BOOL APIENTRY DllMain(HANDLE module, DWORD reason, LPVOID reserved){
+	return DllEntryPoint(reinterpret_cast<HINSTANCE>(module), reason, reserved);
 }
